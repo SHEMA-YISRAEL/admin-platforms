@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../utils/firebase'; // Adjust path as needed
+// import { db } from '../utils/firebase'; // Adjust path as needed
 
 // import { useCallback, useEffect, useState } from "react";
 // import Image from "next/image";
