@@ -4,23 +4,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../utils/firebase'; // Adjust path as needed
 
-// import { useCallback, useEffect, useState } from "react";
-// import Image from "next/image";
-
 export default function Home() {
-  // const [counter, setCounter] = useState(5)
-
-  // const decrementCount = useCallback(()=>{
-  //   setCounter(prevCounter => prevCounter - 1)
-  // }, [])
-
-  // useEffect(()=>{
-  //   if(counter==0){
-  //     console.log("llego a cero")
-  //     return 
-  //   }
-  //   setInterval(decrementCount, 1000)
-  // }, [])
 
   const [data, setData] = useState([]);
 

@@ -1,3 +1,5 @@
+import Courses from "@/components/topoquizz/courses";
+
 interface TopoQuizzProps {
     
 }
@@ -5,7 +7,7 @@ interface TopoQuizzProps {
 const TopoQuizz: React.FC<TopoQuizzProps> = () => {
     return (
         <>
-            TopoQuizz
+            <Courses/>
         </>
     );
 }

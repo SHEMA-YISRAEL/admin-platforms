@@ -11,7 +11,7 @@ interface NavBarProps {
  
 const NavBar: React.FC<NavBarProps> = () => {
     const pathname = usePathname()
-    console.log(pathname)
+    console.log('pathname', pathname)
     const routes = [
         {
             label: "TopoQuizz",
@@ -32,7 +32,7 @@ const NavBar: React.FC<NavBarProps> = () => {
                 {
                     routes.map((element, index)=>{
                         return <p 
-                            className={`grid content-center ${pathname===element.path?"text-yellow-300":""}`} 
+                            className={`grid content-center ${pathname.includes(element.path)?"text-yellow-300":""}`} 
                             key={index}>
                             <Link href={element.path}>
                                 {element.label}
