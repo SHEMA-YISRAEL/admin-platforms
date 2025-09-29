@@ -15,7 +15,7 @@ interface CourseData {
 
 interface IlessonsCounterByCourseType {
     [key: string]: number;
-    }
+}
 
 function useFirebaseData() {
 
@@ -64,8 +64,6 @@ function useFirebaseData() {
                 items.map((element, index)=>{
                     element.lessonsNumber = lessonsCounterByCourse[element.id]
                 })
-
-                console.log(items)
                 setData(items);
             } catch (err) {
                 console.error('Error fetching Firebase data:', err);
