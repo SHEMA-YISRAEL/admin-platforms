@@ -12,8 +12,10 @@ const Courses = () => {
     if (error) return <div>Error: {error}</div>;
 
     const redirectByCourse = (slugCourse:string)=>{
-        router.push(`topoquizz/${slugCourse}`)
-    }
+        router.push(
+            `topoquizz/${slugCourse}`,
+        );
+    };
 
     return (
         <>
@@ -28,7 +30,9 @@ const Courses = () => {
                             <div 
                                 className="grid justify-end content-end bg-blue-300  rounded-2xl h-40 hover:shadow-xl cursor-pointer" 
                                 key={index}
-                                onClick={()=> redirectByCourse(element.slug)}
+                                onClick={()=> redirectByCourse(
+                                    element.id,
+                                )}
                             >
                                 <div className="font-bold pr-3 pb-3 hover:shadow-amber-300">
                                     {element.name}
