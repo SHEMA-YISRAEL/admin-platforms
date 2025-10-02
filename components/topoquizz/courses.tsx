@@ -13,14 +13,14 @@ const Courses = () => {
 
     const redirectByCourse = (slugCourse:string)=>{
         router.push(
-            `topoquizz/${slugCourse}`,
+            `/topoquizz/${slugCourse}`,
         );
     };
 
     return (
         <>
             <div className="">
-                <h1>Courses</h1>
+                <h1 className='font-bold text-5xl ml-6'>Cursos</h1>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 sm:grid-cols-2 gap-5 p-5">
