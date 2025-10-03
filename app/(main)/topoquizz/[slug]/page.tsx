@@ -65,12 +65,12 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
               </div>
 
               <div className="col-span-4">
-                <div className="">
+                {/* <div className="">
                   <h1 className='font-bold text-5xl ml-6'>Preguntas</h1>
                 </div>
                 <div className="h-20 bg-amber-700">
                   <Button>Nueva Pregunta</Button>
-                </div>
+                </div> */}
                 {selectedLessonId && (
                 <div className="p-5">
                     {/* <h2 className='font-bold text-3xl mb-4'>Preguntas de la Lección</h2> */}

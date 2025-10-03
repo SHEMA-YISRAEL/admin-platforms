@@ -5,9 +5,13 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table"
 import { Chip, Button, Switch } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
+import { doc, updateDoc } from "firebase/firestore"
+import { db } from "@/utils/firebase"
 
 import { CiEdit } from "react-icons/ci";
 interface QuestionsTableProps {
@@ -49,7 +53,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
             </Chip>
           ) : null
         },
-        footer: info => info.column.id
+        footer: info => info.column.id,
+        enableSorting: true,
       }),
       columnHelper.accessor(
         'options',{
@@ -82,15 +87,35 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
       ),
       columnHelper.accessor(
         'enable',{
-            header:()=>'Activa',
-            cell:info=> {return <Switch defaultSelected/>},
+            header:()=>'Estado',
+            cell:info=> {
+              const handleSwitchChange = async (isSelected: boolean) => {
+                const questionId = info.row.original.id
+                try {
+                  const questionRef = doc(db, "questions", questionId)
+                  await updateDoc(questionRef, {
+                    enable: isSelected
+                  })
+                  console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
+                } catch (error) {
+                  console.error('Error al actualizar estado:', error)
+                }
+              }
+
+              return (
+                <Switch
+                  defaultSelected={info.getValue()}
+                  onValueChange={handleSwitchChange}
+                />
+              )
+            },
             footer:info=>info.column.id
           }
       ),
       columnHelper.display({
         id: 'action',
         header: () => 'Action',
-        cell: info => { return <Button isIconOnly color="warning"> <CiEdit /></Button>},
+        cell: info => { return <Button isIconOnly color="warning" > <CiEdit size={30}/></Button>},
         footer:info=>info.column.id
       }),
 
@@ -99,6 +124,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
   // const rerender = useReducer(() => ({}), {})[1]
 
   const [tableData, setTableData] = useState(()=>[...questionsData])
+  const [sorting, setSorting] = useState<SortingState>([])
 
   useEffect(() => {
     setTableData(questionsData)
@@ -107,8 +133,13 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
   const table = useReactTable({
     data: tableData,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
         pageSize: 10,
@@ -125,12 +156,21 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
                 <th key={header.id} className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <div
+                      className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2' : ''}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
+                      {{
+                        asc: ' 🔼',
+                        desc: ' 🔽',
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </div>
+                  )}
                 </th>
               ))}
             </tr>
