@@ -6,24 +6,19 @@ import {
   useReactTable,
 
 } from "@tanstack/react-table"
-
+import { Chip } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
 interface QuestionsTableProps {
-    questionsData:QuestionData[]
+  questionsData:QuestionData[]
 }
 
-// type Question = {
-//     answer:number,
-//     difficult:number 
-//     enable:boolean,
-//     explanation:string,
-//     options:string[],
-//     question:string
-//     createdAt:Date,
-// }
-
-
 const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
+
+    const difficultyConfig = {
+      1: { label: "Fácil", color: "success" as const },
+      2: { label: "Medio", color: "warning" as const },
+      3: { label: "Difícil", color: "danger" as const }
+    }
 
     const columnHelper = createColumnHelper<QuestionData>()
 
@@ -40,13 +35,20 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
             footer:info=>info.column.id
           }
       ),
-      columnHelper.accessor(
-        'difficult',{
-          header:()=>'Dificultad',
-          cell:info=> info.getValue(),
-          footer:info=>info.column.id
-        }
-      ),
+      columnHelper.accessor('difficult', {
+        header: () => 'Dificultad',
+        cell: (info) => {
+          const difficultyId = info.getValue() as 1 | 2 | 3
+          const config = difficultyConfig[difficultyId]
+
+          return config ? (
+            <Chip size="sm" color={config.color}>
+              {config.label}
+            </Chip>
+          ) : null
+        },
+        footer: info => info.column.id
+      }),
       columnHelper.accessor(
         'correctAnswer',{
             header:()=>'Respuesta',
