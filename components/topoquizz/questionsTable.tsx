@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table"
-import { Chip, Button, Switch } from "@heroui/react"
+import { Chip, Button, Switch, addToast} from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
 import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
@@ -88,14 +88,19 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
       columnHelper.accessor(
         'enable',{
             header:()=>'Estado',
-            cell:info=> {
+            cell:(info) => {
               const handleSwitchChange = async (isSelected: boolean) => {
                 const questionId = info.row.original.id
+                const question = info.row.original.question
                 try {
                   const questionRef = doc(db, "questions", questionId)
                   await updateDoc(questionRef, {
                     enable: isSelected
                   })
+                  addToast({
+                    title: `${isSelected? "Habilitado":"Deshabilitado"}`,
+                    description:`Pregunta: ${question} - ha sido ${isSelected? "HABILITADA":"DESHABILITADA"}`
+                  });
                   console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
                 } catch (error) {
                   console.error('Error al actualizar estado:', error)
