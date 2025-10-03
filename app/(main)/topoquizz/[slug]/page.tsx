@@ -4,7 +4,7 @@ import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
 import getQuestionsByLesson from "@/app/hooks/topoquizz/getQuestionsByLesson";
 import { use, useState } from "react";
 
-import { Button } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import QuestionsTable from "@/components/topoquizz/questionsTable";
 
 interface LessonComponentProps {
@@ -38,15 +38,15 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
 
     return (
         <>
-          <div 
+          <div
             // className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 sm:grid-cols-2 gap-5 p-5"
-            className="grid grid-cols-5 gap-5"
+            className="grid grid-cols-5 gap-5 h-screen"
             >
               <div className="col-span-1 flex flex-col gap-5 m-5">
                 {
                   data.map((element, index) => {
                     return (
-                      <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 hover:shadow-xl cursor-pointer`} 
+                      <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 hover:shadow-xl cursor-pointer`}
                         key={index}
                         onClick={
                           () => {
@@ -64,7 +64,7 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                 }
               </div>
 
-              <div className="col-span-4">
+              <div className="col-span-4 overflow-y-auto">
                 <div className=" text-center">
                   <h1 className='font-bold text-5xl ml-6'>Preguntas</h1>
                 </div>
@@ -78,19 +78,20 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                 </div>
                 {selectedLessonId && (
                   <div className="mx-30 my-10">
-                      {/* {questionsLoading && <div>Cargando preguntas...</div>}
-                      {questionsError && <div>Error: {questionsError}</div>}
-                      {!questionsLoading && !questionsError && questions.length === 0 && (
-                          <div>No hay preguntas para esta lección</div>
-                      )} */}
-                    <QuestionsTable
-                      questionsData={questions}
-                      isNewQuestionModalOpen={isNewQuestionModalOpen}
-                      onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
-                      lessonId={selectedLessonId}
-                    />
+                    {questionsLoading ? (
+                      <div className="flex justify-center items-center h-64">
+                        <Spinner size="lg" color="warning" />
+                      </div>
+                    ) : (
+                      <QuestionsTable
+                        questionsData={questions}
+                        isNewQuestionModalOpen={isNewQuestionModalOpen}
+                        onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
+                        lessonId={selectedLessonId}
+                      />
+                    )}
                   </div>
-                  )}
+                )}
               </div>
           </div>
         </>
