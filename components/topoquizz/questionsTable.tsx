@@ -10,15 +10,23 @@ import {
 } from "@tanstack/react-table"
 import { Chip, Button, Switch, addToast, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Textarea, Select, SelectItem } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
-import { doc, updateDoc } from "firebase/firestore"
+import { doc, updateDoc, addDoc, collection, Timestamp } from "firebase/firestore"
 import { db } from "@/utils/firebase"
 
 import { CiEdit } from "react-icons/ci";
 interface QuestionsTableProps {
   questionsData:QuestionData[]
+  onOpenNewQuestion?: () => void
+  isNewQuestionModalOpen?: boolean
+  onCloseNewQuestion?: () => void
+  lessonId?: string
 }
 
-const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
+const QuestionsTable: React.FC<QuestionsTableProps> = ({
+  questionsData, 
+  isNewQuestionModalOpen = false, 
+  onCloseNewQuestion, 
+  lessonId}) => {
 
     const difficultyConfig = {
       1: { label: "Fácil", color: "success" as const },
@@ -135,14 +143,20 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
       }),
 
     ]
-  
-  // const rerender = useReducer(() => ({}), {})[1]
 
   const [tableData, setTableData] = useState(()=>[...questionsData])
   const [sorting, setSorting] = useState<SortingState>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
   const [editedQuestion, setEditedQuestion] = useState({
+    question: "",
+    difficult: 1,
+    options: ["", "", "", ""],
+    answer: 0,
+    explanation: "",
+    enable: true
+  })
+  const [newQuestion, setNewQuestion] = useState({
     question: "",
     difficult: 1,
     options: ["", "", "", ""],
@@ -202,10 +216,63 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
     }
   }
 
+  const handleCreateQuestion = async () => {
+    if (!lessonId) {
+      addToast({
+        title: "Error",
+        description: "No se ha seleccionado una lección"
+      })
+      return
+    }
+
+    try {
+      await addDoc(collection(db, "questions"), {
+        question: newQuestion.question,
+        difficult: newQuestion.difficult,
+        options: newQuestion.options,
+        answer: newQuestion.answer,
+        explanation: newQuestion.explanation,
+        enable: newQuestion.enable,
+        lessonId: lessonId,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      })
+
+      addToast({
+        title: "Pregunta creada",
+        description: "La pregunta ha sido creada exitosamente"
+      })
+
+      // Reset form
+      setNewQuestion({
+        question: "",
+        difficult: 1,
+        options: ["", "", "", ""],
+        answer: 0,
+        explanation: "",
+        enable: true
+      })
+
+      onCloseNewQuestion?.()
+    } catch (error) {
+      console.error('Error al crear pregunta:', error)
+      addToast({
+        title: "Error",
+        description: "No se pudo crear la pregunta"
+      })
+    }
+  }
+
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...editedQuestion.options]
     newOptions[index] = value
     setEditedQuestion({ ...editedQuestion, options: newOptions })
+  }
+
+  const handleNewOptionChange = (index: number, value: string) => {
+    const newOptions = [...newQuestion.options]
+    newOptions[index] = value
+    setNewQuestion({ ...newQuestion, options: newOptions })
   }
 
   const table = useReactTable({
