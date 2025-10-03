@@ -2,6 +2,7 @@
 
 import { Button, Input} from "@heroui/react"
 import { useForm, SubmitHandler } from "react-hook-form"
+import { useRouter } from "next/navigation"
 
 type Inputs = {
   userName: string
@@ -10,6 +11,7 @@ type Inputs = {
 
 export default function Page () {
 
+    const router = useRouter()
     const errorFieldRequired = "Este campo es requerido"
     const {
         register,
@@ -17,7 +19,11 @@ export default function Page () {
         watch,
         formState: { errors },
     } = useForm<Inputs>()
-    const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data)
+    const onSubmit: SubmitHandler<Inputs> = (data) => {
+        if (data.userName === "admin" && data.password === "admin") {
+            router.push("/topoquizz")
+        }
+    }
 
 
     return(<>
