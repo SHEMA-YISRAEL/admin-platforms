@@ -6,8 +6,10 @@ import {
   useReactTable,
 
 } from "@tanstack/react-table"
-import { Chip } from "@heroui/react"
+import { Chip, Button, Switch } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
+
+import { CiEdit } from "react-icons/ci";
 interface QuestionsTableProps {
   questionsData:QuestionData[]
 }
@@ -50,30 +52,51 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
         footer: info => info.column.id
       }),
       columnHelper.accessor(
-        'correctAnswer',{
-            header:()=>'Respuesta',
-            cell:info=> info.getValue(),
+        'options',{
+            header:()=>'Opciones',
+            cell:info=> {
+              const options = info.getValue()
+              const correctIndex = info.row.original.answer
+              return options && options.length > 0 ? (
+                <ul className="list-disc list-inside space-y-1">
+                  {options.map((option, index) => (
+                    <li
+                      key={index}
+                      className={index === correctIndex ? 'bg-green-200 px-2 py-1 rounded' : ''}
+                    >
+                      {option}
+                    </li>
+                  ))}
+                </ul>
+              ) : '-'
+            },
             footer:info=>info.column.id
           }
       ),
       columnHelper.accessor(
-        'options',{
-            header:()=>'Opciones',
-            cell:info=> info.getValue()?.join(', ') || '-',
+        'explanation',{
+            header:()=>'Explicacion',
+            cell:info=> info.getValue(),
             footer:info=>info.column.id
           }
       ),
       columnHelper.accessor(
         'enable',{
             header:()=>'Activa',
-            cell:info=> info.getValue() ? 'Sí' : 'No',
+            cell:info=> {return <Switch defaultSelected/>},
             footer:info=>info.column.id
           }
-      )
+      ),
+      columnHelper.display({
+        id: 'action',
+        header: () => 'Action',
+        cell: info => { return <Button isIconOnly color="warning"> <CiEdit /></Button>},
+        footer:info=>info.column.id
+      }),
 
     ]
   
-  const rerender = useReducer(() => ({}), {})[1]
+  // const rerender = useReducer(() => ({}), {})[1]
 
   const [tableData, setTableData] = useState(()=>[...questionsData])
 
@@ -136,9 +159,9 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
         </tfoot> */}
       </table>
       <div className="h-4" />
-      <button onClick={() => rerender()} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-md">
+      {/* <button onClick={() => rerender()} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-md">
         Rerender
-      </button>
+      </button> */}
     </div>
   );
 }

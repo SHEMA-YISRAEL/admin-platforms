@@ -4,7 +4,7 @@ export interface QuestionData{
     id:string,
     question:string,
     options: string[],
-    correctAnswer: number,
+    answer: number,
     enable:boolean,
     lessonId: string,
     difficult:number,
