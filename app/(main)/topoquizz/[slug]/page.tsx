@@ -2,7 +2,7 @@
 
 import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
 import getQuestionsByLesson from "@/app/hooks/topoquizz/getQuestionsByLesson";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { Button, Spinner } from "@heroui/react";
 import QuestionsTable from "@/components/topoquizz/questionsTable";
@@ -19,11 +19,18 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
     const [selectedIndexLesson, setSelectedIndexLesson] = useState<number>(0);
     const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
 
-    const { 
-      data, 
-      loading, 
-      error 
+    const {
+      data,
+      loading,
+      error
     } = getLessonsByCourse(slug);
+
+    useEffect(() => {
+      if (data && data.length > 0 && !selectedLessonId) {
+        setSelectedLessonId(data[0].id);
+        setSelectedIndexLesson(0);
+      }
+    }, [data, selectedLessonId]);
 
     const {
       questionsData: questions, 
@@ -76,22 +83,20 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                     Nueva Pregunta
                   </Button>
                 </div>
-                {selectedLessonId && (
-                  <div className="mx-30 my-10">
-                    {questionsLoading ? (
-                      <div className="flex justify-center items-center h-64">
-                        <Spinner size="lg" color="warning" />
-                      </div>
-                    ) : (
-                      <QuestionsTable
-                        questionsData={questions}
-                        isNewQuestionModalOpen={isNewQuestionModalOpen}
-                        onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
-                        lessonId={selectedLessonId}
-                      />
-                    )}
-                  </div>
-                )}
+                <div className="mx-30 my-10">
+                  {selectedLessonId && questionsLoading ? (
+                    <div className="flex justify-center items-center h-64">
+                      <Spinner size="lg" color="warning" />
+                    </div>
+                  ) : (
+                    <QuestionsTable
+                      questionsData={selectedLessonId ? questions : []}
+                      isNewQuestionModalOpen={isNewQuestionModalOpen}
+                      onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
+                      lessonId={selectedLessonId}
+                    />
+                  )}
+                </div>
               </div>
           </div>
         </>
