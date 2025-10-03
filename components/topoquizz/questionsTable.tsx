@@ -1,4 +1,4 @@
-import { useState, useReducer } from "react"
+import { useState, useReducer, useEffect } from "react"
 import {
   createColumnHelper,
   flexRender,
@@ -67,8 +67,13 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
     ]
   
   const rerender = useReducer(() => ({}), {})[1]
-  
+
   const [tableData, setTableData] = useState(()=>[...questionsData])
+
+  useEffect(() => {
+    setTableData(questionsData)
+  }, [questionsData])
+
   const table = useReactTable({
     data: tableData,
     columns,
@@ -76,14 +81,14 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
   })
 
   return (
-      <div className="p-2">
-      <table>
-        
-        <thead>
+      <div className="w-full overflow-x-auto">
+      <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
+
+        <thead className="bg-gradient-to-r from-amber-500 to-amber-600">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th key={header.id}>
+                <th key={header.id} className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -95,22 +100,22 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
             </tr>
           ))}
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-200">
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
+            <tr key={row.id} className="hover:bg-amber-50 transition-colors duration-150">
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id}>
+                <td key={cell.id} className="px-6 py-4 text-sm text-gray-700">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>
           ))}
         </tbody>
-        <tfoot>
+        <tfoot className="bg-gray-50">
           {table.getFooterGroups().map(footerGroup => (
             <tr key={footerGroup.id}>
               {footerGroup.headers.map(header => (
-                <th key={header.id}>
+                <th key={header.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -124,7 +129,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
         </tfoot>
       </table>
       <div className="h-4" />
-      <button onClick={() => rerender()} className="border p-2">
+      <button onClick={() => rerender()} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-md">
         Rerender
       </button>
     </div>
