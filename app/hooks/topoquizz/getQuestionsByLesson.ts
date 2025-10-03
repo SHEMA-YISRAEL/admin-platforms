@@ -2,19 +2,12 @@ import { getDocs, collection, Timestamp, query, where} from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "@/utils/firebase";
 
-interface QuestionData{
-    id:string,
-    question:string,
-    options: string[],
-    correctAnswer: number,
-    lessonId: string,
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { QuestionData } from "@/interfaces/topoquizz";
 
 function getQuestionsByLesson(lessonId:string){
 
-    const [data, setData] = useState<QuestionData[]>([])
+    const [questionsData, setQuestionsData] = useState<QuestionData[]>([])
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +32,7 @@ function getQuestionsByLesson(lessonId:string){
                         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),
                     } as QuestionData
                 })
-                setData(items)
+                setQuestionsData(items)
 
 
             }catch(err){
@@ -52,7 +45,7 @@ function getQuestionsByLesson(lessonId:string){
         fetchQuestionsByLesson(lessonId)
     }, [lessonId])
 
-    return {data, loading, error}
+    return {questionsData, loading, error}
 
 }
 export default getQuestionsByLesson

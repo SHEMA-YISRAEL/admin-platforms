@@ -1,30 +1,31 @@
 import { useState, useReducer } from "react"
-import { 
+import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  
+
 } from "@tanstack/react-table"
 
+import { QuestionData } from "@/interfaces/topoquizz"
 interface QuestionsTableProps {
-    data:Question[]
+    questionsData:QuestionData[]
 }
 
-type Question = {
-    answer:number,
-    difficult:number 
-    enable:boolean,
-    explanation:string,
-    options:string[],
-    question:string
-    createdAt:Date,
-}
+// type Question = {
+//     answer:number,
+//     difficult:number 
+//     enable:boolean,
+//     explanation:string,
+//     options:string[],
+//     question:string
+//     createdAt:Date,
+// }
 
 
-const QuestionsTable: React.FC<QuestionsTableProps> = ({data}) => {
+const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
 
-    const columnHelper = createColumnHelper<Question>()
+    const columnHelper = createColumnHelper<QuestionData>()
 
     const columns = [
       columnHelper.accessor(
@@ -42,16 +43,23 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({data}) => {
         }
       ),
       columnHelper.accessor(
-        'answer',{
+        'correctAnswer',{
             header:()=>'Respuesta',
             cell:info=> info.getValue(),
             footer:info=>info.column.id
           }
       ),
       columnHelper.accessor(
-        'answer',{
+        'options',{
             header:()=>'Opciones',
-            cell:info=> info.getValue(), //mostrar lista de opciones
+            cell:info=> info.getValue()?.join(', ') || '-',
+            footer:info=>info.column.id
+          }
+      ),
+      columnHelper.accessor(
+        'enable',{
+            header:()=>'Activa',
+            cell:info=> info.getValue() ? 'Sí' : 'No',
             footer:info=>info.column.id
           }
       )
@@ -60,16 +68,17 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({data}) => {
   
   const rerender = useReducer(() => ({}), {})[1]
   
-  const [tableData, setTableData] = useState(()=>[...data])
+  const [tableData, setTableData] = useState(()=>[...questionsData])
   const table = useReactTable({
-    tableData,
+    data: tableData,
     columns,
-    getCore_RowModel:getCoreRowModel()
+    getCoreRowModel: getCoreRowModel()
   })
 
   return (
       <div className="p-2">
       <table>
+        
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>

@@ -5,6 +5,7 @@ import getQuestionsByLesson from "@/app/hooks/topoquizz/getQuestionsByLesson";
 import { use, useState } from "react";
 
 import { Button } from "@heroui/react";
+import QuestionsTable from "@/components/topoquizz/questionsTable";
 
 interface LessonComponentProps {
     params: Promise<{ slug: string }>
@@ -17,9 +18,14 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
     
     const [selectedIndexLesson, setSelectedIndexLesson] = useState<number>(0);
 
-    const { data, loading, error } = getLessonsByCourse(slug);
+    const { 
+      data, 
+      loading, 
+      error 
+    } = getLessonsByCourse(slug);
+
     const {
-      data: questions, 
+      questionsData: questions, 
       loading: questionsLoading, 
       error: questionsError 
     } = getQuestionsByLesson(selectedLessonId);
@@ -37,12 +43,10 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
             >
               <div className="col-span-1 flex flex-col gap-5 border m-5">
                 
-              
-
                 {
                   data.map((element, index) => {
                     return (
-                      <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 mx-10 hover:shadow-xl cursor-pointer`} 
+                      <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 hover:shadow-xl cursor-pointer`} 
                         key={index}
                         onClick={
                           () => {
@@ -75,7 +79,7 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                     {!questionsLoading && !questionsError && questions.length === 0 && (
                         <div>No hay preguntas para esta lección</div>
                     )}
-                    {!questionsLoading && !questionsError && questions.length > 0 && (
+                    {/* {!questionsLoading && !questionsError && questions.length > 0 && (
                         <div className="space-y-4">
                             {questions.map((question, index) => (
                                 <div key={question.id} className="bg-white p-4 rounded-lg shadow">
@@ -94,7 +98,9 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )} */}
+                    <QuestionsTable questionsData={questions}/>
+
                 </div>
                   )}
               </div>
