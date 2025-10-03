@@ -4,7 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-
+  getPaginationRowModel,
 } from "@tanstack/react-table"
 import { Chip, Button, Switch } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
@@ -107,7 +107,13 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
   const table = useReactTable({
     data: tableData,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
   })
 
   return (
@@ -159,9 +165,45 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
         </tfoot> */}
       </table>
       <div className="h-4" />
-      {/* <button onClick={() => rerender()} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-md">
-        Rerender
-      </button> */}
+      <div className="flex items-center justify-between gap-2 px-4 py-4">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => table.setPageIndex(0)}
+            isDisabled={!table.getCanPreviousPage()}
+          >
+            {'<<'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => table.previousPage()}
+            isDisabled={!table.getCanPreviousPage()}
+          >
+            {'<'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => table.nextPage()}
+            isDisabled={!table.getCanNextPage()}
+          >
+            {'>'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            isDisabled={!table.getCanNextPage()}
+          >
+            {'>>'}
+          </Button>
+        </div>
+        <span className="flex items-center gap-1 text-sm text-gray-700">
+          <div>Página</div>
+          <strong>
+            {table.getState().pagination.pageIndex + 1} de{' '}
+            {table.getPageCount()}
+          </strong>
+        </span>
+      </div>
     </div>
   );
 }
