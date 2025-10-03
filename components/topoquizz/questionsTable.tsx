@@ -28,6 +28,11 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
     const columnHelper = createColumnHelper<QuestionData>()
 
     const columns = [
+      columnHelper.display({
+        id: 'number',
+        header: () => '#',
+        cell: info => info.row.index + 1,
+      }),
       columnHelper.accessor(
         'question',{
             header:()=>'Pregunta',
@@ -111,7 +116,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
             </tr>
           ))}
         </tbody>
-        <tfoot className="bg-gray-50">
+        {/* <tfoot className="bg-gray-50">
           {table.getFooterGroups().map(footerGroup => (
             <tr key={footerGroup.id}>
               {footerGroup.headers.map(header => (
@@ -126,7 +131,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({questionsData}) => {
               ))}
             </tr>
           ))}
-        </tfoot>
+        </tfoot> */}
       </table>
       <div className="h-4" />
       <button onClick={() => rerender()} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-md">
