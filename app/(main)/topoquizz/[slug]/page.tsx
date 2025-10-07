@@ -77,7 +77,7 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
                 </div>
                 <div className="">
                   <Button
-                    onClick={() => setIsNewQuestionModalOpen(true)}
+                    onPress={() => setIsNewQuestionModalOpen(true)}
                     isDisabled={!selectedLessonId}
                   >
                     Nueva Pregunta

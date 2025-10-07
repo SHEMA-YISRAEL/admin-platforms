@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect } from "react"
+import { useState, useEffect } from "react"
 import {
   createColumnHelper,
   flexRender,
@@ -8,25 +8,31 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table"
-import { Chip, Button, Switch, addToast, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Textarea, Select, SelectItem } from "@heroui/react"
+
+import { Chip, Button, Switch, addToast } from "@heroui/react"
+
 import { QuestionData } from "@/interfaces/topoquizz"
-import { doc, updateDoc, addDoc, collection, Timestamp } from "firebase/firestore"
+
+import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
 
 import { CiEdit } from "react-icons/ci";
+import EditQuestionModal from "./modals/editQuestion"
+import NewQuestionModal from "./modals/newQuestion"
+
 interface QuestionsTableProps {
   questionsData:QuestionData[]
-  onOpenNewQuestion?: () => void
   isNewQuestionModalOpen?: boolean
   onCloseNewQuestion?: () => void
   lessonId?: string
 }
 
 const QuestionsTable: React.FC<QuestionsTableProps> = ({
-  questionsData, 
-  isNewQuestionModalOpen = false, 
-  onCloseNewQuestion, 
-  lessonId}) => {
+  questionsData,
+  isNewQuestionModalOpen = false,
+  onCloseNewQuestion,
+  lessonId = ""
+  }) => {
 
     const difficultyConfig = {
       1: { label: "Fácil", color: "success" as const },
@@ -144,26 +150,25 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
 
     ]
 
+  // const emptyQuestionObject = {
+  //   id:'',
+  //   lessonId:'',
+  //   createdAt:null,
+  //   updatedAt:null,
+
+  //   question: "",
+  //   difficult: 1,
+  //   options: ["", "", "", ""],
+  //   answer: 0,
+  //   explanation: "",
+  //   enable: true
+  // }
   const [tableData, setTableData] = useState(()=>[...questionsData])
   const [sorting, setSorting] = useState<SortingState>([])
+  
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
-  const [editedQuestion, setEditedQuestion] = useState({
-    question: "",
-    difficult: 1,
-    options: ["", "", "", ""],
-    answer: 0,
-    explanation: "",
-    enable: true
-  })
-  const [newQuestion, setNewQuestion] = useState({
-    question: "",
-    difficult: 1,
-    options: ["", "", "", ""],
-    answer: 0,
-    explanation: "",
-    enable: true
-  })
+
 
   useEffect(() => {
     setTableData(questionsData)
@@ -171,14 +176,6 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
 
   const handleOpenModal = (question: QuestionData) => {
     setSelectedQuestion(question)
-    setEditedQuestion({
-      question: question.question,
-      difficult: question.difficult,
-      options: [...question.options],
-      answer: question.answer,
-      explanation: question.explanation,
-      enable: question.enable
-    })
     setIsModalOpen(true)
   }
 
@@ -187,93 +184,53 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
     setSelectedQuestion(null)
   }
 
-  const handleSaveQuestion = async () => {
-    if (!selectedQuestion) return
+  // const handleCreateQuestion = async () => {
+  //   if (!lessonId) {
+  //     addToast({
+  //       title: "Error",
+  //       description: "No se ha seleccionado una lección"
+  //     })
+  //     return
+  //   }
 
-    try {
-      const questionRef = doc(db, "questions", selectedQuestion.id)
-      await updateDoc(questionRef, {
-        question: editedQuestion.question,
-        difficult: editedQuestion.difficult,
-        options: editedQuestion.options,
-        answer: editedQuestion.answer,
-        explanation: editedQuestion.explanation,
-        enable: editedQuestion.enable
-      })
+  //   try {
+  //     await addDoc(collection(db, "questions"), {
+  //       question: newQuestion.question,
+  //       difficult: newQuestion.difficult,
+  //       options: newQuestion.options,
+  //       answer: newQuestion.answer,
+  //       explanation: newQuestion.explanation,
+  //       enable: newQuestion.enable,
+  //       lessonId: lessonId,
+  //       createdAt: Timestamp.now(),
+  //       updatedAt: Timestamp.now()
+  //     })
 
-      addToast({
-        title: "Pregunta actualizada",
-        description: "La pregunta ha sido actualizada exitosamente"
-      })
+  //     addToast({
+  //       title: "Pregunta creada",
+  //       description: "La pregunta ha sido creada exitosamente"
+  //     })
 
-      handleCloseModal()
-    } catch (error) {
-      console.error('Error al actualizar pregunta:', error)
-      addToast({
-        title: "Error",
-        description: "No se pudo actualizar la pregunta"
-      })
-    }
-  }
+  //     // Reset form
+  //     setNewQuestion(emptyQuestionObject)
 
-  const handleCreateQuestion = async () => {
-    if (!lessonId) {
-      addToast({
-        title: "Error",
-        description: "No se ha seleccionado una lección"
-      })
-      return
-    }
+  //     onCloseNewQuestion?.()
+  //   } catch (error) {
+  //     console.error('Error al crear pregunta:', error)
+  //     addToast({
+  //       title: "Error",
+  //       description: "No se pudo crear la pregunta"
+  //     })
+  //   }
+  // }
 
-    try {
-      await addDoc(collection(db, "questions"), {
-        question: newQuestion.question,
-        difficult: newQuestion.difficult,
-        options: newQuestion.options,
-        answer: newQuestion.answer,
-        explanation: newQuestion.explanation,
-        enable: newQuestion.enable,
-        lessonId: lessonId,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
-      })
+  
 
-      addToast({
-        title: "Pregunta creada",
-        description: "La pregunta ha sido creada exitosamente"
-      })
-
-      // Reset form
-      setNewQuestion({
-        question: "",
-        difficult: 1,
-        options: ["", "", "", ""],
-        answer: 0,
-        explanation: "",
-        enable: true
-      })
-
-      onCloseNewQuestion?.()
-    } catch (error) {
-      console.error('Error al crear pregunta:', error)
-      addToast({
-        title: "Error",
-        description: "No se pudo crear la pregunta"
-      })
-    }
-  }
-
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...editedQuestion.options]
-    newOptions[index] = value
-    setEditedQuestion({ ...editedQuestion, options: newOptions })
-  }
-
-  const handleNewOptionChange = (index: number, value: string) => {
-    const newOptions = [...newQuestion.options]
-    newOptions[index] = value
-    setNewQuestion({ ...newQuestion, options: newOptions })
-  }
+  // const handleNewOptionChange = (index: number, value: string) => {
+  //   const newOptions = [...newQuestion.options]
+  //   newOptions[index] = value
+  //   setNewQuestion({ ...newQuestion, options: newOptions })
+  // }
 
   const table = useReactTable({
     data: tableData,
@@ -390,84 +347,17 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
         </span>
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        size="3xl"
-        scrollBehavior="inside"
-      >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Editar Pregunta
-          </ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <Textarea
-                label="Pregunta"
-                placeholder="Escribe la pregunta"
-                value={editedQuestion.question}
-                onChange={(e) => setEditedQuestion({ ...editedQuestion, question: e.target.value })}
-                minRows={2}
-              />
+      <EditQuestionModal
+        isModalOpenState={isModalOpen}
+        handleCloseModalMethod={handleCloseModal}
+        selectedQuestion={selectedQuestion}
+      />
 
-              <Select
-                label="Dificultad"
-                selectedKeys={[editedQuestion.difficult.toString()]}
-                onChange={(e) => setEditedQuestion({ ...editedQuestion, difficult: parseInt(e.target.value) })}
-              >
-                <SelectItem key="1" value="1">Fácil</SelectItem>
-                <SelectItem key="2" value="2">Medio</SelectItem>
-                <SelectItem key="3" value="3">Difícil</SelectItem>
-              </Select>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Opciones</label>
-                {editedQuestion.options.map((option, index) => (
-                  <div key={index} className="flex gap-2 items-center">
-                    <Input
-                      label={`Opción ${index + 1}`}
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      className="flex-1"
-                    />
-                    <Chip
-                      size="sm"
-                      color={editedQuestion.answer === index ? "success" : "default"}
-                      className="cursor-pointer"
-                      onClick={() => setEditedQuestion({ ...editedQuestion, answer: index })}
-                    >
-                      {editedQuestion.answer === index ? "Correcta" : "Marcar"}
-                    </Chip>
-                  </div>
-                ))}
-              </div>
-
-              <Textarea
-                label="Explicación"
-                placeholder="Escribe la explicación de la respuesta"
-                value={editedQuestion.explanation}
-                onChange={(e) => setEditedQuestion({ ...editedQuestion, explanation: e.target.value })}
-                minRows={3}
-              />
-
-              <Switch
-                isSelected={editedQuestion.enable}
-                onValueChange={(value) => setEditedQuestion({ ...editedQuestion, enable: value })}
-              >
-                {editedQuestion.enable ? "Habilitada" : "Deshabilitada"}
-              </Switch>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onClick={handleCloseModal}>
-              Cancelar
-            </Button>
-            <Button color="primary" onClick={handleSaveQuestion}>
-              Guardar Cambios
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <NewQuestionModal
+        isModalOpenState={isNewQuestionModalOpen}
+        handleCloseModalMethod={onCloseNewQuestion || (() => {})}
+        lessonId={lessonId}
+      />
     </div>
   );
 }

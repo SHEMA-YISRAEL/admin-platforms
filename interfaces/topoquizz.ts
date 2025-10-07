@@ -9,6 +9,6 @@ export interface QuestionData{
     lessonId: string,
     difficult:number,
     explanation:string,
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Date | null;
+    updatedAt: Date | null;
 }
