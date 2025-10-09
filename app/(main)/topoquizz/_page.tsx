@@ -1,6 +1,6 @@
 'use client';
 
-import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
+// import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
 import getQuestionsByLesson from "@/app/hooks/topoquizz/getQuestionsByLesson";
 import { use, useEffect, useState } from "react";
 
@@ -8,29 +8,29 @@ import { Button, Spinner } from "@heroui/react";
 import QuestionsTable from "@/components/topoquizz/questionsTable";
 
 interface LessonComponentProps {
-    params: Promise<{ slug: string }>
+    // params: Promise<{ slug: string }>
 }
 
-const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
+export default function(){
 
-    const { slug } = use(params);
+    // const { slug } = use(params);
     const [selectedLessonId, setSelectedLessonId] = useState<string>("");
 
     const [selectedIndexLesson, setSelectedIndexLesson] = useState<number>(0);
     const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
 
-    const {
-      data,
-      loading,
-      error
-    } = getLessonsByCourse(slug);
+    // const {
+    //   data,
+    //   loading,
+    //   error
+    // } = getLessonsByCourse(slug);
 
-    useEffect(() => {
-      if (data && data.length > 0 && !selectedLessonId) {
-        setSelectedLessonId(data[0].id);
-        setSelectedIndexLesson(0);
-      }
-    }, [data, selectedLessonId]);
+    // useEffect(() => {
+    //   if (data && data.length > 0 && !selectedLessonId) {
+    //     setSelectedLessonId(data[0].id);
+    //     setSelectedIndexLesson(0);
+    //   }
+    // }, [data, selectedLessonId]);
 
     const {
       questionsData: questions, 
@@ -38,8 +38,8 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
       error: questionsError 
     } = getQuestionsByLesson(selectedLessonId);
 
-    if(loading) return <div>Cargando...</div>
-    if(error) return <div>Error: {error}</div>
+    // if(loading) return <div>Cargando...</div>
+    // if(error) return <div>Error: {error}</div>
 
     const redirectByLesson = ( idLesson:string ) => { setSelectedLessonId(idLesson);}
 
@@ -51,23 +51,23 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
             >
               <div className="col-span-1 flex flex-col gap-5 m-5">
                 {
-                  data.map((element, index) => {
-                    return (
-                      <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 hover:shadow-xl cursor-pointer`}
-                        key={index}
-                        onClick={
-                          () => {
-                            setSelectedIndexLesson(index)
-                            redirectByLesson(element.id)
-                          }
-                        }
-                      >
-                        <div className="font-bold pr-3 pb-3 hover:shadow-amber-300">
-                          {element.name}
-                        </div>
-                      </div>
-                    )
-                  })
+                  // data.map((element, index) => {
+                  //   return (
+                  //     <div className={`grid justify-end content-end ${selectedIndexLesson===index? "bg-amber-300":""} rounded-2xl h-10 hover:shadow-xl cursor-pointer`}
+                  //       key={index}
+                  //       onClick={
+                  //         () => {
+                  //           setSelectedIndexLesson(index)
+                  //           redirectByLesson(element.id)
+                  //         }
+                  //       }
+                  //     >
+                  //       <div className="font-bold pr-3 pb-3 hover:shadow-amber-300">
+                  //         {element.name}
+                  //       </div>
+                  //     </div>
+                  //   )
+                  // })
                 }
               </div>
 
@@ -103,4 +103,4 @@ const LessonComponent: React.FC<LessonComponentProps> = ({ params }) => {
     );
 }
 
-export default LessonComponent; 
+// export default LessonComponent; 

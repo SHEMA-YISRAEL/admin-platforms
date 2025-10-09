@@ -5,7 +5,9 @@ interface NeuroAppPageProps {
 const NeuroAppPage: React.FC<NeuroAppPageProps> = () => {
     return (
         <>
-            NeurApp
+            <div className="">
+                <h1 className='font-bold text-5xl ml-6'>NeurApp</h1>
+            </div>
         </>
     );
 }
