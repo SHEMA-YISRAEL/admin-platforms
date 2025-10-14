@@ -1,18 +1,11 @@
 import { getDocs, collection, Timestamp, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react"
 import { db } from "@/utils/firebase";
-
-interface LessonData {
-  id: string,
-  name: string,
-  slug: string,
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { ILessonData } from "@/interfaces/topoquizz";
 
 function getLessonsByCourse(courseId: string) {
 
-  const [data, setData] = useState<LessonData[]>([])
+  const [data, setData] = useState<ILessonData[]>([])
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +28,7 @@ function getLessonsByCourse(courseId: string) {
             id: doc.id,
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
             updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),
-          } as LessonData
+          } as ILessonData
         })
         setData(items)
 

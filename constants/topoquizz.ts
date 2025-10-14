@@ -1,0 +1,2 @@
+
+export const docLessonLabel = 'courses'

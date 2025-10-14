@@ -1,19 +1,9 @@
 import { useEffect, useState } from "react";
 import { db } from "@/utils/firebase";
-import { getDocs, collection} from "firebase/firestore";
+import { getDocs, collection, Timestamp } from "firebase/firestore";
+import { ICoursesData } from "@/interfaces/topoquizz";
 
-interface ICoursesData {
-	id:string,
-	enable:boolean, 
-	image:string,
-	name:string,
-	slug:string,
-
-	createdAt: Date
-	updatedAt: Date
-}
-
-const docLessonLabel = 'courses'
+import { docLessonLabel } from "@/constants/topoquizz";
 
 function getCourses() {
 	const [coursesData, setCoursesData] = useState<ICoursesData[]>([]);
@@ -28,11 +18,15 @@ function getCourses() {
 
 				const querySnapshot = await getDocs(collection(db, docLessonLabel))
 				const items = querySnapshot.docs.map((doc, i)=>{
+					const data = doc.data();
 					return(
 						{
+							...data,
 							id:doc.id,
-							...doc.data()
-						}
+							...doc.data(),
+							createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
+							updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),
+						} as ICoursesData
 					)
 				})
 				setCoursesData(items)

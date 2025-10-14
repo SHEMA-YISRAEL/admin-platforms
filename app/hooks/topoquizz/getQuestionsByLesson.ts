@@ -12,7 +12,7 @@ function getQuestionsByLesson(lessonId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-
+    
     const fetchQuestionsByLesson = async (lessonId: string) => {
       try {
         setLoading(true)
