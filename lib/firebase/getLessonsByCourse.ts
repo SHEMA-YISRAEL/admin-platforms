@@ -15,6 +15,7 @@ function getLessonsByCourse(courseId: string) {
       try {
         setLoading(true)
         setError(null)
+        
         const colLessonsRef = await collection(db, "lessons")
         const q = query(
           colLessonsRef, where('courseId', '==', courseId)

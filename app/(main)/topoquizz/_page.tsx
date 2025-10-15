@@ -1,7 +1,7 @@
 'use client';
 
 // import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
-import getQuestionsByLesson from "@/app/hooks/topoquizz/getQuestionsByLesson";
+import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { use, useEffect, useState } from "react";
 
 import { Button, Spinner } from "@heroui/react";
