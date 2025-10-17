@@ -1,14 +1,10 @@
-import SideBar from "@/components/shared/SideBar";
+// import SideBar from "@/components/shared/SideBar";
 
 export default function TopoquizzLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
 
 
   return (
-    <div>
-      <div>
-        <SideBar />
-      </div>
-
+    <div className="h-screen w-screen">
       {children}
     </div>
   );

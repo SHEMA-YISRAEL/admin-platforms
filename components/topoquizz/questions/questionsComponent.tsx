@@ -8,8 +8,6 @@ interface QuestionsComponentProps {
 }
  
 const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonIdSeelected}) => {
-
-  
   const {
     questionsData: questions, 
     loading: questionsLoading, 
