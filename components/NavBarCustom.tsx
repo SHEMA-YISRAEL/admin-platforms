@@ -53,16 +53,16 @@ const UserMenu = () =>{
 const NavBarCustom: React.FC<NavBarProps> = () => {
 	const pathname = usePathname()
 	console.log('pathname', pathname)
-	const routes = [
-		{
-			label: "TopoQuizz",
-			path: '/topoquizz'
-		},
-		{
-			label: "NeurApp",
-			path: '/neurapp'
-		}
-	]
+	// const routes = [
+	// 	{
+	// 		label: "TopoQuizz",
+	// 		path: '/topoquizz'
+	// 	},
+	// 	{
+	// 		label: "NeurApp",
+	// 		path: '/neurapp'
+	// 	}
+	// ]
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">
@@ -76,7 +76,8 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 						<DropdownTrigger>
 							<Button
 								disableRipple
-								className="p-0 bg-transparent data-[hover=true]:bg-transparent text-1xl px-2"
+								className={`p-0 bg-transparent data-[hover=true]:bg-transparent text-1xl font-bold 
+									px-2 ${pathname.includes('/topoquizz')?"text-amber-400":""}`}
 								endContent={<FaAngleDown/>}
 								radius="sm"
 								color="secondary"
@@ -109,8 +110,10 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 				</Dropdown>
 
 				<NavbarItem>
-          <Link aria-current="page" color="secondary" href="#" className="text-amber-400">
-            Customers
+          <Link aria-current="page" color="secondary" href="/neurapp" 
+						className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
+					>
+            NeurApp
           </Link>
         </NavbarItem>
 			</NavbarContent>
