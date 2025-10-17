@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from "react";
 import { 
 	User, 
 	Dropdown,
@@ -16,7 +15,7 @@ import Link from "next/link";
 import { FaAngleDown, FaBook} from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter} from 'next/navigation'
 
 interface NavBarProps {
 
@@ -52,6 +51,7 @@ const UserMenu = () =>{
 
 const NavBarCustom: React.FC<NavBarProps> = () => {
 	const pathname = usePathname()
+	const router = useRouter()
 	console.log('pathname', pathname)
 	// const routes = [
 	// 	{
@@ -96,6 +96,7 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
               key="dashboard"
               description="Metricas de la aplicacion con informción general de la misma"
               startContent={<MdDashboard/>}
+							onClick={() => router.push('/topoquizz/dashboard')}
             >
               Dashboard
             </DropdownItem>
@@ -103,6 +104,7 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
               key="contenido"
               description="Contenido de la Aplicacion, Temas, Lecciones y preguntas"
               startContent={<FaBook/>}
+							onClick={()=> router.push('/topoquizz/content')}
             >
               Contenido
             </DropdownItem>
