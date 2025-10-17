@@ -1,10 +1,11 @@
 'use client'
-import QuestionsTable from "@/components/topoquizz/questionsTable";
+// import QuestionsTable from "@/components/topoquizz/questionsTable";
 import getCourses from "@/lib/firebase/getCourses";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { Listbox, ListboxItem } from "@heroui/react";
 import getLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
+import QuestionsComponent from "@/components/topoquizz/questions/questionsComponent";
 
 interface ContentPageProps {
 
@@ -61,8 +62,6 @@ const SubjectsList: React.FC<ISubjectListProps> = ({selectedSubject, methodSetSe
           })
         }
         </Listbox>
-
-
       </div>
     </>
   )
@@ -70,19 +69,19 @@ const SubjectsList: React.FC<ISubjectListProps> = ({selectedSubject, methodSetSe
 
 interface ILessonsListType {
   courseSelected:string
+  selectedLesson: Set<string>
+  methodSetLessonSelected:Dispatch<SetStateAction<Set<string>>>;
 }
 
-const LessonsList: React.FC<ILessonsListType>= ({courseSelected})=>{
+const LessonsList: React.FC<ILessonsListType>= ({courseSelected, selectedLesson, methodSetLessonSelected})=>{
   const {
     data:lessonsData,
     loading:loadingLessonsData,
     error} = getLessonsByCourse(courseSelected) //courseSelected:string
 
-  const [selectedLesson, setSelectedLesson] = useState<"all" | Set<string>>(new Set([""]));
-
   useEffect(()=>{
     if (lessonsData.length > 0) {
-      setSelectedLesson(new Set([lessonsData[0].slug || String(0)]));
+      methodSetLessonSelected(new Set([lessonsData[0].slug || String(0)]));
     }
   }, [lessonsData])
 
@@ -98,8 +97,8 @@ const LessonsList: React.FC<ILessonsListType>= ({courseSelected})=>{
           selectedKeys={selectedLesson}
           selectionMode="single"
           variant="flat"
-          onSelectionChange={(keys) => setSelectedLesson(keys as Set<string>)}
-          onAction={(key) => console.log(key)}
+          onSelectionChange={(keys) => methodSetLessonSelected(keys as Set<string>)}
+          // onAction={(key) => console.log(key)}
         >
           {
             lessonsData.map((element, index)=>{
@@ -120,21 +119,31 @@ const LessonsList: React.FC<ILessonsListType>= ({courseSelected})=>{
 
 const ContentPage: React.FC<ContentPageProps> = () => {
 
-  const [courseSelected, setCourselected] = useState(new Set([""]));//useState<string>('')
-  // const [lessonSelected, setLessonSelected] = useState<number>(0)
-  // const [selectedSubject, setSelectedSubject] = useState(new Set([""]));
+  const [courseIdSelected, setCourseIdSelected] = useState(new Set([""]))
+  const [lessonIdSelected, setLessonIdSelected] = useState(new Set([""]));
   
-
   return (
     <>
-      <SubjectsList 
-        selectedSubject={courseSelected}
-        methodSetSelectedSubject={setCourselected}
+      <SubjectsList
+        selectedSubject={courseIdSelected}
+        methodSetSelectedSubject={setCourseIdSelected}
       />
-      <LessonsList 
-        courseSelected={[...courseSelected][0]} //first element
-      /> 
-      {/* <QuestionsTable questionsData={[]}/> */}
+      <LessonsList
+        courseSelected={Array.from(courseIdSelected)[0] || ''} //first element
+        selectedLesson={lessonIdSelected}
+        methodSetLessonSelected={setLessonIdSelected}
+      />
+
+      <QuestionsComponent
+        lessonIdSeelected={Array.from(lessonIdSelected)[0] || ''}
+        // questionsData={[]}
+      />
+
+      {/* <QuestionsTable
+        questionsData={selectedLessonId ? questions : []}
+        isNewQuestionModalOpen={isNewQuestionModalOpen}
+        onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
+      /> */}
 
     </>
   );

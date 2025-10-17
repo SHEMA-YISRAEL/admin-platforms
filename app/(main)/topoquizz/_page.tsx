@@ -89,12 +89,13 @@ export default function(){
                       <Spinner size="lg" color="warning" />
                     </div>
                   ) : (
-                    <QuestionsTable
-                      questionsData={selectedLessonId ? questions : []}
-                      isNewQuestionModalOpen={isNewQuestionModalOpen}
-                      onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
-                      lessonId={selectedLessonId}
-                    />
+                    // <QuestionsTable
+                    //   questionsData={selectedLessonId ? questions : []}
+                    //   isNewQuestionModalOpen={isNewQuestionModalOpen}
+                    //   onCloseNewQuestion={() => setIsNewQuestionModalOpen(false)}
+                    //   lessonId={selectedLessonId}
+                    // />
+                    <></>
                   )}
                 </div>
               </div>
