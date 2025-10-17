@@ -3,7 +3,7 @@
 import getCourses from "@/lib/firebase/getCourses";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Listbox, ListboxItem } from "@heroui/react";
+import { Listbox, ListboxItem, Button } from "@heroui/react";
 import getLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
 import QuestionsComponent from "@/components/topoquizz/questions/questionsComponent";
 
@@ -41,6 +41,10 @@ const SubjectsList: React.FC<ISubjectListProps> = ({selectedSubject, methodSetSe
     <>
       <div className="border m-4 rounded-2xl">
         <div className="text-4xl">Materias</div>
+
+        <Button color="primary">
+          Nueva Materia
+        </Button>
         {
           loadingCourses? <div>Cargando...</div>:<></>
         }
@@ -89,7 +93,9 @@ const LessonsList: React.FC<ILessonsListType>= ({courseSelected, selectedLesson,
     <>
       <div className="border m-4 rounded-2xl">
         <div className="text-4xl">Lecciones</div>
-
+        <Button color="primary">
+          Nueva Leccion
+        </Button>
         {loadingLessonsData?"Cargando...":<></>}
         {error? error:<></>}
 

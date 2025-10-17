@@ -1,9 +1,9 @@
-import NavBar from "@/components/NavBar";
+import NavBarCustom from "@/components/NavBarCustom";
 
 export default function MainLayout({ children }: Readonly<{children: React.ReactNode;}>) {
   return (
         <div>
-            <NavBar/>
+            <NavBarCustom/>
             {children}
         </div>
   );
