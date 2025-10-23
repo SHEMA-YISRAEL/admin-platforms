@@ -256,7 +256,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
   return (
     <div className="border m-4 p-2 rounded-2xl">
 
-      <div className="text-4xl">Preguntas</div>
+      <div className="text-2xl text-center">Preguntas</div>
       {
         // lessonId && questionsLoading ? (
         //   <div className="flex justify-center items-center h-64">
