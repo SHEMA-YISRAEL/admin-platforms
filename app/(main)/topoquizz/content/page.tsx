@@ -16,6 +16,7 @@ import clsx from "clsx";
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 
 import { ICoursesData, ILessonData } from "@/interfaces/topoquizz";
+import { emptySubject, emptyLesson } from "@/utils/topoquizz";
 
 // interface ICustomListBox{
 
@@ -61,60 +62,26 @@ import { ICoursesData, ILessonData } from "@/interfaces/topoquizz";
 //     </Listbox>)
 // }
 
-
-interface ContentPageProps {
-
-}
-
 interface ISubjectListProps {
-  // selectedSubject: Set<string>,
-  // methodSetSelectedSubject: Dispatch<SetStateAction<Set<string>>>;
-  // Correcto
   selectedSubject: ICoursesData | undefined,
   methodSetSelectedSubject: Dispatch<SetStateAction<ICoursesData>>;
-
 }
 
-const SubjectsList: React.FC<ISubjectListProps> = (
-  { 
-    selectedSubject, 
-    methodSetSelectedSubject 
-  }
-) => {
-
+const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetSelectedSubject }) => {
   const {
     coursesData: coursesDataFromFirebase,
     loading: loadingCourses,
     error: errorGettingCoursesData
   } = getCourses()
 
-  // const [selected, setSelected] = useState<ICoursesData>({
-  //   id:'',
-  //   enable:false, 
-  //   image:'',
-  //   name:'',
-  //   slug:'',
-  //   createdAt: null,
-  //   updatedAt: null
-  // })
   const [dataFromServer, setDataFromServer] = useState<ICoursesData[]>([]);
 
   useEffect(() => {
-    
     if (coursesDataFromFirebase.length > 0) {
       setDataFromServer(coursesDataFromFirebase)
       methodSetSelectedSubject(coursesDataFromFirebase[0])
     }
   }, [coursesDataFromFirebase])
-
-  
-  // const people = [
-  //   { id: 1, name: 'Durward Reynolds' },
-  //   { id: 2, name: 'Kenton Towne' },
-  //   { id: 3, name: 'Therese Wunsch' },
-  //   { id: 4, name: 'Benedict Kessler' },
-  //   { id: 5, name: 'Katelyn Rohan' },
-  // ]
 
   return (
     <>
@@ -189,7 +156,7 @@ const SubjectsList: React.FC<ISubjectListProps> = (
 interface ILessonsListType {
   courseSelected: ICoursesData
   selectedLesson: ILessonData | undefined //Set<string>
-  methodSetLessonSelected: Dispatch<SetStateAction<ILessonData | undefined>>
+  methodSetLessonSelected: Dispatch<SetStateAction<ILessonData>>
 }
 
 const LessonsList: React.FC<ILessonsListType> = ({ 
@@ -203,10 +170,12 @@ const LessonsList: React.FC<ILessonsListType> = ({
     error 
   } = getLessonsByCourse(courseSelected.id) //courseSelected:string
 
+   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
+
   useEffect(() => {
     if (lessonsData.length > 0) {
-      console.log(lessonsData)
-      // methodSetLessonSelected(new Set([lessonsData[0].slug || String(0)]));
+      setLessonsDataFromServer(lessonsData);
+      methodSetLessonSelected(lessonsData[0]);
     }
   }, [lessonsData])
 
@@ -221,7 +190,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
         </div>
         
         {
-          loadingLessonsData && courseSelected===null ? "Cargando..." : 
+          loadingLessonsData? "Cargando..." : 
           <>
             <Listbox
               value={selectedLesson} 
@@ -247,7 +216,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
                   'transition duration-100 ease-in data-leave:data-closed:opacity-0'
                 )}
               >
-                {lessonsData.map((element, index) => (
+                {lessonsDataFromServer.map((element, index) => (
                   <ListboxOption
                     key={index}
                     value={element}
@@ -286,49 +255,32 @@ const LessonsList: React.FC<ILessonsListType> = ({
   )
 }
 
+interface ContentPageProps {
+
+}
+
 const ContentPage: React.FC<ContentPageProps> = () => {
 
-  // const [courseIdSelected, setCourseIdSelected] = useState(new Set([""]));
-  // const [lessonIdSelected, setLessonIdSelected] = useState(new Set([""]));
-
-  const [courseSelected, setCourseSelected] = useState<ICoursesData>({
-    id:'',
-    enable:false, 
-    image:'',
-    name:'',
-    slug:'',
-    createdAt: null,
-    updatedAt: null
-  });
-  const [lessonSelected, setLessonSelected] = useState<ILessonData>();
+  const [courseSelected, setCourseSelected] = useState<ICoursesData>(emptySubject);
+  const [lessonSelected, setLessonSelected] = useState<ILessonData>(emptyLesson);
 
   return (
     <div className="h-screen w-screen">
       <div className="text-center text-3xl font-bold my-5">Contenido</div>
-      <div 
-      // className="grid grid-cols-5 grid-rows-1 gap-4 h-screen"
-      >
-        <div 
-        // className="flex flex-col"
-        >
-          <div 
-          // className="flex-1"
-          >
+      <div>
+        <div>
+          <div>
             <SubjectsList
               selectedSubject={courseSelected}
               methodSetSelectedSubject={setCourseSelected}
             />
           </div>
-          <div 
-            // className="grow"
-          >
-
+          <div>
             <LessonsList
-              courseSelected={courseSelected} //first element
+              courseSelected={courseSelected}
               selectedLesson={lessonSelected}
               methodSetLessonSelected={setLessonSelected}
             />
-
           </div>
         </div>
         {/* <div className="col-span-4">

@@ -28,6 +28,6 @@ export interface ILessonData {
   id: string,
   name: string,
   slug: string,
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
