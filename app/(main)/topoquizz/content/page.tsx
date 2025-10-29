@@ -133,6 +133,7 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
         {/* <Listbox
           // disabledKeys={["edit", "delete"]}
           disallowEmptySelection
+
           // aria-label="Single selection example"
           selectedKeys={selectedSubject}
           selectionMode="single"
@@ -170,9 +171,15 @@ const LessonsList: React.FC<ILessonsListType> = ({
     error 
   } = getLessonsByCourse(courseSelected.id) //courseSelected:string
 
-   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
+  const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
 
   useEffect(() => {
+    setLessonsDataFromServer([]);
+    methodSetLessonSelected(emptyLesson);
+  }, [courseSelected.id]);
+
+  useEffect(() => {
+    console.log(lessonsData)
     if (lessonsData.length > 0) {
       setLessonsDataFromServer(lessonsData);
       methodSetLessonSelected(lessonsData[0]);
@@ -190,7 +197,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
         </div>
         
         {
-          loadingLessonsData? "Cargando..." : 
+          loadingLessonsData? "Cargando..." : lessonsData.length > 0?
           <>
             <Listbox
               value={selectedLesson} 
@@ -228,7 +235,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
                 ))}
               </ListboxOptions>
             </Listbox>
-          </>
+          </>:<></>
         }
 
         {/* <Listbox
@@ -283,12 +290,11 @@ const ContentPage: React.FC<ContentPageProps> = () => {
             />
           </div>
         </div>
-        {/* <div className="col-span-4">
+        <div className="col-span-4">
           <QuestionsComponent
-            lessonIdSeelected={Array.from(lessonIdSelected)[0] || ''}
-          // questionsData={[]}
+            lessonSelected={lessonSelected}
           />
-        </div> */}
+        </div>
 
         {/* <QuestionsTable
         questionsData={selectedLessonId ? questions : []}
