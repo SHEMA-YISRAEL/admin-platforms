@@ -19,8 +19,8 @@ import { db } from "@/utils/firebase"
 import { CiEdit } from "react-icons/ci";
 import EditQuestionModal from "./modals/editQuestion"
 // import NewQuestionModal from "./modals/newQuestion"
-import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson"
-import { Spinner } from "@heroui/react"
+// import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson"
+// import { Spinner } from "@heroui/react"
 
 interface QuestionsTableProps {
   questionsData:QuestionData[]
@@ -365,11 +365,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
               selectedQuestion={selectedQuestion}
             />
 
-            {/* <NewQuestionModal
-              isModalOpenState={isNewQuestionModalOpen}
-              handleCloseModalMethod={onCloseNewQuestion || (() => {})}
-              lessonId={lessonId}
-            /> */}
+            
         </div>
         // )
       }

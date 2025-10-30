@@ -7,6 +7,9 @@ import { ICoursesData, ILessonData } from "@/interfaces/topoquizz";
 import { emptySubject, emptyLesson } from "@/utils/topoquizz";
 import SubjectsList from "@/components/topoquizz/questions/subjectListComp";
 import LessonsList from "@/components/topoquizz/questions/lessonListComponent";
+
+import { Button } from "@heroui/react";
+import NewQuestionModal from "@/components/topoquizz/modals/newQuestion";
 interface ContentPageProps {
 
 }
@@ -15,6 +18,8 @@ const ContentPage: React.FC<ContentPageProps> = () => {
 
   const [courseSelected, setCourseSelected] = useState<ICoursesData>(emptySubject);
   const [lessonSelected, setLessonSelected] = useState<ILessonData>(emptyLesson);
+
+  const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
 
   return (
     <div className="h-screen w-screen">
@@ -33,12 +38,27 @@ const ContentPage: React.FC<ContentPageProps> = () => {
             methodSetLessonSelected={setLessonSelected}
           />
         </div>
+
+        <NewQuestionModal
+          isModalOpenState={isNewQuestionModalOpen}
+          handleCloseModalMethod={()=>setIsNewQuestionModalOpen(false)}
+          lessonId={lessonSelected.id}
+        />
       </div>
-        <div className="col-span-4">
-          <QuestionsComponent
-            lessonSelected={lessonSelected}
-          />
-        </div>
+
+      <div className="flex gap-2 my-5 justify-center">
+        <Button color='primary' onPress={()=>{setIsNewQuestionModalOpen(true)}}>
+          Crear Pregunta
+        </Button>
+        <Button color="primary" isDisabled>
+          Subir preguntas en Volumen
+        </Button>
+      </div>
+      <div className="col-span-4">
+        <QuestionsComponent
+          lessonSelected={lessonSelected}
+        />
+      </div>
     </div>
   );
 }
