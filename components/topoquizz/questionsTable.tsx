@@ -41,7 +41,14 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
     columnHelper.accessor(
       'question', {
       header: () => 'Pregunta',
-      cell: info => info.getValue(),
+      cell: info => {
+        const text = info.getValue()
+        return (
+          <div className="max-w-md font-medium">
+            {text}
+          </div>
+        )
+      },
       footer: info => info.column.id
     }
     ),
@@ -67,16 +74,20 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
         const options = info.getValue()
         const correctIndex = info.row.original.answer
         return options && options.length > 0 ? (
-          <ul className="list-disc list-inside space-y-1">
+          <div className="grid grid-cols-2 gap-1 text-xs min-w-[300px]">
             {options.map((option, index) => (
-              <li
+              <div
                 key={index}
-                className={index === correctIndex ? 'bg-green-200 px-2 py-1 rounded' : ''}
+                className={`px-2 py-1 rounded border ${
+                  index === correctIndex
+                    ? 'bg-green-200 border-green-400 font-semibold'
+                    : 'bg-gray-50 border-gray-200'
+                }`}
               >
-                {option}
-              </li>
+                <span className="font-bold">{index + 1}.</span> {option}
+              </div>
             ))}
-          </ul>
+          </div>
         ) : '-'
       },
       footer: info => info.column.id
@@ -85,7 +96,14 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
     columnHelper.accessor(
       'explanation', {
       header: () => 'Explicacion',
-      cell: info => info.getValue(),
+      cell: info => {
+        const text = info.getValue()
+        return text ? (
+          <div className="max-w-xs truncate" title={text}>
+            {text}
+          </div>
+        ) : '-'
+      },
       footer: info => info.column.id
     }
     ),
@@ -123,35 +141,54 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
     ),
     columnHelper.accessor(
       'updatedAt', {
-        header: () => 'Ultima modificacion',
-        cell: info => info.getValue()?.toDateString(),
-        footer: info => info.column.id
+        header: () => 'Modificado',
+        cell: info => {
+          const date = info.getValue()
+          return date ? (
+            <div className="whitespace-nowrap text-xs">
+              {date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit'
+              })}
+              <br/>
+              <span className="text-gray-500">
+                {date.toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+          ) : '-'
+        },
+        footer: info => info.column.id,
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const dateA = rowA.original.updatedAt
+          const dateB = rowB.original.updatedAt
+          if (!dateA) return 1
+          if (!dateB) return -1
+          return dateA.getTime() - dateB.getTime()
+        }
       }
     ),
     columnHelper.display({
       id: 'action',
-      header: () => 'Opciones',
+      header: () => '',
       cell: info => {
         return (
           <Button
             isIconOnly
+            size="sm"
             color="warning"
             onPress={() => handleOpenModal(info.row.original)}
           >
-            <CiEdit size={30} />
+            <CiEdit size={18} />
           </Button>
         )
       },
       footer: info => info.column.id
     }),
-
-    columnHelper.accessor(
-      'updatedAt', {
-        header: () => 'Ultima modificacion',
-        cell: info => info.getValue()?.toDateString(),
-        footer: info => info.column.id
-      }
-    ),
 
     // columnHelper.display({
     //   id: 'lastAuthor',
@@ -203,10 +240,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
 
   useEffect(() => {
     setTableData(questionsData)
-    if(tableData.length > 0){
-      setNoQuestions(true)  
-    }
-
+    setNoQuestions(questionsData.length > 0?false:true)
   }, [questionsData])
 
   const handleOpenModal = (question: QuestionData) => {
@@ -285,28 +319,27 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
   })
 
   return (
-    <div className="px-10 rounded-2xl">
+    <div className="px-4 rounded-lg">
       {
-        //tableData.length === 0? (
         isLoadingDataTable?(
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center h-48">
             <Spinner size="lg" color="warning" />
           </div>
         ) : noQuestions?(
-          <div className="text-center font-semibold text-4xl">
+          <div className="text-center font-semibold text-2xl py-8">
             No hay preguntas
           </div>
         ):(
         <div className="w-full overflow-x-auto">
-          <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
+          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden text-xs">
             <thead className="bg-gradient-to-r from-amber-500 to-amber-600">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    <th key={header.id} className="px-3 py-2 text-left text-xs font-semibold text-white uppercase tracking-tight">
                       {header.isPlaceholder ? null : (
                         <div
-                          className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2' : ''}
+                          className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1' : ''}
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(
@@ -314,8 +347,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
                             header.getContext()
                           )}
                           {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
+                            asc: ' ▲',
+                            desc: ' ▼',
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                       )}
@@ -324,37 +357,21 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-amber-50 transition-colors duration-150">
+                <tr key={row.id} className="hover:bg-amber-50/50 transition-colors">
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4 text-sm text-gray-700">
+                    <td key={cell.id} className="px-3 py-2 text-xs text-gray-700">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
-            {/* <tfoot className="bg-gray-50">
-              {table.getFooterGroups().map(footerGroup => (
-                <tr key={footerGroup.id}>
-                  {footerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.footer,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot> */}
           </table>
-          <div className="h-4" />
-          <div className="flex items-center justify-between gap-2 px-4 py-4">
-            <div className="flex items-center gap-2">
+          <div className="h-2" />
+          <div className="flex items-center justify-between gap-2 px-2 py-2 bg-white rounded-lg shadow-sm">
+            <div className="flex items-center gap-1">
               <Button
                 size="sm"
                 onPress={() => table.setPageIndex(0)}
@@ -385,11 +402,10 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
               </Button>
             </div>
 
-            <span className="flex items-center gap-1 text-sm text-gray-700">
-              <div>Página</div>
+            <span className="flex items-center gap-1 text-xs text-gray-600">
+              <div>Pág</div>
               <strong>
-                {table.getState().pagination.pageIndex + 1} de{' '}
-                {table.getPageCount()}
+                {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
               </strong>
             </span>
           </div>

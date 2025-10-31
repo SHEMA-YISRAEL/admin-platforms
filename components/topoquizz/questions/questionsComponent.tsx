@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState} from "react";
 import QuestionsTable from "../questionsTable";
 import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
-import { ILessonData } from "@/interfaces/topoquizz";
+import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
+import { emptyQuestion } from "@/utils/topoquizz";
 
 
 interface QuestionsComponentProps {
@@ -14,14 +15,19 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected})
     loading: questionsLoading, 
     error: questionsError 
   } = getQuestionsByLesson(lessonSelected.id);
+  
+  const [dataForTable, setDataForTable] = useState<QuestionData[]>([emptyQuestion]);
 
   useEffect(()=>{
-    console.log(questions)
+    if(questions.length > 0){
+      console.log(questions) 
+      setDataForTable(questions)
+    }
   }, [questions])
 
   return (
     <QuestionsTable 
-      questionsData={questions}
+      questionsData={dataForTable}
       isLoadingDataTable={questionsLoading}/>
   );
 }
