@@ -2,7 +2,6 @@ import { useEffect, useState} from "react";
 import QuestionsTable from "../questionsTable";
 import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
-import { emptyQuestion } from "@/utils/topoquizz";
 
 
 interface QuestionsComponentProps {
@@ -11,22 +10,30 @@ interface QuestionsComponentProps {
  
 const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected}) => {
   const {
-    questionsData: questions, 
-    loading: questionsLoading, 
-    error: questionsError 
+    questionsData: questions,
+    loading: questionsLoading
   } = getQuestionsByLesson(lessonSelected.id);
-  
-  const [dataForTable, setDataForTable] = useState<QuestionData[]>([emptyQuestion]);
 
+  const [dataForTable, setDataForTable] = useState<QuestionData[]>([]);
+
+  // Limpiar datos cuando cambia la lección seleccionada
+  useEffect(()=>{
+    setDataForTable([]);
+  }, [lessonSelected.id])
+
+  // Actualizar datos cuando llegan las preguntas
   useEffect(()=>{
     if(questions.length > 0){
-      console.log(questions) 
+      console.log(questions)
       setDataForTable(questions)
+    } else {
+      // Si no hay preguntas, limpiar el array
+      setDataForTable([])
     }
   }, [questions])
 
   return (
-    <QuestionsTable 
+    <QuestionsTable
       questionsData={dataForTable}
       isLoadingDataTable={questionsLoading}/>
   );
