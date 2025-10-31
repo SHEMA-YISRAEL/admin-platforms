@@ -19,9 +19,11 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected})
     console.log(questions)
   }, [questions])
 
-  return (<>
-    <QuestionsTable questionsData={questions}/>
-  </>);
+  return (
+    <QuestionsTable 
+      questionsData={questions}
+      isLoadingDataTable={questionsLoading}/>
+  );
 }
  
 export default QuestionsComponent;

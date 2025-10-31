@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, Dispatch, SetStateAction} from "react"
 import {
   createColumnHelper,
   flexRender,
@@ -15,12 +15,14 @@ import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
 import { CiEdit } from "react-icons/ci";
 import EditQuestionModal from "./modals/editQuestion"
+import { Spinner } from "@heroui/react"
 
 interface QuestionsTableProps {
-  questionsData: QuestionData[]
+  questionsData: QuestionData[],
+  isLoadingDataTable: boolean
 }
 
-const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData }) => {
+const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadingDataTable }) => {
 
   const difficultyConfig = {
     1: { label: "Fácil", color: "success" as const },
@@ -197,10 +199,14 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
-
+  const [noQuestions, setNoQuestions] = useState(false)
 
   useEffect(() => {
     setTableData(questionsData)
+    if(tableData.length > 0){
+      setNoQuestions(true)  
+    }
+
   }, [questionsData])
 
   const handleOpenModal = (question: QuestionData) => {
@@ -280,14 +286,17 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData }) => {
 
   return (
     <div className="px-10 rounded-2xl">
-
-      {/* <div className="text-2xl text-center">Preguntas</div> */}
       {
-        // lessonId && questionsLoading ? (
-        //   <div className="flex justify-center items-center h-64">
-        //     <Spinner size="lg" color="warning" />
-        //   </div>
-        // ) : (
+        //tableData.length === 0? (
+        isLoadingDataTable?(
+          <div className="flex justify-center items-center h-64">
+            <Spinner size="lg" color="warning" />
+          </div>
+        ) : noQuestions?(
+          <div className="text-center font-semibold text-4xl">
+            No hay preguntas
+          </div>
+        ):(
         <div className="w-full overflow-x-auto">
           <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
             <thead className="bg-gradient-to-r from-amber-500 to-amber-600">
@@ -391,7 +400,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData }) => {
             selectedQuestion={selectedQuestion}
           />
         </div>
-        // )
+        )
       }
     </div>
   );
