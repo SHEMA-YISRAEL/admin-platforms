@@ -240,7 +240,16 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
 
   useEffect(() => {
     setTableData(questionsData)
-    setNoQuestions(questionsData.length > 0?false:true)
+    if(questionsData.length > 0){
+      setNoQuestions(false)
+    } else {
+      setNoQuestions(true)
+    }
+    // if(questionsData.length > 0){
+    //   setNoQuestions(false)
+    // } else {
+    //   setNoQuestions(true)
+    // }
   }, [questionsData])
 
   const handleOpenModal = (question: QuestionData) => {
