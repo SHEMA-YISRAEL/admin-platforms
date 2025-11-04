@@ -328,95 +328,101 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
   })
 
   return (
-    <div className="px-4 rounded-lg">
+    <div className="h-full flex flex-col rounded-lg bg-white shadow-md border border-gray-200">
       {
         isLoadingDataTable?(
-          <div className="flex justify-center items-center h-48">
+          <div className="flex justify-center items-center h-full">
             <Spinner size="lg" color="warning" />
           </div>
         ) : noQuestions?(
-          <div className="text-center font-semibold text-2xl py-8">
+          <div className="flex justify-center items-center h-full text-center font-semibold text-2xl text-gray-400">
             No hay preguntas
           </div>
         ):(
-        <div className="w-full overflow-x-auto">
-          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden text-xs">
-            <thead className="bg-gradient-to-r from-amber-500 to-amber-600">
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-3 py-2 text-left text-xs font-semibold text-white uppercase tracking-tight">
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1' : ''}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{
-                            asc: ' ▲',
-                            desc: ' ▼',
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-amber-50/50 transition-colors">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-3 py-2 text-xs text-gray-700">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="h-2" />
-          <div className="flex items-center justify-between gap-2 px-2 py-2 bg-white rounded-lg shadow-sm">
-            <div className="flex items-center gap-1">
-              <Button
-                size="sm"
-                onPress={() => table.setPageIndex(0)}
-                isDisabled={!table.getCanPreviousPage()}
-              >
-                {'<<'}
-              </Button>
-              <Button
-                size="sm"
-                onPress={() => table.previousPage()}
-                isDisabled={!table.getCanPreviousPage()}
-              >
-                {'<'}
-              </Button>
-              <Button
-                size="sm"
-                onPress={() => table.nextPage()}
-                isDisabled={!table.getCanNextPage()}
-              >
-                {'>'}
-              </Button>
-              <Button
-                size="sm"
-                onPress={() => table.setPageIndex(table.getPageCount() - 1)}
-                isDisabled={!table.getCanNextPage()}
-              >
-                {'>>'}
-              </Button>
-            </div>
+        <>
+          {/* Tabla con scroll interno */}
+          <div className="flex-1 overflow-auto">
+            <table className="min-w-full bg-white text-xs">
+              <thead className="bg-gradient-to-r from-amber-500 to-amber-600 sticky top-0 z-10">
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th key={header.id} className="px-3 py-2 text-left text-xs font-semibold text-white uppercase tracking-tight">
+                        {header.isPlaceholder ? null : (
+                          <div
+                            className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1' : ''}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {{
+                              asc: ' ▲',
+                              desc: ' ▼',
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="hover:bg-amber-50/50 transition-colors">
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className="px-3 py-2 text-xs text-gray-700">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-            <span className="flex items-center gap-1 text-xs text-gray-600">
-              <div>Pág</div>
-              <strong>
-                {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
-              </strong>
-            </span>
+          {/* Paginación fija en la parte inferior */}
+          <div className="flex-shrink-0 border-t border-gray-200">
+            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50">
+              <div className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  onPress={() => table.setPageIndex(0)}
+                  isDisabled={!table.getCanPreviousPage()}
+                >
+                  {'<<'}
+                </Button>
+                <Button
+                  size="sm"
+                  onPress={() => table.previousPage()}
+                  isDisabled={!table.getCanPreviousPage()}
+                >
+                  {'<'}
+                </Button>
+                <Button
+                  size="sm"
+                  onPress={() => table.nextPage()}
+                  isDisabled={!table.getCanNextPage()}
+                >
+                  {'>'}
+                </Button>
+                <Button
+                  size="sm"
+                  onPress={() => table.setPageIndex(table.getPageCount() - 1)}
+                  isDisabled={!table.getCanNextPage()}
+                >
+                  {'>>'}
+                </Button>
+              </div>
+
+              <span className="flex items-center gap-1 text-xs text-gray-600">
+                <div>Pág</div>
+                <strong>
+                  {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
+                </strong>
+              </span>
+            </div>
           </div>
 
           <EditQuestionModal
@@ -424,7 +430,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
             handleCloseModalMethod={handleCloseModal}
             selectedQuestion={selectedQuestion}
           />
-        </div>
+        </>
         )
       }
     </div>

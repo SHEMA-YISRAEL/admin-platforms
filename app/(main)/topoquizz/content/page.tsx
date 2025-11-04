@@ -22,45 +22,47 @@ const ContentPage: React.FC<ContentPageProps> = () => {
   const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
 
   return (
-    <div className="h-screen w-full px-4 py-3">
+    <div className="h-screen w-full flex flex-col overflow-hidden">
       {/* Header compacto */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-3">
-        <h1 className="text-2xl font-bold text-gray-800 text-center mb-3">Gestión de Preguntas</h1>
+      <div className="flex-shrink-0 px-4 pt-3 pb-2">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+          <h1 className="text-2xl font-bold text-gray-800 text-center mb-3">Gestión de Preguntas</h1>
 
-        {/* Selectores y acciones en una sola fila */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Selectores de Materia y Lección */}
-          <div className="flex flex-wrap items-center gap-3 flex-1">
-            <SubjectsList
-              selectedSubject={courseSelected}
-              methodSetSelectedSubject={setCourseSelected}
-            />
-            <LessonsList
-              courseSelected={courseSelected}
-              selectedLesson={lessonSelected}
-              methodSetLessonSelected={setLessonSelected}
-            />
-          </div>
+          {/* Selectores y acciones en una sola fila */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Selectores de Materia y Lección */}
+            <div className="flex flex-wrap items-center gap-3 flex-1">
+              <SubjectsList
+                selectedSubject={courseSelected}
+                methodSetSelectedSubject={setCourseSelected}
+              />
+              <LessonsList
+                courseSelected={courseSelected}
+                selectedLesson={lessonSelected}
+                methodSetLessonSelected={setLessonSelected}
+              />
+            </div>
 
-          {/* Botones de acción */}
-          <div className="flex gap-2">
-            <Button
-              color='success'
-              size="sm"
-              onPress={()=>{setIsNewQuestionModalOpen(true)}}
-              className="font-semibold"
-            >
-              + Crear Pregunta
-            </Button>
-            <Button color="primary" size="sm" isDisabled>
-              Subir en Lote
-            </Button>
+            {/* Botones de acción */}
+            <div className="flex gap-2">
+              <Button
+                color='success'
+                size="sm"
+                onPress={()=>{setIsNewQuestionModalOpen(true)}}
+                className="font-semibold"
+              >
+                + Crear Pregunta
+              </Button>
+              <Button color="primary" size="sm" isDisabled>
+                Subir en Lote
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tabla de preguntas */}
-      <div>
+      {/* Tabla de preguntas - ocupa el resto del espacio */}
+      <div className="flex-1 overflow-hidden px-4 pb-3">
         <QuestionsComponent
           lessonSelected={lessonSelected}
         />

@@ -33,9 +33,11 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected})
   }, [questions])
 
   return (
-    <QuestionsTable
-      questionsData={dataForTable}
-      isLoadingDataTable={questionsLoading}/>
+    <div className="h-full">
+      <QuestionsTable
+        questionsData={dataForTable}
+        isLoadingDataTable={questionsLoading}/>
+    </div>
   );
 }
  
