@@ -31,8 +31,19 @@ function getLessonsByCourse(courseId: string) {
             updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),
           } as ILessonData
         })
-        setData(items)
+        
+        //sort
+        items.sort((a, b) => {
+          const dateA = a.updatedAt instanceof Date
+            ? a.updatedAt
+            : (a.updatedAt == null ? new Date(0) : new Date(a.updatedAt));
+          const dateB = b.updatedAt instanceof Date
+            ? b.updatedAt
+            : (b.updatedAt == null ? new Date(0) : new Date(b.updatedAt));
+          return dateA.getTime() - dateB.getTime();
+        });
 
+        setData(items)
 
       } catch (err) {
         console.error('Error fetching Firebase data:', err);

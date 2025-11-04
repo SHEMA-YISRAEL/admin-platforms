@@ -52,7 +52,7 @@ const UserMenu = () =>{
 const NavBarCustom: React.FC<NavBarProps> = () => {
 	const pathname = usePathname()
 	const router = useRouter()
-	console.log('pathname', pathname)
+	// console.log('pathname', pathname)
 	// const routes = [
 	// 	{
 	// 		label: "TopoQuizz",

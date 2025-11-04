@@ -29,7 +29,7 @@ const SideBar: React.FC<SideBarProps> = () => {
         <ul>
           {
             items.map((element, index) => {
-              console.log(`${actualApp}/${element.path}`)
+              // console.log(`${actualApp}/${element.path}`)
               return (
                 <li key={index} >
                   <Link

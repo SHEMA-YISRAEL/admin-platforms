@@ -30,13 +30,15 @@ const LessonsList: React.FC<ILessonsListType> = ({
 
   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
 
+  let idLesson:number= 0
+
   useEffect(() => {
     setLessonsDataFromServer([]);
     methodSetLessonSelected(emptyLesson);
   }, [courseSelected.id]);
 
   useEffect(() => {
-    console.log(lessonsData)
+    // console.log(lessonsData)
     if (lessonsData.length > 0) {
       setLessonsDataFromServer(lessonsData);
       methodSetLessonSelected(lessonsData[0]);
@@ -75,16 +77,19 @@ const LessonsList: React.FC<ILessonsListType> = ({
                 'transition duration-100 ease-in data-leave:data-closed:opacity-0'
               )}
             >
-              {lessonsDataFromServer.map((element, index) => (
-                <ListboxOption
-                  key={index}
-                  value={element}
-                  className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-amber-50 transition-colors"
-                >
-                  <CheckIcon className="invisible size-4 fill-amber-600 group-data-selected:visible" />
-                  <div className="text-sm text-gray-900">{element.name}</div>
-                </ListboxOption>
-              ))}
+              {
+                lessonsDataFromServer.map((element, index) => {
+                  idLesson+=1
+                  return <ListboxOption
+                    key={index}
+                    value={element}
+                    className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-amber-50 transition-colors"
+                  >
+                    <CheckIcon className="invisible size-4 fill-amber-600 group-data-selected:visible" />
+                    <div className="text-sm text-gray-900">{`L${idLesson}`}-{element.name}</div>
+                  </ListboxOption>
+                })
+              }
             </ListboxOptions>
           </Listbox>
         ) : (

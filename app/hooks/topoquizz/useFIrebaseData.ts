@@ -43,17 +43,18 @@ function useFirebaseData() {
                 });
 
 
-                items.sort((a, b) => {
-                    const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
-                    const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
-                    return dateA.getTime() - dateB.getTime();
-                });
+                // items.sort((a, b) => {
+                //     const dateA = a.updatedAt instanceof Date ? a.updatedAt : new Date(a.updatedAt);
+                //     const dateB = b.updatedAt instanceof Date ? b.updatedAt : new Date(b.updatedAt);
+                //     return dateB.getTime() - dateA.getTime();
+                // });
+                // console.log(sortedItems, 'sorted')
 
                 const lessonsCounterByCourse : IlessonsCounterByCourseType = {}
                 const allLessons = await getDocs(collection(db, "lessons")); //llamda a l FB
                 allLessons.docs.map((el, index)=>{
                     const data = el.data();
-                    console.log(data.courseId)
+                    // console.log(data.courseId)
                     if(data.courseId in lessonsCounterByCourse){
                         lessonsCounterByCourse[data.courseId]=lessonsCounterByCourse[data.courseId]+1
                     }else{

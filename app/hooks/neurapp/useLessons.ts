@@ -27,7 +27,7 @@ function useLessons(courseId: number | null) {
                 setError(null);
 
                 const url = `${API_BASE_URL}/courses/${courseId}/lessons`;
-                console.log('Fetching lessons from:', url);
+                // console.log('Fetching lessons from:', url);
 
                 const response = await fetch(url);
 

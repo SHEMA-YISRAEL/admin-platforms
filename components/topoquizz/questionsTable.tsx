@@ -123,7 +123,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
               title: `${isSelected ? "Habilitado" : "Deshabilitado"}`,
               description: `Pregunta: ${question} - ha sido ${isSelected ? "HABILITADA" : "DESHABILITADA"}`
             });
-            console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
+            // console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
           } catch (error) {
             console.error('Error al actualizar estado:', error)
           }

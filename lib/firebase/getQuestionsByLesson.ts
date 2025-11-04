@@ -32,6 +32,17 @@ function getQuestionsByLesson(lessonId: string) {
             updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),
           } as QuestionData
         })
+
+        items.sort((a, b) => {
+          const dateA = a.updatedAt instanceof Date
+            ? a.updatedAt
+            : (a.updatedAt == null ? new Date(0) : new Date(a.updatedAt));
+          const dateB = b.updatedAt instanceof Date
+            ? b.updatedAt
+            : (b.updatedAt == null ? new Date(0) : new Date(b.updatedAt));
+          return dateB.getTime() - dateA.getTime();
+        });
+
         setQuestionsData(items)
 
 
