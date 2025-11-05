@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { ICoursesData, ILessonData } from "@/interfaces/topoquizz";
 import { emptyLesson } from "@/utils/topoquizz";
+import NewLessonModal from "../modals/newLesson";
 
 
 interface ILessonsListType {
@@ -29,8 +30,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
   } = getLessonsByCourse(courseSelected.id) //courseSelected:string
 
   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
-
-  let idLesson:number= 0
+  const [isNewLessonModalOpen, setIsNewLessonModalOpen] = useState(false);
 
   useEffect(() => {
     setLessonsDataFromServer([]);
@@ -41,7 +41,12 @@ const LessonsList: React.FC<ILessonsListType> = ({
     // console.log(lessonsData)
     if (lessonsData.length > 0) {
       setLessonsDataFromServer(lessonsData);
-      methodSetLessonSelected(lessonsData[0]);
+      // Solo seleccionar automáticamente la primera si no hay ninguna seleccionada
+      if (!selectedLesson || !selectedLesson.id) {
+        methodSetLessonSelected(lessonsData[0]);
+      }
+    } else {
+      setLessonsDataFromServer([]);
     }
   }, [lessonsData])
 
@@ -51,7 +56,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
       {
         loadingLessonsData ? (
           <div className="text-xs text-gray-500">Cargando...</div>
-        ) : lessonsData.length > 0 ? (
+        ) : lessonsDataFromServer.length > 0 ? (
           <Listbox
             value={selectedLesson}
             onChange={methodSetLessonSelected}
@@ -79,14 +84,13 @@ const LessonsList: React.FC<ILessonsListType> = ({
             >
               {
                 lessonsDataFromServer.map((element, index) => {
-                  idLesson+=1
                   return <ListboxOption
-                    key={index}
+                    key={element.id}
                     value={element}
                     className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-amber-50 transition-colors"
                   >
                     <CheckIcon className="invisible size-4 fill-amber-600 group-data-selected:visible" />
-                    <div className="text-sm text-gray-900">{`L${idLesson}`}-{element.name}</div>
+                    <div className="text-sm text-gray-900">{`L${index + 1}`} - {element.name}</div>
                   </ListboxOption>
                 })
               }
@@ -96,9 +100,22 @@ const LessonsList: React.FC<ILessonsListType> = ({
           <div className="text-xs text-gray-400 italic">Sin lecciones</div>
         )
       }
-      <Button size="sm" color="primary" variant="flat" className="text-xs">
+      <Button
+        size="sm"
+        color="primary"
+        variant="flat"
+        className="text-xs"
+        onPress={() => setIsNewLessonModalOpen(true)}
+        isDisabled={!courseSelected.id}
+      >
         + Lección
       </Button>
+
+      <NewLessonModal
+        isModalOpenState={isNewLessonModalOpen}
+        handleCloseModalMethod={() => setIsNewLessonModalOpen(false)}
+        courseId={courseSelected.id}
+      />
     </div>
   )
 }
