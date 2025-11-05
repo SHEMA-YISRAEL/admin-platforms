@@ -9,6 +9,9 @@ import {
   SortingState,
 } from "@tanstack/react-table"
 
+import { TbPlayerTrackNext, TbPlayerTrackPrev} from "react-icons/tb"
+import { MdSkipPrevious, MdSkipNext  } from "react-icons/md";
+
 import { Chip, Button, Switch, addToast } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
 import { doc, updateDoc } from "firebase/firestore"
@@ -353,14 +356,20 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
                             className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1' : ''}
                             onClick={header.column.getToggleSortingHandler()}
                           >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {{
-                              asc: ' ▲',
-                              desc: ' ▼',
-                            }[header.column.getIsSorted() as string] ?? null}
+                            {
+                              flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )
+                            }
+                              
+                            {
+                              {
+                                asc: ' ▲',
+                                desc: ' ▼',
+                              }
+                              [header.column.getIsSorted() as string] ?? null
+                            }
                           </div>
                         )}
                       </th>
@@ -384,39 +393,44 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
 
           {/* Paginación fija en la parte inferior */}
           <div className="flex-shrink-0 border-t border-gray-200">
-            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50">
+            <div className="flex items-center justify-end gap-2 px-3 py-2 bg-gray-50">
               <div className="flex items-center gap-1">
                 <Button
                   size="sm"
+                  className="p-2 text-2xl"
+
                   onPress={() => table.setPageIndex(0)}
                   isDisabled={!table.getCanPreviousPage()}
                 >
-                  {'<<'}
+                  <TbPlayerTrackPrev />
                 </Button>
                 <Button
                   size="sm"
+                  className="p-2 text-2xl"
                   onPress={() => table.previousPage()}
                   isDisabled={!table.getCanPreviousPage()}
                 >
-                  {'<'}
+                  <MdSkipPrevious/>
                 </Button>
                 <Button
                   size="sm"
+                  className="p-2 text-2xl"
                   onPress={() => table.nextPage()}
                   isDisabled={!table.getCanNextPage()}
                 >
-                  {'>'}
+                  <MdSkipNext />
                 </Button>
                 <Button
                   size="sm"
+                  className="p-2 text-2xl"
                   onPress={() => table.setPageIndex(table.getPageCount() - 1)}
                   isDisabled={!table.getCanNextPage()}
                 >
-                  {'>>'}
+                  {<TbPlayerTrackNext />}
                 </Button>
               </div>
 
-              <span className="flex items-center gap-1 text-xs text-gray-600">
+              <span className="flex items-center gap-1 text-xl text-gray-600 font-bold">
                 <div>Pág</div>
                 <strong>
                   {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
