@@ -1,4 +1,4 @@
-import { getDocs, collection, Timestamp, query, where } from "firebase/firestore";
+import { collection, Timestamp, query, where, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react"
 import { db } from "@/utils/firebase";
 
@@ -12,17 +12,17 @@ function getQuestionsByLesson(lessonId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    
-    const fetchQuestionsByLesson = async (lessonId: string) => {
-      try {
-        setLoading(true)
-        setError(null)
-        const colQuestionsRef = await collection(db, "questions")
-        const q = query(
-          colQuestionsRef, where('lessonId', '==', lessonId)
-        )
+    setLoading(true)
+    setError(null)
 
-        const querySnapshot = await getDocs(q);
+    const colQuestionsRef = collection(db, "questions")
+    const q = query(
+      colQuestionsRef, where('lessonId', '==', lessonId)
+    )
+
+    // Usar onSnapshot para escuchar cambios en tiempo real
+    const unsubscribe = onSnapshot(q,
+      (querySnapshot) => {
         const items = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -44,16 +44,17 @@ function getQuestionsByLesson(lessonId: string) {
         });
 
         setQuestionsData(items)
-
-
-      } catch (err) {
+        setLoading(false)
+      },
+      (err) => {
         console.error('Error fetching Firebase data:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
         setLoading(false)
       }
-    }
-    fetchQuestionsByLesson(lessonId)
+    )
+
+    // Cleanup: desuscribirse cuando el componente se desmonte o cambie lessonId
+    return () => unsubscribe()
   }, [lessonId])
 
   return { questionsData, loading, error }

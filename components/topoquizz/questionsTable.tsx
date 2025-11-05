@@ -19,6 +19,7 @@ import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
 import { CiEdit } from "react-icons/ci";
 import EditQuestionModal from "./modals/editQuestion"
+import DeleteQuestionModal from "./modals/deleteQuestion"
 import { Spinner } from "@heroui/react"
 
 interface QuestionsTableProps {
@@ -193,10 +194,9 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
 
             <Button
               isIconOnly
-              isDisabled
               size="sm"
               color="danger"
-              onPress={() => console.log('eliminar')}
+              onPress={() => handleOpenDeleteModal(info.row.original)}
             >
               <RiDeleteBin6Line size={18}/>
             </Button>
@@ -232,7 +232,9 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
   const [sorting, setSorting] = useState<SortingState>([])
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
+  const [questionToDelete, setQuestionToDelete] = useState<QuestionData | null>(null)
   const [noQuestions, setNoQuestions] = useState(false)
 
   useEffect(() => {
@@ -257,6 +259,16 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedQuestion(null)
+  }
+
+  const handleOpenDeleteModal = (question: QuestionData) => {
+    setQuestionToDelete(question)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setQuestionToDelete(null)
   }
 
   // const handleCreateQuestion = async () => {
@@ -435,6 +447,12 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
             isModalOpenState={isModalOpen}
             handleCloseModalMethod={handleCloseModal}
             selectedQuestion={selectedQuestion}
+          />
+
+          <DeleteQuestionModal
+            isModalOpenState={isDeleteModalOpen}
+            handleCloseModalMethod={handleCloseDeleteModal}
+            selectedQuestion={questionToDelete}
           />
         </>
         )
