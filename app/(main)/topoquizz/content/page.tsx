@@ -11,6 +11,7 @@ import LessonsList from "@/components/topoquizz/questions/lessonListComponent";
 import { Button } from "@heroui/react";
 import NewQuestionModal from "@/components/topoquizz/modals/newQuestion";
 import DifficultFilter from "@/components/topoquizz/questions/difficultFilter";
+import SearchFilter from "@/components/topoquizz/questions/searchFilter";
 import { IDifficult } from "@/types/Topoqizz";
 
 interface ContentPageProps { }
@@ -46,6 +47,7 @@ const ContentPage: React.FC<ContentPageProps> = () => {
   ]
 
   const[levelSelected, setLevelSelected] = useState<IDifficult>(difficultLevels[0])
+  const[searchText, setSearchText] = useState<string>("")
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden">
@@ -69,6 +71,8 @@ const ContentPage: React.FC<ContentPageProps> = () => {
               />
 
               <DifficultFilter difficultLevels={difficultLevels} levelSelected={levelSelected} methodSetLevelSelected={setLevelSelected}/>
+
+              <SearchFilter searchValue={searchText} onSearchChange={setSearchText} />
             </div>
 
             {/* Botones de acción */}
@@ -94,6 +98,7 @@ const ContentPage: React.FC<ContentPageProps> = () => {
         <QuestionsComponent
           lessonSelected={lessonSelected}
           filterValue={levelSelected}
+          searchText={searchText}
         />
       </div>
 

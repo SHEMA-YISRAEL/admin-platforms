@@ -7,9 +7,10 @@ import { IDifficult } from "@/types/Topoqizz";
 interface QuestionsComponentProps {
   lessonSelected: ILessonData
   filterValue: IDifficult
+  searchText: string
 }
  
-const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue}) => {
+const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue, searchText}) => {
   const {
     questionsData: questions,
     loading: questionsLoading
@@ -24,13 +25,26 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, 
 
   // Actualizar datos cuando llegan las preguntas
   useEffect(()=>{
-    questions.length > 0?
-      filterValue.identifier!==-1?
-        setDataForTable(questions.filter((el)=> el.difficult === filterValue.identifier)):
-        setDataForTable(questions) 
-      : 
-    setDataForTable([])
-  }, [questions, filterValue])
+    if (questions.length > 0) {
+      let filteredData = questions;
+
+      // Filtrar por dificultad
+      if (filterValue.identifier !== -1) {
+        filteredData = filteredData.filter((el) => el.difficult === filterValue.identifier);
+      }
+
+      // Filtrar por texto de búsqueda
+      if (searchText.trim() !== "") {
+        filteredData = filteredData.filter((el) =>
+          el.question.toLowerCase().includes(searchText.toLowerCase())
+        );
+      }
+
+      setDataForTable(filteredData);
+    } else {
+      setDataForTable([]);
+    }
+  }, [questions, filterValue, searchText])
 
   return (
     <div className="h-full">
