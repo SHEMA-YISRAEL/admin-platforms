@@ -2,13 +2,14 @@ import { useEffect, useState} from "react";
 import QuestionsTable from "../questionsTable";
 import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
-
+import { IDifficult } from "@/types/Topoqizz";
 
 interface QuestionsComponentProps {
   lessonSelected: ILessonData
+  filterValue: IDifficult
 }
  
-const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected}) => {
+const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue}) => {
   const {
     questionsData: questions,
     loading: questionsLoading
@@ -23,14 +24,13 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected})
 
   // Actualizar datos cuando llegan las preguntas
   useEffect(()=>{
-    if(questions.length > 0){
-      console.log(questions)
-      setDataForTable(questions)
-    } else {
-      // Si no hay preguntas, limpiar el array
-      setDataForTable([])
-    }
-  }, [questions])
+    questions.length > 0?
+      filterValue.identifier!==-1?
+        setDataForTable(questions.filter((el)=> el.difficult === filterValue.identifier)):
+        setDataForTable(questions) 
+      : 
+    setDataForTable([])
+  }, [questions, filterValue])
 
   return (
     <div className="h-full">

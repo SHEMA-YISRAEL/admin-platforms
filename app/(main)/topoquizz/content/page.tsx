@@ -10,9 +10,10 @@ import LessonsList from "@/components/topoquizz/questions/lessonListComponent";
 
 import { Button } from "@heroui/react";
 import NewQuestionModal from "@/components/topoquizz/modals/newQuestion";
-interface ContentPageProps {
+import DifficultFilter from "@/components/topoquizz/questions/difficultFilter";
+import { IDifficult } from "@/types/Topoqizz";
 
-}
+interface ContentPageProps { }
 
 const ContentPage: React.FC<ContentPageProps> = () => {
 
@@ -20,6 +21,31 @@ const ContentPage: React.FC<ContentPageProps> = () => {
   const [lessonSelected, setLessonSelected] = useState<ILessonData>(emptyLesson);
 
   const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
+
+  const difficultLevels = [
+    {
+      id:'all',
+      label:'Todos',
+      identifier:-1
+    },
+    {
+      id:'easy',
+      label:'Fácil',
+      identifier:1
+    },
+    {
+      id:'medium',
+      label:'Medio',
+      identifier:2
+    },
+    {
+      id:'hard',
+      label:'Difícil',
+      identifier:3
+    },
+  ]
+
+  const[levelSelected, setLevelSelected] = useState<IDifficult>(difficultLevels[0])
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden">
@@ -41,6 +67,8 @@ const ContentPage: React.FC<ContentPageProps> = () => {
                 selectedLesson={lessonSelected}
                 methodSetLessonSelected={setLessonSelected}
               />
+
+              <DifficultFilter difficultLevels={difficultLevels} levelSelected={levelSelected} methodSetLevelSelected={setLevelSelected}/>
             </div>
 
             {/* Botones de acción */}
@@ -65,6 +93,7 @@ const ContentPage: React.FC<ContentPageProps> = () => {
       <div className="flex-1 overflow-hidden px-4 pb-3">
         <QuestionsComponent
           lessonSelected={lessonSelected}
+          filterValue={levelSelected}
         />
       </div>
 

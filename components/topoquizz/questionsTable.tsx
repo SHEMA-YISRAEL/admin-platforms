@@ -1,4 +1,4 @@
-import { useState, useEffect, Dispatch, SetStateAction} from "react"
+import { useState, useEffect } from "react"
 import {
   createColumnHelper,
   flexRender,
@@ -11,6 +11,7 @@ import {
 
 import { TbPlayerTrackNext, TbPlayerTrackPrev} from "react-icons/tb"
 import { MdSkipPrevious, MdSkipNext  } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 import { Chip, Button, Switch, addToast } from "@heroui/react"
 import { QuestionData } from "@/interfaces/topoquizz"
@@ -102,7 +103,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       cell: info => {
         const text = info.getValue()
         return text ? (
-          <div className="max-w-xs truncate" title={text}>
+          <div className="max-w-xs" title={text}>
             {text}
           </div>
         ) : '-'
@@ -177,46 +178,39 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
     ),
     columnHelper.display({
       id: 'action',
-      header: () => '',
+      header: () => 'Acciones',
       cell: info => {
         return (
-          <Button
-            isIconOnly
-            size="sm"
-            color="warning"
-            onPress={() => handleOpenModal(info.row.original)}
-          >
-            <CiEdit size={18} />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              isIconOnly
+              size="sm"
+              color="warning"
+              onPress={() => handleOpenModal(info.row.original)}
+            >
+              <CiEdit size={18} />
+            </Button>
+
+            <Button
+              isIconOnly
+              isDisabled
+              size="sm"
+              color="danger"
+              onPress={() => console.log('eliminar')}
+            >
+              <RiDeleteBin6Line size={18}/>
+            </Button>
+          </div>
         )
       },
       footer: info => info.column.id
     }),
 
-    // columnHelper.display({
-    //   id: 'lastAuthor',
-    //   header: () => 'Ultimo revisor',
-    //   cell: info => info.getValue(),
-    // })
-
-    // columnHelper.display(
-    //   {
-    //     id: 'action',
-    //     header: () => 'Action',
-    //     cell: info => {
-    //       return (
-    //         <Button
-    //           isIconOnly
-    //           color="warning"
-    //           onClick={() => handleOpenModal(info.row.original)}
-    //         >
-    //           <CiEdit size={30} />
-    //         </Button>
-    //       )
-    //     },
-    //     footer: info => info.column.id
-    //   }
-    // )
+    columnHelper.display({
+      id: 'lastAuthor',
+      header: () => 'Ultimo revisor / Autor',
+      cell: info => info.getValue(),
+    })
   ]
 
   // const emptyQuestionObject = {
@@ -304,8 +298,6 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
   //     })
   //   }
   // }
-
-
 
   // const handleNewOptionChange = (index: number, value: string) => {
   //   const newOptions = [...newQuestion.options]
