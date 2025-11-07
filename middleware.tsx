@@ -5,7 +5,7 @@ export function middleware(request: NextRequest){
     const {pathname}= request.nextUrl
 
     // Rutas permitidas
-    const allowedPaths = ['/topoquizz/content', '/topoquizz/dashboard']
+    const allowedPaths = ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate']
     const isAllowed = allowedPaths.some(path => pathname.startsWith(path))
     if (!isAllowed) {
         const redirectUrl = new URL('/topoquizz/content', request.url)

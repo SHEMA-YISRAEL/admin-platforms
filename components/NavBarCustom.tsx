@@ -14,6 +14,7 @@ import Link from "next/link";
 
 import { FaAngleDown, FaBook} from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import { BsTranslate } from "react-icons/bs";
 
 import { usePathname, useRouter} from 'next/navigation'
 
@@ -107,6 +108,15 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 							onClick={()=> router.push('/topoquizz/content')}
             >
               Contenido
+            </DropdownItem>
+
+						<DropdownItem
+              key="traducciones"
+              description="Edicion de las versiones traducidas de las preguntas"
+              startContent={<BsTranslate />}
+							onClick={()=> router.push('/topoquizz/translate')}
+            >
+              Traducciones
             </DropdownItem>
           </DropdownMenu>
 				</Dropdown>

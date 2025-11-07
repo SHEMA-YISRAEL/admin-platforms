@@ -1,5 +1,12 @@
 
 
+export interface QuestionTranslation {
+    language: 'en' | 'pt' | 'de',
+    question: string,
+    options: string[],
+    explanation: string
+}
+
 export interface QuestionData{
     id:string,
     question:string,
@@ -9,6 +16,7 @@ export interface QuestionData{
     lessonId: string,
     difficult:number,
     explanation:string,
+    translations?: QuestionTranslation[],
     createdAt: Date | null;
     updatedAt: Date | null;
 }
