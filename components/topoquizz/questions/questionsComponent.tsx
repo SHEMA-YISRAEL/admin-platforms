@@ -3,14 +3,16 @@ import QuestionsTable from "../questionsTable";
 import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
 import { IDifficult } from "@/types/Topoqizz";
+import { LanguageCode } from "@/types/languages";
 
 interface QuestionsComponentProps {
   lessonSelected: ILessonData
   filterValue: IDifficult
   searchText: string
+  selectedLanguage: LanguageCode
 }
- 
-const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue, searchText}) => {
+
+const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue, searchText, selectedLanguage}) => {
   const {
     questionsData: questions,
     loading: questionsLoading
@@ -50,7 +52,9 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, 
     <div className="h-full">
       <QuestionsTable
         questionsData={dataForTable}
-        isLoadingDataTable={questionsLoading}/>
+        isLoadingDataTable={questionsLoading}
+        selectedLanguage={selectedLanguage}
+      />
     </div>
   );
 }
