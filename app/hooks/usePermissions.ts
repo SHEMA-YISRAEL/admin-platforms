@@ -32,7 +32,7 @@ export const usePermissions = (): UsePermissionsReturn => {
     permissions,
     hasPermission,
 
-    canEditTranslateEnglisNeurapp:hasPermission('canEditTranslateEnglisNeurapp'),
+    canEditTranslateEnglisNeurapp:hasPermission('translateEnglish'),
     
     canViewTopoquizz: hasPermission('canViewTopoquizz'),
     canEditTopoquizz: hasPermission('canEditTopoquizz'),

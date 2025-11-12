@@ -14,7 +14,7 @@ export const useAuth = (): UseAuthReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { userData } = useAuthContext();
+  
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
@@ -25,7 +25,7 @@ export const useAuth = (): UseAuthReturn => {
 
       // Esperar un poco para que el contexto se actualice
       setTimeout(() => {
-        router.push('/topoquizz');
+        router.push('/');
       }, 500);
     } catch (err) {
       console.error('Error en login:', err);

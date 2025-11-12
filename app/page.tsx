@@ -1,46 +1,42 @@
 'use client'
-import { redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../utils/firebase'; // Adjust path as needed
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { usePermissions } from '@/app/hooks/usePermissions';
 
 export default function Home() {
+  const router = useRouter();
+  const { user, loading } = useAuthContext();
+  const { canViewTopoquizz, canViewNeurapp } = usePermissions();
 
-  // const [data, setData] = useState([]);
+  useEffect(() => {
+    if (!loading) {
+      // Si no está autenticado, redirigir a login
+      if (!user) {
+        router.push('/login');
+        return;
+      }
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const querySnapshot = await getDocs(collection(db, "lessons"));
-  //     const items = querySnapshot.docs.map(
-  //       doc => (
-  //         { 
-  //           id: doc.id, 
-  //           ...doc.data() 
-  //         }
-  //       )
-  //     );
-  //     setData(items);
-  //     console.log(items)
-  //     // console.log(data)
-  //   };
-  //   fetchData();
-  // }, []);
+      // Si está autenticado, redirigir según permisos
+      if (canViewTopoquizz) {
+        router.push('/topoquizz/content');
+      } else if (canViewNeurapp) {
+        router.push('/neurapp');
+      } else {
+        // Si no tiene ningún permiso, redirigir a login
+        router.push('/login');
+      }
+    }
+  }, [user, loading, canViewTopoquizz, canViewNeurapp, router]);
 
+  // Mostrar loading mientras verifica autenticación
   return (
-    <div className="font-sans  items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="w-full flex gap-[32px] items-center sm:items-start text-white font-bold sm:columns-1">
-        <div
-          className="w-1/3 h-40 cursor-pointer bg-blue-600 rounded-4xl text-6xl flex items-center justify-center"
-          onClick={() => redirect('/topoquizz')}>
-          Topoquizz
-        </div>
-        <div
-          className="w-1/3 h-40 cursor-pointer bg-amber-300 rounded-4xl text-6xl flex items-center justify-center"
-          onClick={() => redirect('/neurapp')}>
-          NeurApp
-        </div>
-      </main>
-
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Cargando...</p>
+      </div>
     </div>
   );
 }

@@ -46,7 +46,8 @@ export interface UserPermissions {
   canViewNeurapp?: boolean;
   canEditNeurapp?: boolean;
   canDeleteNeurapp?: boolean;
-  canEditTranslateEnglisNeurapp?: boolean;
+  
+  translateEnglish?: boolean;
 }
 
 export interface UserData {

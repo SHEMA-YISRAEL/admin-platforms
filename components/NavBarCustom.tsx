@@ -18,15 +18,23 @@ import { BsTranslate } from "react-icons/bs";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { UserPermissions } from "@/interfaces/topoquizz";
+import { hasPermission } from "@/lib/firebase/auth";
 
 interface NavBarProps {
 
 }
 
+const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
+	if(!permissions) return false
+	return hasPermission(permissions, 'translateEnglish')
+}
+
 const UserMenu = () =>{
 
-	const {logout} = useAuth()
-
+	const { logout } = useAuth()
+	
 	return(
 		<>
 			<Dropdown placement="bottom-end">
@@ -54,19 +62,10 @@ const UserMenu = () =>{
 }
 
 const NavBarCustom: React.FC<NavBarProps> = () => {
+	const { userData } = useAuthContext();
 	const pathname = usePathname()
 	const router = useRouter()
-	// console.log('pathname', pathname)
-	// const routes = [
-	// 	{
-	// 		label: "TopoQuizz",
-	// 		path: '/topoquizz'
-	// 	},
-	// 	{
-	// 		label: "NeurApp",
-	// 		path: '/neurapp'
-	// 	}
-	// ]
+	
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">
@@ -96,9 +95,9 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
               base: "gap-4",
             }}
           >
-            <DropdownItem
+            {/* <DropdownItem
               key="dashboard"
-              description="Metricas de la aplicacion con informción general de la misma"
+              description="Metricas de la aplicacion con información general de la misma"
               startContent={<MdDashboard/>}
 							onClick={() => router.push('/topoquizz/dashboard')}
             >
@@ -111,7 +110,7 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 							onClick={()=> router.push('/topoquizz/content')}
             >
               Contenido
-            </DropdownItem>
+            </DropdownItem> */}
 
 						<DropdownItem
               key="traducciones"
@@ -123,14 +122,18 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
             </DropdownItem>
           </DropdownMenu>
 				</Dropdown>
+				
+				{
+					checkTranslatePermission(userData?.permissions)?
+						<NavbarItem>
+							<Link aria-current="page" color="secondary" href="/neurapp" 
+								className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
+							>
+								NeurApp
+							</Link>
+						</NavbarItem> :<></>
+				}
 
-				<NavbarItem>
-          <Link aria-current="page" color="secondary" href="/neurapp" 
-						className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
-					>
-            NeurApp
-          </Link>
-        </NavbarItem>
 			</NavbarContent>
 
 			<NavbarContent justify="end">
