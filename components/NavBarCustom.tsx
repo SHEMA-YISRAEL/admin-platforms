@@ -17,12 +17,15 @@ import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 
 import { usePathname, useRouter} from 'next/navigation'
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface NavBarProps {
 
 }
 
 const UserMenu = () =>{
+
+	const {logout} = useAuth()
 
 	return(
 		<>
@@ -41,7 +44,7 @@ const UserMenu = () =>{
 				</DropdownTrigger>
 				<DropdownMenu aria-label="Profile Actions" variant="flat">
           <DropdownItem key="help_and_feedback">Permisos</DropdownItem>
-          <DropdownItem key="logout" color="danger">
+          <DropdownItem onClick={()=>logout()} key="logout" color="danger">
             Cerrar sesión
           </DropdownItem>
         </DropdownMenu>

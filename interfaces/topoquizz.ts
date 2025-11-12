@@ -1,11 +1,5 @@
 
 export interface QuestionTranslation {
-    question: string;
-    options: string[];
-    explanation: string;
-}
-
-export interface QuestionTranslation {
     language: 'en' | 'pt' | 'de',
     question: string,
     options: string[],
@@ -24,13 +18,6 @@ export interface QuestionData{
     translations?: QuestionTranslation[],
     createdAt: Date | null;
     updatedAt: Date | null;
-    // Traducciones por idioma
-    translations?: {
-        es?: QuestionTranslation;  // Español (por defecto)
-        en?: QuestionTranslation;  // Inglés
-        pt?: QuestionTranslation;  // Portugués
-        de?: QuestionTranslation;  // Alemán
-    };
 }
 
 export interface ICoursesData {
@@ -48,6 +35,25 @@ export interface ILessonData {
   id: string,
   name: string,
   slug: string,
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
+
+export interface UserPermissions {
+  canViewTopoquizz?: boolean;
+  canEditTopoquizz?: boolean;
+  canDeleteTopoquizz?: boolean;
+  canViewNeurapp?: boolean;
+  canEditNeurapp?: boolean;
+  canDeleteNeurapp?: boolean;
+  canEditTranslateEnglisNeurapp?: boolean;
+}
+
+export interface UserData {
+  id: string;
+  userName: string;
+  email: string;
+  permissions: UserPermissions;
   createdAt: Date | null;
   updatedAt: Date | null;
 }
