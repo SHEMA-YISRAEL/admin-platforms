@@ -12,7 +12,9 @@ import { Button } from "@heroui/react";
 import NewQuestionModal from "@/components/topoquizz/modals/newQuestion";
 import DifficultFilter from "@/components/topoquizz/questions/difficultFilter";
 import SearchFilter from "@/components/topoquizz/questions/searchFilter";
+import LanguageSelector from "@/components/topoquizz/questions/languageSelector";
 import { IDifficult } from "@/types/Topoqizz";
+import { LanguageCode, DEFAULT_LANGUAGE } from "@/types/languages";
 
 interface ContentPageProps { }
 
@@ -48,6 +50,7 @@ const ContentPage: React.FC<ContentPageProps> = () => {
 
   const[levelSelected, setLevelSelected] = useState<IDifficult>(difficultLevels[0])
   const[searchText, setSearchText] = useState<string>("")
+  const[selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(DEFAULT_LANGUAGE)
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden">
@@ -71,6 +74,8 @@ const ContentPage: React.FC<ContentPageProps> = () => {
               />
 
               <DifficultFilter difficultLevels={difficultLevels} levelSelected={levelSelected} methodSetLevelSelected={setLevelSelected}/>
+
+              <LanguageSelector selectedLanguage={selectedLanguage} onLanguageChange={setSelectedLanguage} />
 
               <SearchFilter searchValue={searchText} onSearchChange={setSearchText} />
             </div>
@@ -99,6 +104,7 @@ const ContentPage: React.FC<ContentPageProps> = () => {
           lessonSelected={lessonSelected}
           filterValue={levelSelected}
           searchText={searchText}
+          selectedLanguage={selectedLanguage}
         />
       </div>
 

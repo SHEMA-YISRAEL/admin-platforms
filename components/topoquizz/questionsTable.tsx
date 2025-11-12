@@ -21,13 +21,33 @@ import { CiEdit } from "react-icons/ci";
 import EditQuestionModal from "./modals/editQuestion"
 import DeleteQuestionModal from "./modals/deleteQuestion"
 import { Spinner } from "@heroui/react"
+import { LanguageCode } from "@/types/languages"
 
 interface QuestionsTableProps {
   questionsData: QuestionData[],
-  isLoadingDataTable: boolean
+  isLoadingDataTable: boolean,
+  selectedLanguage: LanguageCode
 }
 
-const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadingDataTable }) => {
+const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadingDataTable, selectedLanguage }) => {
+
+  // Función para obtener el contenido según el idioma
+  const getTranslatedContent = (question: QuestionData) => {
+    if (selectedLanguage === 'es') {
+      return {
+        question: question.question,
+        options: question.options,
+        explanation: question.explanation
+      };
+    }
+
+    const translation = question.translations?.[selectedLanguage];
+    return {
+      question: translation?.question || question.question,
+      options: translation?.options || question.options,
+      explanation: translation?.explanation || question.explanation
+    };
+  };
 
   const difficultyConfig = {
     1: { label: "Fácil", color: "success" as const },
@@ -47,10 +67,10 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       'question', {
       header: () => 'Pregunta',
       cell: info => {
-        const text = info.getValue()
+        const translatedContent = getTranslatedContent(info.row.original)
         return (
           <div className="max-w-md font-medium">
-            {text}
+            {translatedContent.question}
           </div>
         )
       },
@@ -76,7 +96,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       'options', {
       header: () => 'Opciones',
       cell: info => {
-        const options = info.getValue()
+        const translatedContent = getTranslatedContent(info.row.original)
+        const options = translatedContent.options
         const correctIndex = info.row.original.answer
         return options && options.length > 0 ? (
           <div className="grid grid-cols-2 gap-1 text-xs min-w-[300px]">
@@ -102,7 +123,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       'explanation', {
       header: () => 'Explicacion',
       cell: info => {
-        const text = info.getValue()
+        const translatedContent = getTranslatedContent(info.row.original)
+        const text = translatedContent.explanation
         return text ? (
           <div className="max-w-xs" title={text}>
             {text}
