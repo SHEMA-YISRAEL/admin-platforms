@@ -65,12 +65,7 @@ export interface UserPermissions {
 
   // Permisos de traducción por idioma
   translateEnglish?: boolean;
-<<<<<<< Updated upstream
 
-  translateGerman?: boolean;
-  translatePortuguese?: boolean;
-  translateKorean?: boolean;
-=======
   translatePortuguese?: boolean;
   translateGerman?: boolean;
   translateKorean?: boolean;
@@ -79,7 +74,6 @@ export interface UserPermissions {
   canEditSpanishVersion?: boolean;
   // Permiso para ver versión en español (solo lectura)
   canViewSpanishVersion?: boolean;
->>>>>>> Stashed changes
 }
 
 export interface UserData {
