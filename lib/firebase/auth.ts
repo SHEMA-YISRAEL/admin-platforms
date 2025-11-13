@@ -38,7 +38,8 @@ export const getUserData = async (userId: string): Promise<UserData | null> => {
       return {
         id: userDoc.id,
         userName: data.userName || "",
-        email: data.email || "",
+        email: data.userMail || "",
+        rol:data.rol || "",
         permissions: data.permissions || {},
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
         updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt),

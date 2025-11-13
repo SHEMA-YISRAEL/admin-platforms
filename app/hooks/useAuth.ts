@@ -29,15 +29,19 @@ export const useAuth = (): UseAuthReturn => {
       if (!userData) {
         throw new Error('No se pudieron obtener los datos del usuario');
       }
-
+      console.log(userData)
       // Determinar la ruta según permisos
       let redirectPath = '/login'; // Por defecto, volver a login si no tiene permisos
 
-      if (userData.permissions.canViewTopoquizz) {
-        redirectPath = '/topoquizz/content';
-      } else if (userData.permissions.canViewNeurapp) {
-        redirectPath = '/neurapp';
-      } else if (userData.permissions.translateEnglish) {
+      // if (userData.permissions.canViewTopoquizz) {
+      //   redirectPath = '/topoquizz/content';
+      // } else if (userData.permissions.canViewNeurapp) {
+      //   redirectPath = '/neurapp';
+      // } else if (userData.permissions.translateEnglish) {
+      //   redirectPath = '/topoquizz/translate';
+      // }
+
+      if(userData.rol==="translator"){
         redirectPath = '/topoquizz/translate';
       }
 

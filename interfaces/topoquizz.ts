@@ -55,6 +55,7 @@ export interface UserData {
   userName: string;
   email: string;
   permissions: UserPermissions;
+  rol?:string;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

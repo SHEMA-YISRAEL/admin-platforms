@@ -13,16 +13,15 @@ import {
 import Link from "next/link";
 
 import { FaAngleDown, FaBook} from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+// import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { UserPermissions } from "@/interfaces/topoquizz";
-import { hasPermission } from "@/lib/firebase/auth";
+// import { UserPermissions } from "@/interfaces/topoquizz";
+// import { hasPermission } from "@/lib/firebase/auth";
 import { usePermissions } from "@/app/hooks/usePermissions";
-
 interface NavBarProps {
 
 }
@@ -35,24 +34,29 @@ interface NavBarProps {
 const UserMenu = () =>{
 
 	const { logout } = useAuth()
+	const { userData } = useAuthContext();
 	
 	return(
 		<>
 			<Dropdown placement="bottom-end">
 				<DropdownTrigger>
 						<div className="flex cursor-pointer items-center gap-3">
+							
 							<User
-								avatarProps={{
-									src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-								}}
-								description="Pasante"
-								name="Valeria Claros"
+								// avatarProps={
+								// 	{
+								// 		src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+
+								// 	}
+								// }
+								description={userData?.rol}
+								name={userData?.email}
 							/>
 							<FaAngleDown/>
 						</div>
 				</DropdownTrigger>
 				<DropdownMenu aria-label="Profile Actions" variant="flat">
-          <DropdownItem key="help_and_feedback">Permisos</DropdownItem>
+          {/* <DropdownItem key="help_and_feedback">Permisos</DropdownItem> */}
           <DropdownItem onClick={()=>logout()} key="logout" color="danger">
             Cerrar sesión
           </DropdownItem>
@@ -63,7 +67,7 @@ const UserMenu = () =>{
 }
 
 const NavBarCustom: React.FC<NavBarProps> = () => {
-	const { userData } = useAuthContext();
+	
 	const pathname = usePathname()
 	const router = useRouter()
 	
