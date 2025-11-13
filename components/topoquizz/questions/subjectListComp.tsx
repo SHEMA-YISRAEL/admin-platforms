@@ -2,7 +2,7 @@
 import useCourses from "@/lib/firebase/getCourses";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Button } from "@heroui/react";
+// import { Button } from "@heroui/react";
 import { getTranslatedName } from "@/utils/topoquizz";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
@@ -28,8 +28,6 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
     if (coursesDataFromFirebase.length > 0) {
       setDataFromServer(coursesDataFromFirebase)
       methodSetSelectedSubject(coursesDataFromFirebase[0])
-
-      console.log(coursesDataFromFirebase)
     }
   }, [coursesDataFromFirebase])
 
@@ -79,9 +77,9 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
           </Listbox>
         )
       }
-      <Button size="sm" color="primary" variant="flat" className="text-xs">
+      {/* <Button size="sm" color="primary" variant="flat" className="text-xs">
         + Materia
-      </Button>
+      </Button> */}
     </div>
   )
 }

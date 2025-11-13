@@ -29,7 +29,6 @@ export const useAuth = (): UseAuthReturn => {
       if (!userData) {
         throw new Error('No se pudieron obtener los datos del usuario');
       }
-      console.log(userData)
       // Determinar la ruta según permisos
       let redirectPath = '/login'; // Por defecto, volver a login si no tiene permisos
 

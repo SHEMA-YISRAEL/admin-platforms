@@ -1,7 +1,7 @@
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Button } from "@heroui/react";
+// import { Button } from "@heroui/react";
 import useLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
@@ -38,7 +38,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
   }, [courseSelected.id]);
 
   useEffect(() => {
-    // console.log(lessonsData)
+    
     if (lessonsData.length > 0) {
       setLessonsDataFromServer(lessonsData);
       // Solo seleccionar automáticamente la primera si no hay ninguna seleccionada
@@ -100,7 +100,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
           <div className="text-xs text-gray-400 italic">Sin lecciones</div>
         )
       }
-      <Button
+      {/* <Button
         size="sm"
         color="primary"
         variant="flat"
@@ -109,7 +109,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
         isDisabled={!courseSelected.id}
       >
         + Lección
-      </Button>
+      </Button> */}
 
       <NewLessonModal
         isModalOpenState={isNewLessonModalOpen}
