@@ -4,7 +4,7 @@ import { db } from "@/utils/firebase";
 
 import { QuestionData } from "@/interfaces/topoquizz";
 
-function getQuestionsByLesson(lessonId: string) {
+function useQuestionsByLesson(lessonId: string) {
 
   const [questionsData, setQuestionsData] = useState<QuestionData[]>([])
 
@@ -60,4 +60,4 @@ function getQuestionsByLesson(lessonId: string) {
   return { questionsData, loading, error }
 
 }
-export default getQuestionsByLesson
+export default useQuestionsByLesson

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { db } from "@/utils/firebase";
 import { ILessonData } from "@/interfaces/topoquizz";
 
-function getLessonsByCourse(courseId: string) {
+function useLessonsByCourse(courseId: string) {
 
   const [data, setData] = useState<ILessonData[]>([])
   const [loading, setLoading] = useState(true);
@@ -66,4 +66,4 @@ function getLessonsByCourse(courseId: string) {
   return { data, loading, error }
 
 }
-export default getLessonsByCourse
+export default useLessonsByCourse

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
+import useQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
 import { Spinner } from "@heroui/react";
 import TranslationCard from "./translationCard";
@@ -12,7 +12,7 @@ const TranslationsListComponent: React.FC<TranslationsListComponentProps> = ({ l
   const {
     questionsData: questions,
     loading: questionsLoading
-  } = getQuestionsByLesson(lessonSelected.id);
+  } = useQuestionsByLesson(lessonSelected.id);
 
   const [dataForList, setDataForList] = useState<QuestionData[]>([]);
 
