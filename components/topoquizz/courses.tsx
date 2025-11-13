@@ -5,17 +5,17 @@ import { useRouter } from 'next/navigation'
 
 const Courses = () => {
     
-    const { data, loading, error } = useFirebaseData();
-    const router = useRouter()
+    const {  loading, error } = useFirebaseData();
+    // const router = useRouter()
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
-    const redirectByCourse = (slugCourse:string)=>{
-        router.push(
-            `/topoquizz/${slugCourse}`,
-        );
-    };
+    // const redirectByCourse = (slugCourse:string)=>{
+    //     router.push(
+    //         `/topoquizz/${slugCourse}`,
+    //     );
+    // };
 
     return (
         <>

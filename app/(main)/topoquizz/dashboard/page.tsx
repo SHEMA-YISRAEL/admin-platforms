@@ -1,8 +1,8 @@
-interface DashBoardPageProps {
+// interface DashBoardPageProps {
     
-}
+// }
  
-const DashBoardPage: React.FC<DashBoardPageProps> = () => {
+const DashBoardPage = () => {
     return (
         <div className="h-screen flex flex-col">
             <div className="text-4xl font-bold text-center py-5">Panel de control</div>

@@ -52,7 +52,7 @@ function useFirebaseData() {
 
                 const lessonsCounterByCourse : IlessonsCounterByCourseType = {}
                 const allLessons = await getDocs(collection(db, "lessons")); //llamda a l FB
-                allLessons.docs.map((el, index)=>{
+                allLessons.docs.map((el)=>{
                     const data = el.data();
                     // console.log(data.courseId)
                     if(data.courseId in lessonsCounterByCourse){
@@ -62,7 +62,7 @@ function useFirebaseData() {
                     }
                 })
                 
-                items.map((element, index)=>{
+                items.map((element)=>{
                     element.lessonsNumber = lessonsCounterByCourse[element.id]
                 })
                 setData(items);

@@ -6,13 +6,13 @@ import {
 	DropdownTrigger, 
 	DropdownMenu, 
 	DropdownItem,
-	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent, Avatar
+	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent
 } from "@heroui/react";
 
 
 import Link from "next/link";
 
-import { FaAngleDown, FaBook} from "react-icons/fa";
+import { FaAngleDown } from "react-icons/fa";
 // import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 
@@ -22,9 +22,9 @@ import { useAuthContext } from "@/contexts/AuthContext";
 // import { UserPermissions } from "@/interfaces/topoquizz";
 // import { hasPermission } from "@/lib/firebase/auth";
 import { usePermissions } from "@/app/hooks/usePermissions";
-interface NavBarProps {
+// interface NavBarProps {
 
-}
+// }
 
 // const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
 // 	if(!permissions) return false
@@ -66,7 +66,7 @@ const UserMenu = () =>{
 	)
 }
 
-const NavBarCustom: React.FC<NavBarProps> = () => {
+const NavBarCustom = () => {
 	
 	const pathname = usePathname()
 	const router = useRouter()

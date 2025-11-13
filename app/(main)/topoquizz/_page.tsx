@@ -2,21 +2,24 @@
 
 // import getLessonsByCourse from "@/app/hooks/topoquizz/getLessonsByCourse";
 import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
-import { use, useEffect, useState } from "react";
+import { 
+  // use, 
+  // useEffect, 
+  useState } from "react";
 
 import { Button, Spinner } from "@heroui/react";
-import QuestionsTable from "@/components/topoquizz/questionsTable";
+// import QuestionsTable from "@/components/topoquizz/questionsTable";
 
-interface LessonComponentProps {
-    // params: Promise<{ slug: string }>
-}
+// interface LessonComponentProps {
+//     // params: Promise<{ slug: string }>
+// }
 
 export default function(){
 
     // const { slug } = use(params);
     const [selectedLessonId, setSelectedLessonId] = useState<string>("");
 
-    const [selectedIndexLesson, setSelectedIndexLesson] = useState<number>(0);
+    // const [selectedIndexLesson, setSelectedIndexLesson] = useState<number>(0);
     const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] = useState<boolean>(false);
 
     // const {
@@ -33,9 +36,9 @@ export default function(){
     // }, [data, selectedLessonId]);
 
     const {
-      questionsData: questions, 
+      // questionsData: questions, 
       loading: questionsLoading, 
-      error: questionsError 
+      // error: questionsError 
     } = getQuestionsByLesson(selectedLessonId);
 
     // if(loading) return <div>Cargando...</div>

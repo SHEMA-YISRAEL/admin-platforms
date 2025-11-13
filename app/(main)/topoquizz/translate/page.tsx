@@ -8,11 +8,11 @@ import LessonsList from "@/components/topoquizz/questions/lessonListComponent";
 import TranslationsListComponent from "@/components/topoquizz/translations/translationsListComponent";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-interface TranslationsComponentPageProps {
+// interface TranslationsComponentPageProps {
 
-}
+// }
 
-const TranslationsComponentPage: React.FC<TranslationsComponentPageProps> = () => {
+const TranslationsComponentPage = () => {
   const [courseSelected, setCourseSelected] = useState<ICoursesData>(emptySubject);
   const [lessonSelected, setLessonSelected] = useState<ILessonData>(emptyLesson);
 

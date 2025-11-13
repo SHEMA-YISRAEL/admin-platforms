@@ -26,7 +26,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
   const {
     data: lessonsData,
     loading: loadingLessonsData,
-    error 
+    // error 
   } = getLessonsByCourse(courseSelected.id) //courseSelected:string
 
   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);

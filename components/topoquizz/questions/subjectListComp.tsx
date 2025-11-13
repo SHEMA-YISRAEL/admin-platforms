@@ -18,7 +18,7 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
   const {
     coursesData: coursesDataFromFirebase,
     loading: loadingCourses,
-    error: errorGettingCoursesData
+    // error: errorGettingCoursesData
   } = getCourses()
 
   const [dataFromServer, setDataFromServer] = useState<ICoursesData[]>([]);
