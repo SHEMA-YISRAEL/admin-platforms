@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { QuestionData, QuestionTranslation } from "@/interfaces/topoquizz";
+import { QuestionData, DataQuestionTranslated } from "@/interfaces/topoquizz";
 import { Button, Chip, Textarea, addToast } from "@heroui/react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase";
@@ -10,30 +10,35 @@ interface TranslationCardProps {
   questionNumber: number;
 }
 
+type LanguageCode = 'en' | 'pt' | 'de' | 'ko';
+
 const languages = [
-  { code: 'en', label: 'Inglés', flag: '🇬🇧' },
-  { code: 'pt', label: 'Portugués', flag: '🇧🇷' },
-  { code: 'de', label: 'Alemán', flag: '🇩🇪' }
-] as const;
+  { code: 'en' as const, label: 'Inglés', flag: '🇬🇧' },
+  { code: 'pt' as const, label: 'Portugués', flag: '🇧🇷' },
+  { code: 'de' as const, label: 'Alemán', flag: '🇩🇪' },
+  { code: 'ko' as const, label: 'Coreano', flag: '🇰🇷' }
+];
 
 const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNumber }) => {
+
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'pt' | 'de'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>('en');
   const [isSaving, setIsSaving] = useState(false);
 
   // Obtener la traducción existente para el idioma seleccionado
-  const existingTranslation = question.translations?.find(t => t.language === selectedLanguage);
+  const existingTranslation = question.translations?.[selectedLanguage];
 
   const [translatedQuestion, setTranslatedQuestion] = useState(existingTranslation?.question || '');
+
   const [translatedOptions, setTranslatedOptions] = useState<string[]>(
     existingTranslation?.options || ['', '', '', '']
   );
   const [translatedExplanation, setTranslatedExplanation] = useState(existingTranslation?.explanation || '');
 
   // Actualizar los campos cuando cambia el idioma seleccionado
-  const handleLanguageChange = (lang: 'en' | 'pt' | 'de') => {
+  const handleLanguageChange = (lang: LanguageCode) => {
     setSelectedLanguage(lang);
-    const translation = question.translations?.find(t => t.language === lang);
+    const translation = question.translations?.[lang];
     setTranslatedQuestion(translation?.question || '');
     setTranslatedOptions(translation?.options || ['', '', '', '']);
     setTranslatedExplanation(translation?.explanation || '');
@@ -59,17 +64,18 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
 
     setIsSaving(true);
     try {
-      const newTranslation: QuestionTranslation = {
-        language: selectedLanguage,
+      // Crear el objeto de traducción para el idioma seleccionado
+      const newTranslation: DataQuestionTranslated = {
         question: translatedQuestion,
         options: translatedOptions,
         explanation: translatedExplanation
       };
 
-      // Actualizar o agregar la traducción
-      const existingTranslations = question.translations || [];
-      const filteredTranslations = existingTranslations.filter(t => t.language !== selectedLanguage);
-      const updatedTranslations = [...filteredTranslations, newTranslation];
+      // Actualizar solo el idioma específico en el objeto translations
+      const updatedTranslations = {
+        ...question.translations,
+        [selectedLanguage]: newTranslation
+      };
 
       const questionRef = doc(db, "questions", question.id);
       await updateDoc(questionRef, {
@@ -100,8 +106,10 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
   const config = difficultyConfig[question.difficult as 1 | 2 | 3];
 
   // Verificar si tiene traducciones completas
-  const hasTranslations = question.translations && question.translations.length > 0;
-  const translationsCount = question.translations?.length || 0;
+  const translationsCount = question.translations
+    ? Object.keys(question.translations).filter(key => key !== 'es').length
+    : 0;
+  const hasTranslations = translationsCount > 0;
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -126,7 +134,7 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
                 </Chip>
               )}
             </div>
-            <p className="text-sm font-medium text-gray-800 line-clamp-2">{question.question}</p>
+            <p className="text-sm font-medium text-gray-800 line-clamp-2">{question.translations?.es?.question || 'Sin pregunta'}</p>
           </div>
           <Button
             size="sm"
@@ -145,11 +153,11 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
           {/* Pregunta original */}
           <div className="mb-4 p-3 bg-gray-50 rounded-lg">
             <h4 className="text-xs font-semibold text-gray-600 mb-2">PREGUNTA ORIGINAL (Español)</h4>
-            <p className="text-sm text-gray-800 mb-3">{question.question}</p>
+            <p className="text-sm text-gray-800 mb-3">{question.translations?.es?.question || 'Sin pregunta en español'}</p>
 
             <h5 className="text-xs font-semibold text-gray-600 mb-1">Opciones:</h5>
             <div className="grid grid-cols-1 gap-1 mb-3">
-              {question.options.map((option, index) => (
+              {(question.translations?.es?.options || []).map((option, index) => (
                 <div
                   key={index}
                   className={`text-xs px-2 py-1 rounded ${
@@ -163,10 +171,10 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
               ))}
             </div>
 
-            {question.explanation && (
+            {question.translations?.es?.explanation && (
               <>
                 <h5 className="text-xs font-semibold text-gray-600 mb-1">Explicación:</h5>
-                <p className="text-xs text-gray-700">{question.explanation}</p>
+                <p className="text-xs text-gray-700">{question.translations.es.explanation}</p>
               </>
             )}
           </div>

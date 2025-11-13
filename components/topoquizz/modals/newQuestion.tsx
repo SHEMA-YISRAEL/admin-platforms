@@ -17,7 +17,7 @@ import {
     Tab
 } from "@heroui/react";
 
-import { QuestionData, QuestionTranslation } from "@/interfaces/topoquizz";
+import { QuestionData, DataQuestionTranslated } from "@/interfaces/topoquizz";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import { AVAILABLE_LANGUAGES, LanguageCode } from "@/types/languages";
@@ -30,16 +30,13 @@ interface NewQuestionModalProps {
 }
 
 const emptyQuestion: Omit<QuestionData, 'id' | 'createdAt' | 'updatedAt' | 'lessonId'> = {
-    question: "",
     difficult: 1,
-    options: ["", "", "", ""],
     answer: 0,
-    explanation: "",
     enable: true,
     translations: {}
 };
 
-const emptyTranslation: QuestionTranslation = {
+const emptyTranslation: DataQuestionTranslated = {
     question: "",
     options: ["", "", "", ""],
     explanation: ""
@@ -55,67 +52,44 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
     const [currentLang, setCurrentLang] = useState<LanguageCode>('es');
 
     const handleOptionChange = (index: number, value: string) => {
-        if (currentLang === 'es') {
-            // Para español, actualizar campos principales
-            const newOptions = [...newQuestion.options];
-            newOptions[index] = value;
-            setNewQuestion({ ...newQuestion, options: newOptions });
-        } else {
-            // Para otros idiomas, actualizar traducciones
-            const translations = { ...newQuestion.translations };
-            if (!translations[currentLang]) {
-                translations[currentLang] = { ...emptyTranslation };
-            }
-            const newOptions = [...(translations[currentLang]?.options || ["", "", "", ""])];
-            newOptions[index] = value;
-            translations[currentLang] = {
-                ...translations[currentLang]!,
-                options: newOptions
-            };
-            setNewQuestion({ ...newQuestion, translations });
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
         }
+        const newOptions = [...(translations[currentLang]?.options || ["", "", "", ""])];
+        newOptions[index] = value;
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            options: newOptions
+        };
+        setNewQuestion({ ...newQuestion, translations });
     };
 
     const handleQuestionChange = (value: string) => {
-        if (currentLang === 'es') {
-            setNewQuestion({ ...newQuestion, question: value });
-        } else {
-            const translations = { ...newQuestion.translations };
-            if (!translations[currentLang]) {
-                translations[currentLang] = { ...emptyTranslation };
-            }
-            translations[currentLang] = {
-                ...translations[currentLang]!,
-                question: value
-            };
-            setNewQuestion({ ...newQuestion, translations });
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
         }
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            question: value
+        };
+        setNewQuestion({ ...newQuestion, translations });
     };
 
     const handleExplanationChange = (value: string) => {
-        if (currentLang === 'es') {
-            setNewQuestion({ ...newQuestion, explanation: value });
-        } else {
-            const translations = { ...newQuestion.translations };
-            if (!translations[currentLang]) {
-                translations[currentLang] = { ...emptyTranslation };
-            }
-            translations[currentLang] = {
-                ...translations[currentLang]!,
-                explanation: value
-            };
-            setNewQuestion({ ...newQuestion, translations });
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
         }
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            explanation: value
+        };
+        setNewQuestion({ ...newQuestion, translations });
     };
 
     const getCurrentContent = () => {
-        if (currentLang === 'es') {
-            return {
-                question: newQuestion.question,
-                options: newQuestion.options,
-                explanation: newQuestion.explanation
-            };
-        }
         return newQuestion.translations?.[currentLang] || emptyTranslation;
     };
 
@@ -123,18 +97,19 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 
     const handleSaveQuestion = async () => {
         // Validaciones
-        if (!newQuestion.question.trim()) {
+        const esTranslation = newQuestion.translations?.es;
+        if (!esTranslation?.question?.trim()) {
             addToast({
                 title: "Error",
-                description: "La pregunta no puede estar vacía"
+                description: "La pregunta en español no puede estar vacía"
             });
             return;
         }
 
-        if (newQuestion.options.some(opt => !opt.trim())) {
+        if (esTranslation.options.some((opt: string) => !opt.trim())) {
             addToast({
                 title: "Error",
-                description: "Todas las opciones deben estar completas"
+                description: "Todas las opciones en español deben estar completas"
             });
             return;
         }
@@ -149,11 +124,8 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 
         try {
             await addDoc(collection(db, "questions"), {
-                question: newQuestion.question,
                 difficult: newQuestion.difficult,
-                options: newQuestion.options,
                 answer: newQuestion.answer,
-                explanation: newQuestion.explanation,
                 enable: newQuestion.enable,
                 lessonId: lessonId,
                 translations: newQuestion.translations || {},
@@ -238,7 +210,7 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-medium">Opciones</label>
-                            {currentContent.options.map((option, index) => (
+                            {currentContent.options.map((option: string, index: number) => (
                                 <div key={index} className="flex gap-2 items-center">
                                     <Input
                                         label={`Opción ${index + 1}`}

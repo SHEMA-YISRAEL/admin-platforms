@@ -19,9 +19,7 @@ import { LanguageCode, DEFAULT_LANGUAGE } from "@/types/languages";
 // import { useAuthContext } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-interface ContentPageProps { }
-
-const ContentPage: React.FC<ContentPageProps> = () => {
+const ContentPage: React.FC = () => {
 
   const [courseSelected, setCourseSelected] = useState<ICoursesData>(emptySubject);
   const [lessonSelected, setLessonSelected] = useState<ILessonData>(emptyLesson);

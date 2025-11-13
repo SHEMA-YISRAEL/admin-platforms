@@ -1,5 +1,5 @@
 
-import getCourses from "@/lib/firebase/getCourses";
+import useCourses from "@/lib/firebase/getCourses";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { Button } from "@heroui/react";
@@ -19,7 +19,7 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
     coursesData: coursesDataFromFirebase,
     loading: loadingCourses,
     // error: errorGettingCoursesData
-  } = getCourses()
+  } = useCourses()
 
   const [dataFromServer, setDataFromServer] = useState<ICoursesData[]>([]);
 

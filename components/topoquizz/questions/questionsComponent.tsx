@@ -38,7 +38,7 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, 
       // Filtrar por texto de búsqueda
       if (searchText.trim() !== "") {
         filteredData = filteredData.filter((el) =>
-          el.question.toLowerCase().includes(searchText.toLowerCase())
+          el.translations?.es?.question?.toLowerCase().includes(searchText.toLowerCase())
         );
       }
 

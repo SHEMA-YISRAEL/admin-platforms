@@ -1,21 +1,25 @@
 
-export interface QuestionTranslation {
-    language: 'en' | 'pt' | 'de',
-    question: string,
-    options: string[],
-    explanation: string
+export interface DataQuestionTranslated {
+  explanation: string;
+  options: string[];
+  question: string;
 }
 
-export interface QuestionData{
-    id:string,
-    question:string,
-    options: string[],
-    answer: number,
-    enable:boolean,
-    lessonId: string,
-    difficult:number,
-    explanation:string,
-    translations?: QuestionTranslation[],
+export interface QuestionTranslations {
+  es?: DataQuestionTranslated;
+  en?: DataQuestionTranslated;
+  pt?: DataQuestionTranslated;
+  ko?: DataQuestionTranslated;
+  de?: DataQuestionTranslated;
+}
+
+export interface QuestionData {
+    id: string;
+    answer: number;
+    enable: boolean;
+    lessonId: string;
+    difficult: number;
+    translations?: QuestionTranslations;
     createdAt: Date | null;
     updatedAt: Date | null;
 }

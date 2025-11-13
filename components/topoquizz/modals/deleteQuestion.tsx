@@ -33,7 +33,7 @@ const DeleteQuestionModal: React.FC<DeleteQuestionModalProps> = ({
 
       addToast({
         title: "Pregunta eliminada",
-        description: `La pregunta "${selectedQuestion.question}" ha sido eliminada exitosamente`,
+        description: `La pregunta con ID "${selectedQuestion.id}" ha sido eliminada exitosamente`,
         color: "success"
       })
 
@@ -66,7 +66,7 @@ const DeleteQuestionModal: React.FC<DeleteQuestionModalProps> = ({
             {selectedQuestion && (
               <div className="bg-gray-100 p-3 rounded-lg">
                 <p className="font-semibold text-sm mb-2">Pregunta a eliminar:</p>
-                <p className="text-sm text-gray-700">{selectedQuestion.question}</p>
+                <p className="text-sm text-gray-700">{selectedQuestion.translations?.es?.question || 'Sin pregunta'}</p>
               </div>
             )}
           </div>

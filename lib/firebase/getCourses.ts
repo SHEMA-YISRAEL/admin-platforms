@@ -5,10 +5,10 @@ import { ICoursesData } from "@/interfaces/topoquizz";
 
 import { docLessonLabel } from "@/constants/topoquizz";
 
-function getCourses() {
+function useCourses() {
 	const [coursesData, setCoursesData] = useState<ICoursesData[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<String | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(()=>{
 		const fetchCourses = async ()=>{
@@ -17,7 +17,7 @@ function getCourses() {
 				setError(error);
 
 				const querySnapshot = await getDocs(collection(db, docLessonLabel))
-				const items = querySnapshot.docs.map((doc, i)=>{
+				const items = querySnapshot.docs.map((doc)=>{
 					const data = doc.data();
 					return(
 						{
@@ -42,4 +42,4 @@ function getCourses() {
   return {coursesData, loading, error};
 }
 
-export default getCourses;
+export default useCourses;

@@ -33,19 +33,11 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
 
   // Función para obtener el contenido según el idioma
   const getTranslatedContent = (question: QuestionData) => {
-    if (selectedLanguage === 'es') {
-      return {
-        question: question.question,
-        options: question.options,
-        explanation: question.explanation
-      };
-    }
-
     const translation = question.translations?.[selectedLanguage];
     return {
-      question: translation?.question || question.question,
-      options: translation?.options || question.options,
-      explanation: translation?.explanation || question.explanation
+      question: translation?.question || '',
+      options: translation?.options || [],
+      explanation: translation?.explanation || ''
     };
   };
 
@@ -63,8 +55,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       header: () => '#',
       cell: info => info.row.index + 1,
     }),
-    columnHelper.accessor(
-      'question', {
+    columnHelper.display({
+      id: 'question',
       header: () => 'Pregunta',
       cell: info => {
         const translatedContent = getTranslatedContent(info.row.original)
@@ -74,9 +66,7 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
           </div>
         )
       },
-      footer: info => info.column.id
-    }
-    ),
+    }),
     columnHelper.accessor('difficult', {
       header: () => 'Dificultad',
       cell: (info) => {
@@ -92,8 +82,8 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
       footer: info => info.column.id,
       enableSorting: true,
     }),
-    columnHelper.accessor(
-      'options', {
+    columnHelper.display({
+      id: 'options',
       header: () => 'Opciones',
       cell: info => {
         const translatedContent = getTranslatedContent(info.row.original)
@@ -116,11 +106,9 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
           </div>
         ) : '-'
       },
-      footer: info => info.column.id
-    }
-    ),
-    columnHelper.accessor(
-      'explanation', {
+    }),
+    columnHelper.display({
+      id: 'explanation',
       header: () => 'Explicacion',
       cell: info => {
         const translatedContent = getTranslatedContent(info.row.original)
@@ -131,16 +119,14 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
           </div>
         ) : '-'
       },
-      footer: info => info.column.id
-    }
-    ),
+    }),
     columnHelper.accessor(
       'enable', {
       header: () => 'Estado',
       cell: (info) => {
         const handleSwitchChange = async (isSelected: boolean) => {
           const questionId = info.row.original.id
-          const question = info.row.original.question
+          const question = info.row.original.translations?.es?.question || 'Sin pregunta'
           try {
             const questionRef = doc(db, "questions", questionId)
             await updateDoc(questionRef, {

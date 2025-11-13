@@ -17,7 +17,7 @@ import {
   Tab
 } from "@heroui/react";
 
-import { QuestionData, QuestionTranslation } from "@/interfaces/topoquizz";
+import { QuestionData, DataQuestionTranslated } from "@/interfaces/topoquizz";
 import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
 import { AVAILABLE_LANGUAGES, LanguageCode } from "@/types/languages";
@@ -29,7 +29,7 @@ interface EditQuestionModalProps {
   selectedQuestion: QuestionData | null,
 }
 
-const emptyTranslation: QuestionTranslation = {
+const emptyTranslation: DataQuestionTranslated = {
   question: "",
   options: ["", "", "", ""],
   explanation: ""
@@ -48,7 +48,6 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
     if (selectedQuestion) {
       setEditedQuestion({
         ...selectedQuestion,
-        options: [...selectedQuestion.options],
         translations: selectedQuestion.translations || {}
       })
     }
@@ -58,71 +57,49 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
   const handleOptionChange = (index: number, value: string) => {
     if (!editedQuestion) return
 
-    if (currentLang === 'es') {
-      const newOptions = [...editedQuestion.options]
-      newOptions[index] = value
-      setEditedQuestion({ ...editedQuestion, options: newOptions })
-    } else {
-      const translations = { ...editedQuestion.translations };
-      if (!translations[currentLang]) {
-        translations[currentLang] = { ...emptyTranslation };
-      }
-      const newOptions = [...(translations[currentLang]?.options || ["", "", "", ""])];
-      newOptions[index] = value;
-      translations[currentLang] = {
-        ...translations[currentLang]!,
-        options: newOptions
-      };
-      setEditedQuestion({ ...editedQuestion, translations });
+    const translations = { ...editedQuestion.translations };
+    if (!translations[currentLang]) {
+      translations[currentLang] = { ...emptyTranslation };
     }
+    const newOptions = [...(translations[currentLang]?.options || ["", "", "", ""])];
+    newOptions[index] = value;
+    translations[currentLang] = {
+      ...translations[currentLang]!,
+      options: newOptions
+    };
+    setEditedQuestion({ ...editedQuestion, translations });
   }
 
   const handleQuestionChange = (value: string) => {
     if (!editedQuestion) return
 
-    if (currentLang === 'es') {
-      setEditedQuestion({ ...editedQuestion, question: value });
-    } else {
-      const translations = { ...editedQuestion.translations };
-      if (!translations[currentLang]) {
-        translations[currentLang] = { ...emptyTranslation };
-      }
-      translations[currentLang] = {
-        ...translations[currentLang]!,
-        question: value
-      };
-      setEditedQuestion({ ...editedQuestion, translations });
+    const translations = { ...editedQuestion.translations };
+    if (!translations[currentLang]) {
+      translations[currentLang] = { ...emptyTranslation };
     }
+    translations[currentLang] = {
+      ...translations[currentLang]!,
+      question: value
+    };
+    setEditedQuestion({ ...editedQuestion, translations });
   };
 
   const handleExplanationChange = (value: string) => {
     if (!editedQuestion) return
 
-    if (currentLang === 'es') {
-      setEditedQuestion({ ...editedQuestion, explanation: value });
-    } else {
-      const translations = { ...editedQuestion.translations };
-      if (!translations[currentLang]) {
-        translations[currentLang] = { ...emptyTranslation };
-      }
-      translations[currentLang] = {
-        ...translations[currentLang]!,
-        explanation: value
-      };
-      setEditedQuestion({ ...editedQuestion, translations });
+    const translations = { ...editedQuestion.translations };
+    if (!translations[currentLang]) {
+      translations[currentLang] = { ...emptyTranslation };
     }
+    translations[currentLang] = {
+      ...translations[currentLang]!,
+      explanation: value
+    };
+    setEditedQuestion({ ...editedQuestion, translations });
   };
 
   const getCurrentContent = () => {
     if (!editedQuestion) return emptyTranslation;
-
-    if (currentLang === 'es') {
-      return {
-        question: editedQuestion.question,
-        options: editedQuestion.options,
-        explanation: editedQuestion.explanation
-      };
-    }
     return editedQuestion.translations?.[currentLang] || emptyTranslation;
   };
 
@@ -132,15 +109,11 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
     if (!editedQuestion || !selectedQuestion) return
 
     try {
-
       const questionRef = doc(db, "questions", selectedQuestion.id)
 
       await updateDoc(questionRef, {
-        question: editedQuestion.question,
         difficult: editedQuestion.difficult,
-        options: editedQuestion.options,
         answer: editedQuestion.answer,
-        explanation: editedQuestion.explanation,
         enable: editedQuestion.enable,
         translations: editedQuestion.translations || {}
       })
@@ -218,7 +191,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Opciones</label>
-              {currentContent.options.map((option, index) => (
+              {currentContent.options.map((option: string, index: number) => (
                 <div key={index} className="flex gap-2 items-center">
                   <Input
                     label={`Opción ${index + 1}`}
