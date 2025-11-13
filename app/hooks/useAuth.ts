@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginWithEmailAndPassword, logout as firebaseLogout } from '@/lib/firebase/auth';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { loginWithEmailAndPassword, logout as firebaseLogout, getUserData } from '@/lib/firebase/auth';
 
 interface UseAuthReturn {
   login: (email: string, password: string) => Promise<void>;
@@ -14,19 +13,37 @@ export const useAuth = (): UseAuthReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
-      await loginWithEmailAndPassword(email, password);
+      // Hacer login con Firebase Auth
+      const user = await loginWithEmailAndPassword(email, password);
 
-      // Esperar un poco para que el contexto se actualice
-      setTimeout(() => {
-        router.push('/');
-      }, 500);
+      // Obtener los datos del usuario y sus permisos
+      const userData = await getUserData(user.uid);
+      
+      // Redirigir según los permisos del usuario
+      if (!userData) {
+        throw new Error('No se pudieron obtener los datos del usuario');
+      }
+
+      // Determinar la ruta según permisos
+      let redirectPath = '/login'; // Por defecto, volver a login si no tiene permisos
+
+      if (userData.permissions.canViewTopoquizz) {
+        redirectPath = '/topoquizz/content';
+      } else if (userData.permissions.canViewNeurapp) {
+        redirectPath = '/neurapp';
+      } else if (userData.permissions.translateEnglish) {
+        redirectPath = '/topoquizz/translate';
+      }
+
+      // Redirigir a la ruta apropiada
+      router.push(redirectPath);
+
     } catch (err) {
       console.error('Error en login:', err);
 
@@ -44,6 +61,8 @@ export const useAuth = (): UseAuthReturn => {
           errorMessage = 'Demasiados intentos. Intenta más tarde';
         } else if (err.message.includes('auth/network-request-failed')) {
           errorMessage = 'Error de conexión. Verifica tu internet';
+        } else {
+          errorMessage = err.message;
         }
       }
 

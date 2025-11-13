@@ -6,7 +6,7 @@ interface UsePermissionsReturn {
   permissions: UserPermissions | undefined;
   hasPermission: (permission: keyof UserPermissions) => boolean;
 
-  canEditTranslateEnglisNeurapp:boolean;
+  translateEnglish:boolean;
 
   canViewTopoquizz: boolean;
   canEditTopoquizz: boolean;
@@ -32,7 +32,7 @@ export const usePermissions = (): UsePermissionsReturn => {
     permissions,
     hasPermission,
 
-    canEditTranslateEnglisNeurapp:hasPermission('translateEnglish'),
+    translateEnglish:hasPermission('translateEnglish'),
     
     canViewTopoquizz: hasPermission('canViewTopoquizz'),
     canEditTopoquizz: hasPermission('canEditTopoquizz'),

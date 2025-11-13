@@ -21,15 +21,16 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserPermissions } from "@/interfaces/topoquizz";
 import { hasPermission } from "@/lib/firebase/auth";
+import { usePermissions } from "@/app/hooks/usePermissions";
 
 interface NavBarProps {
 
 }
 
-const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
-	if(!permissions) return false
-	return hasPermission(permissions, 'translateEnglish')
-}
+// const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
+// 	if(!permissions) return false
+// 	return hasPermission(permissions, 'translateEnglish')
+// }
 
 const UserMenu = () =>{
 
@@ -66,6 +67,7 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 	const pathname = usePathname()
 	const router = useRouter()
 	
+	const {translateEnglish} = usePermissions()
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">
@@ -124,7 +126,7 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 				</Dropdown>
 				
 				{
-					checkTranslatePermission(userData?.permissions)?
+					translateEnglish?
 						<NavbarItem>
 							<Link aria-current="page" color="secondary" href="/neurapp" 
 								className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}

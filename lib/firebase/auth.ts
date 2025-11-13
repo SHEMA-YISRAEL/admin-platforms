@@ -29,7 +29,8 @@ export const loginWithEmailAndPassword = async (
  */
 export const getUserData = async (userId: string): Promise<UserData | null> => {
   try {
-    const userDocRef = doc(db, "users", userId);
+    
+    const userDocRef = doc(db, "adminUsers", userId);
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
@@ -46,7 +47,7 @@ export const getUserData = async (userId: string): Promise<UserData | null> => {
 
     return null;
   } catch (error) {
-    console.error("Error al obtener datos del usuario:", error);
+    console.error("Error al obtener datos del usuario no encontrado :", error);
     throw error;
   }
 };
