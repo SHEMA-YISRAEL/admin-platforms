@@ -8,10 +8,13 @@ interface UsePermissionsReturn {
 
 
   translateEnglish:boolean;
+<<<<<<< Updated upstream
   translateGerman:boolean;
   translatePortuguese:boolean;
   translateKorean:boolean;
   // translateEnglish:boolean;
+=======
+>>>>>>> Stashed changes
   
 
   canViewTopoquizz: boolean;

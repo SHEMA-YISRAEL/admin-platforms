@@ -1,4 +1,4 @@
-export type LanguageCode = 'es' | 'en' | 'pt' | 'de';
+export type LanguageCode = 'es' | 'en' | 'pt' | 'de' | 'ko';
 
 export interface Language {
   code: LanguageCode;
@@ -11,6 +11,7 @@ export const AVAILABLE_LANGUAGES: Language[] = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'pt', name: 'Português', flag: '🇵🇹' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
 ];
 
 export const DEFAULT_LANGUAGE: LanguageCode = 'es';

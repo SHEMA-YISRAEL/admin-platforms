@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { QuestionData, DataQuestionTranslated } from "@/interfaces/topoquizz";
 import { Button, Chip, Textarea, addToast } from "@heroui/react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import { MdTranslate, MdSave } from "react-icons/md";
-import { useAuth } from "@/app/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { getAllowedLanguages } from "@/utils/permissions";
+import { LanguageCode } from "@/types/languages";
 import { usePermissions } from "@/app/hooks/usePermissions";
 
 interface TranslationCardProps {
@@ -12,9 +14,7 @@ interface TranslationCardProps {
   questionNumber: number;
 }
 
-type LanguageCode = 'en' | 'pt' | 'de' | 'ko';
-
-const languages = [
+const ALL_LANGUAGES = [
   { code: 'en' as const, label: 'Inglés', flag: '🇬🇧' },
   { code: 'pt' as const, label: 'Portugués', flag: '🇧🇷' },
   { code: 'de' as const, label: 'Alemán', flag: '🇩🇪' },
@@ -22,11 +22,31 @@ const languages = [
 ];
 
 const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNumber }) => {
+  const { userData } = useAuthContext();
+
+  // Obtener los idiomas a los que el usuario tiene acceso
+  const allowedLanguageCodes = useMemo(() => {
+    return getAllowedLanguages(userData?.permissions);
+  }, [userData?.permissions]);
+
+  // Filtrar los idiomas disponibles según permisos
+  const availableLanguages = useMemo(() => {
+    return ALL_LANGUAGES.filter(lang => allowedLanguageCodes.includes(lang.code));
+  }, [allowedLanguageCodes]);
 
   const { translateEnglish, translateGerman, translateKorean, translatePortuguese} = usePermissions()
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(
+    availableLanguages[0]?.code || 'en'
+  );
+
+  // Actualizar el idioma seleccionado si cambian los permisos
+  useEffect(() => {
+    if (availableLanguages.length > 0 && !availableLanguages.find(l => l.code === selectedLanguage)) {
+      setSelectedLanguage(availableLanguages[0].code);
+    }
+  }, [availableLanguages, selectedLanguage]);
   const [isSaving, setIsSaving] = useState(false);
 
   // Obtener la traducción existente para el idioma seleccionado
@@ -48,7 +68,7 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
     setTranslatedExplanation(translation?.explanation || '');
   };
 
-  useAuth
+  
 
   const handleSaveTranslation = async () => {
     if (!translatedQuestion.trim()) {
@@ -90,7 +110,7 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
 
       addToast({
         title: "Traducción guardada",
-        description: `Traducción al ${languages.find(l => l.code === selectedLanguage)?.label} guardada exitosamente`
+        description: `Traducción al ${availableLanguages.find(l => l.code === selectedLanguage)?.label} guardada exitosamente`
       });
     } catch (error) {
       console.error('Error al guardar traducción:', error);
@@ -155,120 +175,145 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
 
       {/* Contenido expandido */}
       {isExpanded && (
-        <div className="p-4 border-t border-gray-200">
-          {/* Pregunta original */}
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <h4 className="text-xs font-semibold text-gray-600 mb-2">PREGUNTA ORIGINAL (Español)</h4>
-            <p className="text-sm text-gray-800 mb-3">{question.translations?.es?.question || 'Sin pregunta en español'}</p>
+        <div className="flex border-t border-gray-200">
+          {/* Columna izquierda: Pregunta original */}
+          <div className="w-1/2 p-6 border-r border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
+                📖 Pregunta Original (Español)
+              </h4>
 
-            <h5 className="text-xs font-semibold text-gray-600 mb-1">Opciones:</h5>
-            <div className="grid grid-cols-1 gap-1 mb-3">
-              {(question.translations?.es?.options || []).map((option, index) => (
-                <div
-                  key={index}
-                  className={`text-xs px-2 py-1 rounded ${
-                    index === question.answer
-                      ? 'bg-green-100 border border-green-400 font-semibold'
-                      : 'bg-white border border-gray-200'
-                  }`}
-                >
-                  <span className="font-bold">{index + 1}.</span> {option}
-                </div>
-              ))}
-            </div>
-
-            {question.translations?.es?.explanation && (
-              <>
-                <h5 className="text-xs font-semibold text-gray-600 mb-1">Explicación:</h5>
-                <p className="text-xs text-gray-700">{question.translations.es.explanation}</p>
-              </>
-            )}
-          </div>
-
-          {/* Selector de idioma */}
-          <div className="flex gap-2 mb-4">
-            {languages.map((lang) => (
-              <Button
-                key={lang.code}
-                size="sm"
-                color={selectedLanguage === lang.code ? 'warning' : 'default'}
-                variant={selectedLanguage === lang.code ? 'solid' : 'flat'}
-                onPress={() => handleLanguageChange(lang.code)}
-              >
-                {lang.flag} {lang.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Formulario de traducción */}
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                Pregunta en {languages.find(l => l.code === selectedLanguage)?.label}
-              </label>
-              <Textarea
-                value={translatedQuestion}
-                onValueChange={setTranslatedQuestion}
-                placeholder={`Traduce la pregunta al ${languages.find(l => l.code === selectedLanguage)?.label.toLowerCase()}`}
-                minRows={2}
-                size="sm"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                Opciones traducidas
-              </label>
-              <div className="space-y-2">
-                {translatedOptions.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-600 w-6">
-                      {index + 1}.
-                    </span>
-                    <Textarea
-                      value={option}
-                      onValueChange={(value) => {
-                        const newOptions = [...translatedOptions];
-                        newOptions[index] = value;
-                        setTranslatedOptions(newOptions);
-                      }}
-                      placeholder={`Opción ${index + 1}`}
-                      minRows={1}
-                      size="sm"
-                      className="flex-1"
-                    />
-                    {index === question.answer && (
-                      <Chip size="sm" color="success" variant="flat">
-                        Correcta
-                      </Chip>
-                    )}
-                  </div>
-                ))}
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <p className="text-base font-medium text-gray-900 leading-relaxed">
+                  {question.translations?.es?.question || 'Sin pregunta en español'}
+                </p>
               </div>
+
+              <div>
+                <h5 className="text-sm font-semibold text-gray-700 mb-3">Opciones:</h5>
+                <div className="grid grid-cols-1 gap-2">
+                  {(question.translations?.es?.options || []).map((option, index) => (
+                    <div
+                      key={index}
+                      className={`text-sm px-4 py-2 rounded-lg transition-all ${
+                        index === question.answer
+                          ? 'bg-green-50 border-2 border-green-400 font-semibold text-green-900 shadow-sm'
+                          : 'bg-white border border-gray-300 text-gray-800'
+                      }`}
+                    >
+                      <span className="font-bold text-base mr-2">{index + 1}.</span>
+                      <span>{option}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {question.translations?.es?.explanation && (
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h5 className="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                    💡 Explicación:
+                  </h5>
+                  <p className="text-sm text-blue-800 leading-relaxed">
+                    {question.translations.es.explanation}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Columna derecha: Formulario de traducción */}
+          <div className="w-1/2 p-4">
+            {/* Selector de idioma */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              {availableLanguages.length === 0 ? (
+                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+                  ⚠️ No tienes permisos para traducir a ningún idioma. Contacta al administrador.
+                </div>
+              ) : (
+                availableLanguages.map((lang) => (
+                  <Button
+                    key={lang.code}
+                    size="sm"
+                    color={selectedLanguage === lang.code ? 'warning' : 'default'}
+                    variant={selectedLanguage === lang.code ? 'solid' : 'flat'}
+                    onPress={() => handleLanguageChange(lang.code)}
+                  >
+                    {lang.flag} {lang.label}
+                  </Button>
+                ))
+              )}
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                Explicación en {languages.find(l => l.code === selectedLanguage)?.label}
-              </label>
-              <Textarea
-                value={translatedExplanation}
-                onValueChange={setTranslatedExplanation}
-                placeholder={`Traduce la explicación al ${languages.find(l => l.code === selectedLanguage)?.label.toLowerCase()}`}
-                minRows={2}
-                size="sm"
-              />
-            </div>
+            {/* Formulario de traducción */}
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                  Pregunta en {availableLanguages.find(l => l.code === selectedLanguage)?.label}
+                </label>
+                <Textarea
+                  value={translatedQuestion}
+                  onValueChange={setTranslatedQuestion}
+                  placeholder={`Traduce la pregunta al ${availableLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
+                  minRows={2}
+                  size="sm"
+                />
+              </div>
 
-            <div className="flex justify-end">
-              <Button
-                color="success"
-                onPress={handleSaveTranslation}
-                isLoading={isSaving}
-                startContent={<MdSave />}
-              >
-                Guardar Traducción
-              </Button>
+              <div>
+                <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                  Opciones traducidas
+                </label>
+                <div className="space-y-2">
+                  {translatedOptions.map((option, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-600 w-6">
+                        {index + 1}.
+                      </span>
+                      <Textarea
+                        value={option}
+                        onValueChange={(value) => {
+                          const newOptions = [...translatedOptions];
+                          newOptions[index] = value;
+                          setTranslatedOptions(newOptions);
+                        }}
+                        placeholder={`Opción ${index + 1}`}
+                        minRows={1}
+                        size="sm"
+                        className="flex-1"
+                      />
+                      {index === question.answer && (
+                        <Chip size="sm" color="success" variant="flat">
+                          Correcta
+                        </Chip>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                  Explicación en {availableLanguages.find(l => l.code === selectedLanguage)?.label}
+                </label>
+                <Textarea
+                  value={translatedExplanation}
+                  onValueChange={setTranslatedExplanation}
+                  placeholder={`Traduce la explicación al ${availableLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
+                  minRows={2}
+                  size="sm"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  color="success"
+                  onPress={handleSaveTranslation}
+                  isLoading={isSaving}
+                  startContent={<MdSave />}
+                >
+                  Guardar Traducción
+                </Button>
+              </div>
             </div>
           </div>
         </div>
