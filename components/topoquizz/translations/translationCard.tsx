@@ -4,6 +4,8 @@ import { Button, Chip, Textarea, addToast } from "@heroui/react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import { MdTranslate, MdSave } from "react-icons/md";
+import { useAuth } from "@/app/hooks/useAuth";
+import { usePermissions } from "@/app/hooks/usePermissions";
 
 interface TranslationCardProps {
   question: QuestionData;
@@ -20,6 +22,8 @@ const languages = [
 ];
 
 const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNumber }) => {
+
+  const { translateEnglish, translateGerman, translateKorean, translatePortuguese} = usePermissions()
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>('en');
@@ -43,6 +47,8 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
     setTranslatedOptions(translation?.options || ['', '', '', '']);
     setTranslatedExplanation(translation?.explanation || '');
   };
+
+  useAuth
 
   const handleSaveTranslation = async () => {
     if (!translatedQuestion.trim()) {

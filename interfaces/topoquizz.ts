@@ -64,6 +64,10 @@ export interface UserPermissions {
   canDeleteNeurapp?: boolean;
   
   translateEnglish?: boolean;
+
+  translateGerman?: boolean;
+  translatePortuguese?: boolean;
+  translateKorean?: boolean;
 }
 
 export interface UserData {

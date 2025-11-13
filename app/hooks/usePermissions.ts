@@ -6,7 +6,13 @@ interface UsePermissionsReturn {
   permissions: UserPermissions | undefined;
   hasPermission: (permission: keyof UserPermissions) => boolean;
 
+
   translateEnglish:boolean;
+  translateGerman:boolean;
+  translatePortuguese:boolean;
+  translateKorean:boolean;
+  // translateEnglish:boolean;
+  
 
   canViewTopoquizz: boolean;
   canEditTopoquizz: boolean;
@@ -33,6 +39,9 @@ export const usePermissions = (): UsePermissionsReturn => {
     hasPermission,
 
     translateEnglish:hasPermission('translateEnglish'),
+    translateGerman:hasPermission('translateGerman'),
+    translatePortuguese:hasPermission('translatePortuguese'),
+    translateKorean:hasPermission('translateKorean'),
     
     canViewTopoquizz: hasPermission('canViewTopoquizz'),
     canEditTopoquizz: hasPermission('canEditTopoquizz'),
