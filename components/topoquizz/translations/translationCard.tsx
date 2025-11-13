@@ -4,8 +4,6 @@ import { Button, Chip, Textarea, addToast } from "@heroui/react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import { MdTranslate, MdSave } from "react-icons/md";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { getAllowedLanguages } from "@/utils/permissions";
 import { LanguageCode } from "@/types/languages";
 import { usePermissions } from "@/app/hooks/usePermissions";
 
@@ -22,31 +20,32 @@ const ALL_LANGUAGES = [
 ];
 
 const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNumber }) => {
-  const { userData } = useAuthContext();
-
-  // Obtener los idiomas a los que el usuario tiene acceso
-  const allowedLanguageCodes = useMemo(() => {
-    return getAllowedLanguages(userData?.permissions);
-  }, [userData?.permissions]);
-
-  // Filtrar los idiomas disponibles según permisos
-  const availableLanguages = useMemo(() => {
-    return ALL_LANGUAGES.filter(lang => allowedLanguageCodes.includes(lang.code));
-  }, [allowedLanguageCodes]);
-
   const { translateEnglish, translateGerman, translateKorean, translatePortuguese} = usePermissions()
+
+  // Mapeo de permisos por idioma
+  const languagePermissions = useMemo(() => ({
+    en: translateEnglish,
+    de: translateGerman,
+    ko: translateKorean,
+    pt: translatePortuguese
+  }), [translateEnglish, translateGerman, translateKorean, translatePortuguese]);
+
+  // Filtrar idiomas según permisos específicos del hook usePermissions
+  const allowedLanguages = useMemo(() => {
+    return ALL_LANGUAGES.filter(lang => languagePermissions[lang.code]);
+  }, [languagePermissions]);
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(
-    availableLanguages[0]?.code || 'en'
+    allowedLanguages[0]?.code || 'en'
   );
 
   // Actualizar el idioma seleccionado si cambian los permisos
   useEffect(() => {
-    if (availableLanguages.length > 0 && !availableLanguages.find(l => l.code === selectedLanguage)) {
-      setSelectedLanguage(availableLanguages[0].code);
+    if (allowedLanguages.length > 0 && !allowedLanguages.find(l => l.code === selectedLanguage)) {
+      setSelectedLanguage(allowedLanguages[0].code);
     }
-  }, [availableLanguages, selectedLanguage]);
+  }, [allowedLanguages, selectedLanguage]);
   const [isSaving, setIsSaving] = useState(false);
 
   // Obtener la traducción existente para el idioma seleccionado
@@ -110,7 +109,7 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
 
       addToast({
         title: "Traducción guardada",
-        description: `Traducción al ${availableLanguages.find(l => l.code === selectedLanguage)?.label} guardada exitosamente`
+        description: `Traducción al ${allowedLanguages.find(l => l.code === selectedLanguage)?.label} guardada exitosamente`
       });
     } catch (error) {
       console.error('Error al guardar traducción:', error);
@@ -225,12 +224,12 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
           <div className="w-1/2 p-4">
             {/* Selector de idioma */}
             <div className="flex gap-2 mb-4 flex-wrap">
-              {availableLanguages.length === 0 ? (
+              {allowedLanguages.length === 0 ? (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
                   ⚠️ No tienes permisos para traducir a ningún idioma. Contacta al administrador.
                 </div>
               ) : (
-                availableLanguages.map((lang) => (
+                allowedLanguages.map((lang) => (
                   <Button
                     key={lang.code}
                     size="sm"
@@ -248,12 +247,12 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Pregunta en {availableLanguages.find(l => l.code === selectedLanguage)?.label}
+                  Pregunta en {allowedLanguages.find(l => l.code === selectedLanguage)?.label}
                 </label>
                 <Textarea
                   value={translatedQuestion}
                   onValueChange={setTranslatedQuestion}
-                  placeholder={`Traduce la pregunta al ${availableLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
+                  placeholder={`Traduce la pregunta al ${allowedLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
                   minRows={2}
                   size="sm"
                 />
@@ -293,12 +292,12 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
 
               <div>
                 <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Explicación en {availableLanguages.find(l => l.code === selectedLanguage)?.label}
+                  Explicación en {allowedLanguages.find(l => l.code === selectedLanguage)?.label}
                 </label>
                 <Textarea
                   value={translatedExplanation}
                   onValueChange={setTranslatedExplanation}
-                  placeholder={`Traduce la explicación al ${availableLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
+                  placeholder={`Traduce la explicación al ${allowedLanguages.find(l => l.code === selectedLanguage)?.label?.toLowerCase()}`}
                   minRows={2}
                   size="sm"
                 />
