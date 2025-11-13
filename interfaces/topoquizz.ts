@@ -24,21 +24,33 @@ export interface QuestionData {
     updatedAt: Date | null;
 }
 
+export interface TitleTopicTranslation {
+  name: string;
+}
+
+export interface TitleTopicsInter {
+  es?: TitleTopicTranslation;
+  en?: TitleTopicTranslation;
+  pt?: TitleTopicTranslation;
+  ko?: TitleTopicTranslation;
+  de?: TitleTopicTranslation;
+}
 export interface ICoursesData {
     id:string,
     enable:boolean, 
-    image:string,
-    name:string,
+    // image:string,
+    // name:string,
     slug:string,
+    translations:TitleTopicsInter
     createdAt: Date | null;
     updatedAt: Date | null;
 }
 
 
 export interface ILessonData {
-  id: string,
-  name: string,
-  slug: string,
+  id: string;
+  slug: string;
+  translations?: TitleTopicsInter;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

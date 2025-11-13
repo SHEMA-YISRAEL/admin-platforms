@@ -8,7 +8,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headless
 import clsx from "clsx";
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { ICoursesData, ILessonData } from "@/interfaces/topoquizz";
-import { emptyLesson } from "@/utils/topoquizz";
+import { emptyLesson, getTranslatedName } from "@/utils/topoquizz";
 import NewLessonModal from "../modals/newLesson";
 
 
@@ -68,7 +68,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
                 'focus:outline-none focus:ring-2 focus:ring-amber-500'
               )}
             >
-              {selectedLesson?.name || 'Seleccionar...'}
+              {selectedLesson ? getTranslatedName(selectedLesson.translations) : 'Seleccionar...'}
               <ChevronDownIcon
                 className="absolute top-2 right-2 size-4 fill-gray-600"
                 aria-hidden="true"
@@ -90,7 +90,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
                     className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-amber-50 transition-colors"
                   >
                     <CheckIcon className="invisible size-4 fill-amber-600 group-data-selected:visible" />
-                    <div className="text-sm text-gray-900">{`L${index + 1}`} - {element.name}</div>
+                    <div className="text-sm text-gray-900">{`L${index + 1}`} - {getTranslatedName(element.translations)}</div>
                   </ListboxOption>
                 })
               }

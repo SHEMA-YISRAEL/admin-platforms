@@ -1,24 +1,36 @@
 
+import { ICoursesData, ILessonData, TitleTopicsInter } from "@/interfaces/topoquizz";
+import { LanguageCode } from "@/types/languages";
 
+/**
+ * Obtiene el nombre traducido de un curso o lección
+ * @param translations - El objeto de traducciones
+ * @param language - El código del idioma (por defecto 'es')
+ * @returns El nombre traducido o un string vacío si no existe
+ */
+export const getTranslatedName = (
+  translations: TitleTopicsInter | undefined,
+  language: LanguageCode = 'es'
+): string => {
+  return translations?.[language]?.name || '';
+};
 
-export const emptySubject =  {
-  id:'',
-  enable:false, 
-  image:'',
-  name:'',
-  slug:'',
+export const emptySubject: ICoursesData = {
+  id: '',
+  enable: false,
+  slug: '',
+  translations: {},
   createdAt: null,
   updatedAt: null
-}
+};
 
-
-export const emptyLesson = {
+export const emptyLesson: ILessonData = {
   id: '',
-  name: '',
   slug: '',
+  translations: {},
   createdAt: null,
-  updatedAt: null,
-}
+  updatedAt: null
+};
 
 // id:string,
 // question:string,
