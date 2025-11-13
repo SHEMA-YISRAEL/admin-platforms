@@ -2,7 +2,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { Button } from "@heroui/react";
-import getLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
+import useLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import clsx from "clsx";
@@ -27,7 +27,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
     data: lessonsData,
     loading: loadingLessonsData,
     // error 
-  } = getLessonsByCourse(courseSelected.id) //courseSelected:string
+  } = useLessonsByCourse(courseSelected.id) //courseSelected:string
 
   const [lessonsDataFromServer, setLessonsDataFromServer] = useState<ILessonData[]>([]);
   const [isNewLessonModalOpen, setIsNewLessonModalOpen] = useState(false);
