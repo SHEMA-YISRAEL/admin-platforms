@@ -1,7 +1,7 @@
 'use client'
 
 import useFirebaseData from "@/app/hooks/topoquizz/useFirebaseData";
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 
 const Courses = () => {
     

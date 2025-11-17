@@ -17,7 +17,7 @@ interface IlessonsCounterByCourseType {
     [key: string]: number;
 }
 
-function useFirebaseData() {
+function useFirebaseData() {    
 
     const [data, setData] = useState<CourseData[]>([]);
     const [loading, setLoading] = useState(true);
