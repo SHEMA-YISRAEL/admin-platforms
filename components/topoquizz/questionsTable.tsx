@@ -9,148 +9,217 @@ import {
   SortingState,
 } from "@tanstack/react-table"
 
+import { TbPlayerTrackNext, TbPlayerTrackPrev} from "react-icons/tb"
+import { MdSkipPrevious, MdSkipNext  } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
+
 import { Chip, Button, Switch, addToast } from "@heroui/react"
-
 import { QuestionData } from "@/interfaces/topoquizz"
-
 import { doc, updateDoc } from "firebase/firestore"
 import { db } from "@/utils/firebase"
-
 import { CiEdit } from "react-icons/ci";
 import EditQuestionModal from "./modals/editQuestion"
-// import NewQuestionModal from "./modals/newQuestion"
-import getQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson"
+import DeleteQuestionModal from "./modals/deleteQuestion"
 import { Spinner } from "@heroui/react"
+import { LanguageCode } from "@/types/languages"
 
 interface QuestionsTableProps {
-  questionsData:QuestionData[]
-  // isNewQuestionModalOpen?: boolean
-  // onCloseNewQuestion?: () => void
-  // lessonId?: string
+  questionsData: QuestionData[],
+  isLoadingDataTable: boolean,
+  selectedLanguage: LanguageCode
 }
 
-const QuestionsTable: React.FC<QuestionsTableProps> = ({
-  questionsData,
-  // isNewQuestionModalOpen = false,
-  // onCloseNewQuestion,
-  // lessonId = ""
-  }) => {
+const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadingDataTable, selectedLanguage }) => {
 
-    const difficultyConfig = {
-      1: { label: "Fácil", color: "success" as const },
-      2: { label: "Medio", color: "warning" as const },
-      3: { label: "Difícil", color: "danger" as const }
-    }
+  // Función para obtener el contenido según el idioma
+  const getTranslatedContent = (question: QuestionData) => {
+    const translation = question.translations?.[selectedLanguage];
+    return {
+      question: translation?.question || '',
+      options: translation?.options || [],
+      explanation: translation?.explanation || ''
+    };
+  };
 
-    const columnHelper = createColumnHelper<QuestionData>()
+  const difficultyConfig = {
+    1: { label: "Fácil", color: "success" as const },
+    2: { label: "Medio", color: "warning" as const },
+    3: { label: "Difícil", color: "danger" as const }
+  }
 
-    const columns = [
-      columnHelper.display({
-        id: 'number',
-        header: () => '#',
-        cell: info => info.row.index + 1,
-      }),
-      columnHelper.accessor(
-        'question',{
-            header:()=>'Pregunta',
-            cell:info=> info.getValue(),
-            footer:info=>info.column.id
+  const columnHelper = createColumnHelper<QuestionData>()
+
+  const columns = [
+    columnHelper.display({
+      id: 'number',
+      header: () => '#',
+      cell: info => info.row.index + 1,
+    }),
+    columnHelper.display({
+      id: 'question',
+      header: () => 'Pregunta',
+      cell: info => {
+        const translatedContent = getTranslatedContent(info.row.original)
+        return (
+          <div className="max-w-md font-medium">
+            {translatedContent.question}
+          </div>
+        )
+      },
+    }),
+    columnHelper.accessor('difficult', {
+      header: () => 'Dificultad',
+      cell: (info) => {
+        const difficultyId = info.getValue() as 1 | 2 | 3
+        const config = difficultyConfig[difficultyId]
+
+        return config ? (
+          <Chip size="sm" color={config.color}>
+            {config.label}
+          </Chip>
+        ) : null
+      },
+      footer: info => info.column.id,
+      enableSorting: true,
+    }),
+    columnHelper.display({
+      id: 'options',
+      header: () => 'Opciones',
+      cell: info => {
+        const translatedContent = getTranslatedContent(info.row.original)
+        const options = translatedContent.options
+        const correctIndex = info.row.original.answer
+        return options && options.length > 0 ? (
+          <div className="grid grid-cols-2 gap-1 text-xs min-w-[300px]">
+            {options.map((option, index) => (
+              <div
+                key={index}
+                className={`px-2 py-1 rounded border ${
+                  index === correctIndex
+                    ? 'bg-green-200 border-green-400 font-semibold'
+                    : 'bg-gray-50 border-gray-200'
+                }`}
+              >
+                <span className="font-bold">{index + 1}.</span> {option}
+              </div>
+            ))}
+          </div>
+        ) : '-'
+      },
+    }),
+    columnHelper.display({
+      id: 'explanation',
+      header: () => 'Explicacion',
+      cell: info => {
+        const translatedContent = getTranslatedContent(info.row.original)
+        const text = translatedContent.explanation
+        return text ? (
+          <div className="max-w-xs" title={text}>
+            {text}
+          </div>
+        ) : '-'
+      },
+    }),
+    columnHelper.accessor(
+      'enable', {
+      header: () => 'Estado',
+      cell: (info) => {
+        const handleSwitchChange = async (isSelected: boolean) => {
+          const questionId = info.row.original.id
+          const question = info.row.original.translations?.es?.question || 'Sin pregunta'
+          try {
+            const questionRef = doc(db, "questions", questionId)
+            await updateDoc(questionRef, {
+              enable: isSelected
+            })
+            addToast({
+              title: `${isSelected ? "Habilitado" : "Deshabilitado"}`,
+              description: `Pregunta: ${question} - ha sido ${isSelected ? "HABILITADA" : "DESHABILITADA"}`
+            });
+            // console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
+          } catch (error) {
+            console.error('Error al actualizar estado:', error)
           }
-      ),
-      columnHelper.accessor('difficult', {
-        header: () => 'Dificultad',
-        cell: (info) => {
-          const difficultyId = info.getValue() as 1 | 2 | 3
-          const config = difficultyConfig[difficultyId]
+        }
 
-          return config ? (
-            <Chip size="sm" color={config.color}>
-              {config.label}
-            </Chip>
-          ) : null
+        return (
+          <Switch
+            defaultSelected={info.getValue()}
+            onValueChange={handleSwitchChange}
+          />
+        )
+      },
+      footer: info => info.column.id
+    }
+    ),
+    columnHelper.accessor(
+      'updatedAt', {
+        header: () => 'Modificado',
+        cell: info => {
+          const date = info.getValue()
+          return date ? (
+            <div className="whitespace-nowrap text-xs">
+              {date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit'
+              })}
+              <br/>
+              <span className="text-gray-500">
+                {date.toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+          ) : '-'
         },
         footer: info => info.column.id,
         enableSorting: true,
-      }),
-      columnHelper.accessor(
-        'options',{
-            header:()=>'Opciones',
-            cell:info=> {
-              const options = info.getValue()
-              const correctIndex = info.row.original.answer
-              return options && options.length > 0 ? (
-                <ul className="list-disc list-inside space-y-1">
-                  {options.map((option, index) => (
-                    <li
-                      key={index}
-                      className={index === correctIndex ? 'bg-green-200 px-2 py-1 rounded' : ''}
-                    >
-                      {option}
-                    </li>
-                  ))}
-                </ul>
-              ) : '-'
-            },
-            footer:info=>info.column.id
-          }
-      ),
-      columnHelper.accessor(
-        'explanation',{
-            header:()=>'Explicacion',
-            cell:info=> info.getValue(),
-            footer:info=>info.column.id
-          }
-      ),
-      columnHelper.accessor(
-        'enable',{
-            header:()=>'Estado',
-            cell:(info) => {
-              const handleSwitchChange = async (isSelected: boolean) => {
-                const questionId = info.row.original.id
-                const question = info.row.original.question
-                try {
-                  const questionRef = doc(db, "questions", questionId)
-                  await updateDoc(questionRef, {
-                    enable: isSelected
-                  })
-                  addToast({
-                    title: `${isSelected? "Habilitado":"Deshabilitado"}`,
-                    description:`Pregunta: ${question} - ha sido ${isSelected? "HABILITADA":"DESHABILITADA"}`
-                  });
-                  console.log(`Pregunta ${questionId} actualizada a ${isSelected}`)
-                } catch (error) {
-                  console.error('Error al actualizar estado:', error)
-                }
-              }
-
-              return (
-                <Switch
-                  defaultSelected={info.getValue()}
-                  onValueChange={handleSwitchChange}
-                />
-              )
-            },
-            footer:info=>info.column.id
-          }
-      ),
-      columnHelper.display({
-        id: 'action',
-        header: () => 'Action',
-        cell: info => {
-          return (
+        sortingFn: (rowA, rowB) => {
+          const dateA = rowA.original.updatedAt
+          const dateB = rowB.original.updatedAt
+          if (!dateA) return 1
+          if (!dateB) return -1
+          return dateA.getTime() - dateB.getTime()
+        }
+      }
+    ),
+    columnHelper.display({
+      id: 'action',
+      header: () => 'Acciones',
+      cell: info => {
+        return (
+          <div className="flex gap-2">
             <Button
               isIconOnly
+              size="sm"
               color="warning"
-              onClick={() => handleOpenModal(info.row.original)}
+              onPress={() => handleOpenModal(info.row.original)}
             >
-              <CiEdit size={30}/>
+              <CiEdit size={18} />
             </Button>
-          )
-        },
-        footer:info=>info.column.id
-      }),
 
-    ]
+            <Button
+              isIconOnly
+              size="sm"
+              color="danger"
+              onPress={() => handleOpenDeleteModal(info.row.original)}
+            >
+              <RiDeleteBin6Line size={18}/>
+            </Button>
+          </div>
+        )
+      },
+      footer: info => info.column.id
+    }),
+
+    columnHelper.display({
+      id: 'lastAuthor',
+      header: () => 'Ultimo revisor / Autor',
+      cell: info => info.getValue(),
+    })
+  ]
 
   // const emptyQuestionObject = {
   //   id:'',
@@ -166,16 +235,28 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
   //   enable: true
   // }
   const [tableData, setTableData] = useState(
-    ()=>[...questionsData]
+    () => [...questionsData]
   )
   const [sorting, setSorting] = useState<SortingState>([])
-  
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedQuestion, setSelectedQuestion] = useState<QuestionData | null>(null)
+  const [questionToDelete, setQuestionToDelete] = useState<QuestionData | null>(null)
+  const [noQuestions, setNoQuestions] = useState(false)
 
   useEffect(() => {
     setTableData(questionsData)
+    if(questionsData.length > 0){
+      setNoQuestions(false)
+    } else {
+      setNoQuestions(true)
+    }
+    // if(questionsData.length > 0){
+    //   setNoQuestions(false)
+    // } else {
+    //   setNoQuestions(true)
+    // }
   }, [questionsData])
 
   const handleOpenModal = (question: QuestionData) => {
@@ -186,6 +267,16 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedQuestion(null)
+  }
+
+  const handleOpenDeleteModal = (question: QuestionData) => {
+    setQuestionToDelete(question)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setQuestionToDelete(null)
   }
 
   // const handleCreateQuestion = async () => {
@@ -228,8 +319,6 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
   //   }
   // }
 
-  
-
   // const handleNewOptionChange = (index: number, value: string) => {
   //   const newOptions = [...newQuestion.options]
   //   newOptions[index] = value
@@ -254,124 +343,127 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({
   })
 
   return (
-    <div className="px-10 rounded-2xl">
-
-      {/* <div className="text-2xl text-center">Preguntas</div> */}
+    <div className="h-full flex flex-col rounded-lg bg-white shadow-md border border-gray-200">
       {
-        // lessonId && questionsLoading ? (
-        //   <div className="flex justify-center items-center h-64">
-        //     <Spinner size="lg" color="warning" />
-        //   </div>
-        // ) : (
-          <div className="w-full overflow-x-auto">
-          <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
-            <thead className="bg-gradient-to-r from-amber-500 to-amber-600">
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2' : ''}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-amber-50 transition-colors duration-150">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4 text-sm text-gray-700">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-            {/* <tfoot className="bg-gray-50">
-              {table.getFooterGroups().map(footerGroup => (
-                <tr key={footerGroup.id}>
-                  {footerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.footer,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot> */}
-          </table>
-          <div className="h-4" />
-            <div className="flex items-center justify-between gap-2 px-4 py-4">
-              <div className="flex items-center gap-2">
+        isLoadingDataTable?(
+          <div className="flex justify-center items-center h-full">
+            <Spinner size="lg" color="warning" />
+          </div>
+        ) : noQuestions?(
+          <div className="flex justify-center items-center h-full text-center font-semibold text-2xl text-gray-400">
+            No hay preguntas
+          </div>
+        ):(
+        <>
+          {/* Tabla con scroll interno */}
+          <div className="flex-1 overflow-auto">
+            <table className="min-w-full bg-white text-xs">
+              <thead className="bg-gradient-to-r from-amber-500 to-amber-600 sticky top-0 z-10">
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th key={header.id} className="px-3 py-2 text-left text-xs font-semibold text-white uppercase tracking-tight">
+                        {header.isPlaceholder ? null : (
+                          <div
+                            className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1' : ''}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {
+                              flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )
+                            }
+                              
+                            {
+                              {
+                                asc: ' ▲',
+                                desc: ' ▼',
+                              }
+                              [header.column.getIsSorted() as string] ?? null
+                            }
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="hover:bg-amber-50/50 transition-colors">
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className="px-3 py-2 text-xs text-gray-700">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación fija en la parte inferior */}
+          <div className="flex-shrink-0 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-2 px-3 py-2 bg-gray-50">
+              <div className="flex items-center gap-1">
                 <Button
                   size="sm"
-                  onClick={() => table.setPageIndex(0)}
+                  className="p-2 text-2xl"
+
+                  onPress={() => table.setPageIndex(0)}
                   isDisabled={!table.getCanPreviousPage()}
                 >
-                  {'<<'}
+                  <TbPlayerTrackPrev />
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => table.previousPage()}
+                  className="p-2 text-2xl"
+                  onPress={() => table.previousPage()}
                   isDisabled={!table.getCanPreviousPage()}
                 >
-                  {'<'}
+                  <MdSkipPrevious/>
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => table.nextPage()}
+                  className="p-2 text-2xl"
+                  onPress={() => table.nextPage()}
                   isDisabled={!table.getCanNextPage()}
                 >
-                  {'>'}
+                  <MdSkipNext />
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  className="p-2 text-2xl"
+                  onPress={() => table.setPageIndex(table.getPageCount() - 1)}
                   isDisabled={!table.getCanNextPage()}
                 >
-                  {'>>'}
+                  {<TbPlayerTrackNext />}
                 </Button>
               </div>
-              <span className="flex items-center gap-1 text-sm text-gray-700">
-                <div>Página</div>
+
+              <span className="flex items-center gap-1 text-xl text-gray-600 font-bold">
+                <div>Pág</div>
                 <strong>
-                  {table.getState().pagination.pageIndex + 1} de{' '}
-                  {table.getPageCount()}
+                  {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
                 </strong>
               </span>
             </div>
+          </div>
 
-            <EditQuestionModal
-              isModalOpenState={isModalOpen}
-              handleCloseModalMethod={handleCloseModal}
-              selectedQuestion={selectedQuestion}
-            />
+          <EditQuestionModal
+            isModalOpenState={isModalOpen}
+            handleCloseModalMethod={handleCloseModal}
+            selectedQuestion={selectedQuestion}
+          />
 
-            {/* <NewQuestionModal
-              isModalOpenState={isNewQuestionModalOpen}
-              handleCloseModalMethod={onCloseNewQuestion || (() => {})}
-              lessonId={lessonId}
-            /> */}
-        </div>
-        // )
+          <DeleteQuestionModal
+            isModalOpenState={isDeleteModalOpen}
+            handleCloseModalMethod={handleCloseDeleteModal}
+            selectedQuestion={questionToDelete}
+          />
+        </>
+        )
       }
     </div>
   );

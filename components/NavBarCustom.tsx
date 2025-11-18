@@ -6,41 +6,58 @@ import {
 	DropdownTrigger, 
 	DropdownMenu, 
 	DropdownItem,
-	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent, Avatar
+	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent
 } from "@heroui/react";
 
 
 import Link from "next/link";
 
-import { FaAngleDown, FaBook} from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+import { FaAngleDown } from "react-icons/fa";
+// import { MdDashboard } from "react-icons/md";
+import { BsTranslate } from "react-icons/bs";
 
 import { usePathname, useRouter} from 'next/navigation'
+import { useAuth } from "@/app/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
+// import { UserPermissions } from "@/interfaces/topoquizz";
+// import { hasPermission } from "@/lib/firebase/auth";
+import { usePermissions } from "@/app/hooks/usePermissions";
+// interface NavBarProps {
 
-interface NavBarProps {
+// }
 
-}
+// const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
+// 	if(!permissions) return false
+// 	return hasPermission(permissions, 'translateEnglish')
+// }
 
 const UserMenu = () =>{
 
+	const { logout } = useAuth()
+	const { userData } = useAuthContext();
+	
 	return(
 		<>
 			<Dropdown placement="bottom-end">
 				<DropdownTrigger>
 						<div className="flex cursor-pointer items-center gap-3">
+							
 							<User
-								avatarProps={{
-									src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-								}}
-								description="Pasante"
-								name="Valeria Claros"
+								// avatarProps={
+								// 	{
+								// 		src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+
+								// 	}
+								// }
+								description={userData?.rol}
+								name={userData?.email}
 							/>
 							<FaAngleDown/>
 						</div>
 				</DropdownTrigger>
 				<DropdownMenu aria-label="Profile Actions" variant="flat">
-          <DropdownItem key="help_and_feedback">Permisos</DropdownItem>
-          <DropdownItem key="logout" color="danger">
+          {/* <DropdownItem key="help_and_feedback">Permisos</DropdownItem> */}
+          <DropdownItem onClick={()=>logout()} key="logout" color="danger">
             Cerrar sesión
           </DropdownItem>
         </DropdownMenu>
@@ -49,20 +66,12 @@ const UserMenu = () =>{
 	)
 }
 
-const NavBarCustom: React.FC<NavBarProps> = () => {
+const NavBarCustom = () => {
+	
 	const pathname = usePathname()
 	const router = useRouter()
-	console.log('pathname', pathname)
-	// const routes = [
-	// 	{
-	// 		label: "TopoQuizz",
-	// 		path: '/topoquizz'
-	// 	},
-	// 	{
-	// 		label: "NeurApp",
-	// 		path: '/neurapp'
-	// 	}
-	// ]
+	
+	const {translateEnglish} = usePermissions()
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">
@@ -92,9 +101,9 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
               base: "gap-4",
             }}
           >
-            <DropdownItem
+            {/* <DropdownItem
               key="dashboard"
-              description="Metricas de la aplicacion con informción general de la misma"
+              description="Metricas de la aplicacion con información general de la misma"
               startContent={<MdDashboard/>}
 							onClick={() => router.push('/topoquizz/dashboard')}
             >
@@ -107,17 +116,30 @@ const NavBarCustom: React.FC<NavBarProps> = () => {
 							onClick={()=> router.push('/topoquizz/content')}
             >
               Contenido
+            </DropdownItem> */}
+
+						<DropdownItem
+              key="traducciones"
+              description="Edicion de las versiones traducidas de las preguntas"
+              startContent={<BsTranslate />}
+							onClick={()=> router.push('/topoquizz/translate')}
+            >
+              Traducciones
             </DropdownItem>
           </DropdownMenu>
 				</Dropdown>
+				
+				{
+					translateEnglish?
+						<NavbarItem>
+							<Link aria-current="page" color="secondary" href="/neurapp" 
+								className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
+							>
+								NeurApp
+							</Link>
+						</NavbarItem> :<></>
+				}
 
-				<NavbarItem>
-          <Link aria-current="page" color="secondary" href="/neurapp" 
-						className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
-					>
-            NeurApp
-          </Link>
-        </NavbarItem>
 			</NavbarContent>
 
 			<NavbarContent justify="end">

@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-interface SideBarProps {
+// interface SideBarProps {
 
-}
+// }
 
-const SideBar: React.FC<SideBarProps> = () => {
+const SideBar = () => {
 
   const pathname = usePathname()
   const actualApp = pathname.split('/')[1]
@@ -29,7 +29,7 @@ const SideBar: React.FC<SideBarProps> = () => {
         <ul>
           {
             items.map((element, index) => {
-              console.log(`${actualApp}/${element.path}`)
+
               return (
                 <li key={index} >
                   <Link

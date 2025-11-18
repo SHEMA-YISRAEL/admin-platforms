@@ -35,7 +35,7 @@ export default function CoursePage() {
   // 2) Evitar llamar useLessons con NaN
   const lessonsEnabled = Number.isFinite(courseId) && courseId > 0;
   const { lessons, loading: lessonsLoading, setLessons, error: lessonsError } =
-    useLessons(lessonsEnabled ? courseId : undefined as any);
+    useLessons(lessonsEnabled ? courseId : 0);
 
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   const [activeView, setActiveView] = useState<'lessons' | 'sublessons'>('lessons');

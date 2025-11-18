@@ -12,12 +12,15 @@ import {
     Switch,
     Button,
     ModalFooter,
-    addToast
+    addToast,
+    Tabs,
+    Tab
 } from "@heroui/react";
 
-import { QuestionData } from "@/interfaces/topoquizz";
+import { QuestionData, DataQuestionTranslated } from "@/interfaces/topoquizz";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "@/utils/firebase";
+import { AVAILABLE_LANGUAGES, LanguageCode } from "@/types/languages";
 
 
 interface NewQuestionModalProps {
@@ -27,12 +30,16 @@ interface NewQuestionModalProps {
 }
 
 const emptyQuestion: Omit<QuestionData, 'id' | 'createdAt' | 'updatedAt' | 'lessonId'> = {
-    question: "",
     difficult: 1,
-    options: ["", "", "", ""],
     answer: 0,
-    explanation: "",
-    enable: true
+    enable: true,
+    translations: {}
+};
+
+const emptyTranslation: DataQuestionTranslated = {
+    question: "",
+    options: ["", "", "", ""],
+    explanation: ""
 };
 
 const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
@@ -42,27 +49,67 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 }) => {
 
     const [newQuestion, setNewQuestion] = useState(emptyQuestion);
+    const [currentLang, setCurrentLang] = useState<LanguageCode>('es');
 
     const handleOptionChange = (index: number, value: string) => {
-        const newOptions = [...newQuestion.options];
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
+        }
+        const newOptions = [...(translations[currentLang]?.options || ["", "", "", ""])];
         newOptions[index] = value;
-        setNewQuestion({ ...newQuestion, options: newOptions });
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            options: newOptions
+        };
+        setNewQuestion({ ...newQuestion, translations });
     };
+
+    const handleQuestionChange = (value: string) => {
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
+        }
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            question: value
+        };
+        setNewQuestion({ ...newQuestion, translations });
+    };
+
+    const handleExplanationChange = (value: string) => {
+        const translations = { ...newQuestion.translations };
+        if (!translations[currentLang]) {
+            translations[currentLang] = { ...emptyTranslation };
+        }
+        translations[currentLang] = {
+            ...translations[currentLang]!,
+            explanation: value
+        };
+        setNewQuestion({ ...newQuestion, translations });
+    };
+
+    const getCurrentContent = () => {
+        return newQuestion.translations?.[currentLang] || emptyTranslation;
+    };
+
+    const currentContent = getCurrentContent();
 
     const handleSaveQuestion = async () => {
         // Validaciones
-        if (!newQuestion.question.trim()) {
+        const esTranslation = newQuestion.translations?.es;
+        if (!esTranslation?.question?.trim()) {
             addToast({
                 title: "Error",
-                description: "La pregunta no puede estar vacía"
+                description: "La pregunta en español no puede estar vacía"
             });
             return;
         }
 
-        if (newQuestion.options.some(opt => !opt.trim())) {
+        if (esTranslation.options.some((opt: string) => !opt.trim())) {
             addToast({
                 title: "Error",
-                description: "Todas las opciones deben estar completas"
+                description: "Todas las opciones en español deben estar completas"
             });
             return;
         }
@@ -77,13 +124,11 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 
         try {
             await addDoc(collection(db, "questions"), {
-                question: newQuestion.question,
                 difficult: newQuestion.difficult,
-                options: newQuestion.options,
                 answer: newQuestion.answer,
-                explanation: newQuestion.explanation,
                 enable: newQuestion.enable,
                 lessonId: lessonId,
+                translations: newQuestion.translations || {},
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now()
             });
@@ -118,27 +163,54 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
                 </ModalHeader>
                 <ModalBody>
                     <div className="flex flex-col gap-4">
+                        {/* Tabs de idiomas */}
+                        <Tabs
+                            selectedKey={currentLang}
+                            onSelectionChange={(key) => setCurrentLang(key as LanguageCode)}
+                            aria-label="Idiomas"
+                            color="warning"
+                            variant="bordered"
+                        >
+                            {AVAILABLE_LANGUAGES.map((lang) => (
+                                <Tab
+                                    key={lang.code}
+                                    title={
+                                        <div className="flex items-center gap-2">
+                                            <span>{lang.flag}</span>
+                                            <span>{lang.name}</span>
+                                        </div>
+                                    }
+                                />
+                            ))}
+                        </Tabs>
+
+                        {/* Contenido según idioma seleccionado */}
                         <Textarea
                             label="Pregunta"
                             placeholder="Escribe la pregunta"
-                            value={newQuestion.question}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+                            value={currentContent.question}
+                            onChange={(e) => handleQuestionChange(e.target.value)}
                             minRows={2}
                         />
 
-                        <Select
-                            label="Dificultad"
-                            selectedKeys={[newQuestion.difficult.toString()]}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, difficult: parseInt(e.target.value) })}
-                        >
-                            <SelectItem key="1" textValue="1">Fácil</SelectItem>
-                            <SelectItem key="2" textValue="2">Medio</SelectItem>
-                            <SelectItem key="3" textValue="3">Difícil</SelectItem>
-                        </Select>
+                        {/* Dificultad y respuesta correcta solo en español */}
+                        {currentLang === 'es' && (
+                            <>
+                                <Select
+                                    label="Dificultad"
+                                    selectedKeys={[newQuestion.difficult.toString()]}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, difficult: parseInt(e.target.value) })}
+                                >
+                                    <SelectItem key="1" textValue="1">Fácil</SelectItem>
+                                    <SelectItem key="2" textValue="2">Medio</SelectItem>
+                                    <SelectItem key="3" textValue="3">Difícil</SelectItem>
+                                </Select>
+                            </>
+                        )}
 
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-medium">Opciones</label>
-                            {newQuestion.options.map((option, index) => (
+                            {currentContent.options.map((option: string, index: number) => (
                                 <div key={index} className="flex gap-2 items-center">
                                     <Input
                                         label={`Opción ${index + 1}`}
@@ -146,17 +218,19 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
                                         onChange={(e) => handleOptionChange(index, e.target.value)}
                                         className="flex-1"
                                     />
-                                    <div
-                                        className="cursor-pointer"
-                                        onClick={() => setNewQuestion({ ...newQuestion, answer: index })}
-                                    >
-                                        <Chip
-                                            size="sm"
-                                            color={newQuestion.answer === index ? "success" : "default"}
+                                    {currentLang === 'es' && (
+                                        <div
+                                            className="cursor-pointer"
+                                            onClick={() => setNewQuestion({ ...newQuestion, answer: index })}
                                         >
-                                            {newQuestion.answer === index ? "Correcta" : "Marcar"}
-                                        </Chip>
-                                    </div>
+                                            <Chip
+                                                size="sm"
+                                                color={newQuestion.answer === index ? "success" : "default"}
+                                            >
+                                                {newQuestion.answer === index ? "Correcta" : "Marcar"}
+                                            </Chip>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -164,17 +238,20 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
                         <Textarea
                             label="Explicación"
                             placeholder="Escribe la explicación de la respuesta"
-                            value={newQuestion.explanation}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, explanation: e.target.value })}
+                            value={currentContent.explanation}
+                            onChange={(e) => handleExplanationChange(e.target.value)}
                             minRows={3}
                         />
 
-                        <Switch
-                            isSelected={newQuestion.enable}
-                            onValueChange={(value) => setNewQuestion({ ...newQuestion, enable: value })}
-                        >
-                            {newQuestion.enable ? "Habilitada" : "Deshabilitada"}
-                        </Switch>
+                        {/* Estado solo en español */}
+                        {currentLang === 'es' && (
+                            <Switch
+                                isSelected={newQuestion.enable}
+                                onValueChange={(value) => setNewQuestion({ ...newQuestion, enable: value })}
+                            >
+                                {newQuestion.enable ? "Habilitada" : "Deshabilitada"}
+                            </Switch>
+                        )}
                     </div>
                 </ModalBody>
                 <ModalFooter>

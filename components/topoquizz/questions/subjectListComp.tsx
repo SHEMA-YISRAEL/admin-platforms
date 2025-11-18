@@ -1,8 +1,9 @@
 
-import getCourses from "@/lib/firebase/getCourses";
+import useCourses from "@/lib/firebase/getCourses";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { Button } from "@heroui/react";
+// import { Button } from "@heroui/react";
+import { getTranslatedName } from "@/utils/topoquizz";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import clsx from "clsx";
@@ -18,8 +19,8 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
   const {
     coursesData: coursesDataFromFirebase,
     loading: loadingCourses,
-    error: errorGettingCoursesData
-  } = getCourses()
+    // error: errorGettingCoursesData
+  } = useCourses()
 
   const [dataFromServer, setDataFromServer] = useState<ICoursesData[]>([]);
 
@@ -31,58 +32,55 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
   }, [coursesDataFromFirebase])
 
   return (
-    <>
-      <div className="m-4 rounded-2xl p-1">
-        
-        <div className="flex gap-2 justify-end">
-          <div className="text-2xl text-center ">Materias</div>
-          {
-            loadingCourses ? <div>Cargando...</div> : 
-            <div className="w-1/2">
-              <Listbox
-                value={selectedSubject} 
-                onChange={methodSetSelectedSubject}
-              >
-                <ListboxButton
-                  className={clsx(
-                    'relative block w-full rounded-lg py-1.5 pr-8 pl-3 text-left text-sm/6 bg-black text-white',
-                    'focus:not-data-focus:outline-none data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25'
-                  )}
+    <div className="flex items-center gap-2">
+      <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">Materia:</label>
+      {
+        loadingCourses ? (
+          <div className="text-xs text-gray-500">Cargando...</div>
+        ) : (
+          <Listbox
+            value={selectedSubject}
+            onChange={methodSetSelectedSubject}
+          >
+            <ListboxButton
+              className={clsx(
+                'relative block min-w-[180px] rounded-lg py-1.5 pr-8 pl-3 text-left text-sm bg-gray-50 text-gray-900 border border-gray-300',
+                'hover:bg-gray-100 transition-colors',
+                'focus:outline-none focus:ring-2 focus:ring-amber-500'
+              )}
+            >
+              {selectedSubject ? getTranslatedName(selectedSubject.translations) : 'Seleccionar...'}
+              <ChevronDownIcon
+                className="absolute top-2 right-2 size-4 fill-gray-600"
+                aria-hidden="true"
+              />
+            </ListboxButton>
+            <ListboxOptions
+              anchor="bottom"
+              transition
+              className={clsx(
+                'w-(--button-width) rounded-lg border border-gray-200 bg-white p-1 mt-1 shadow-xl z-50',
+                'transition duration-100 ease-in data-leave:data-closed:opacity-0'
+              )}
+            >
+              {dataFromServer.map((element, index) => (
+                <ListboxOption
+                  key={index}
+                  value={element}
+                  className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 hover:bg-amber-50 transition-colors"
                 >
-                  {selectedSubject?.name}
-                  <ChevronDownIcon
-                    className="group pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white"
-                    aria-hidden="true"
-                  />
-                </ListboxButton>
-                <ListboxOptions
-                  anchor="bottom"
-                  transition
-                  className={clsx(
-                    'w-(--button-width) rounded-xl border border-white/5 bg-black p-1 [--anchor-gap:--spacing(1)] focus:outline-none',
-                    'transition duration-100 ease-in data-leave:data-closed:opacity-0'
-                  )}
-                >
-                  {dataFromServer.map((element, index) => (
-                    <ListboxOption
-                      key={index}
-                      value={element}
-                      className="group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-white/10"
-                    >
-                      <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" />
-                      <div className="text-sm/6 text-white">{element.name}</div>
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </Listbox>
-            </div>
-          }
-          <Button size="sm" color="primary">
-            Nueva Materia
-          </Button>
-        </div>
-      </div>
-    </>
+                  <CheckIcon className="invisible size-4 fill-amber-600 group-data-selected:visible" />
+                  <div className="text-sm text-gray-900">{getTranslatedName(element.translations)}</div>
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
+        )
+      }
+      {/* <Button size="sm" color="primary" variant="flat" className="text-xs">
+        + Materia
+      </Button> */}
+    </div>
   )
 }
 
