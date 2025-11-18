@@ -101,7 +101,7 @@ export default function LessonManager({
     <div>
       <div className="flex justify-between items-center mb-4 2xl:mx-50">
         <h2 className="text-xl font-bold">Lecciones del Curso</h2>
-        <Button className="bg-green-600 text-white" onPress={handleCreate}>
+        <Button className="bg-blue-500 text-white" onPress={handleCreate}>
           + Nueva Lección
         </Button>
       </div>

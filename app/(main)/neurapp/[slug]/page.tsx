@@ -86,13 +86,23 @@ export default function CoursePage() {
       </Tabs>
 
       {/* Dashboard del Curso */}
-      <div className="mt-6 px-4 bg-gray-300">
-        <Card className="2xl:mx-50 mt-3">
-          <CardBody>
-            <h1 className="text-2xl font-bold mb-2">{currentCourse.title}</h1>
-            {currentCourse.description && (
-              <p className="text-gray-600 mb-4">{currentCourse.description}</p>
-            )}
+      <div className="mt-6 px-4">
+        <Card className="max-w-sm 2xl:mx-50 bg-gray-100  w-full mt-3 rounded-lg shadow-md">
+          <CardBody className="p-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-md text-white font-bold ${colors[courseId % colors.length]}`}
+              >
+                {currentCourse.title?.charAt(0)?.toUpperCase() ?? 'C'}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base font-semibold truncate">{currentCourse.title}</h1>
+                {currentCourse.description && (
+                  <p className="text-sm text-gray-500 mt-1 truncate">{currentCourse.description}</p>
+                )}
+              </div>
+            </div>
           </CardBody>
         </Card>
 

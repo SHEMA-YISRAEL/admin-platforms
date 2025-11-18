@@ -95,7 +95,7 @@ export default function SublessonManager({
     <div>
       <div className="flex justify-between items-center mb-4 2xl:mx-50">
         <h2 className="text-xl font-bold">Sublecciones</h2>
-        <Button className="bg-green-600 text-white text-sm" onPress={handleCreate}>
+        <Button className="bg-blue-500 text-white text-sm" onPress={handleCreate}>
           + Nueva Sublección
         </Button>
       </div>
