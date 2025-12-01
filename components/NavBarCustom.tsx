@@ -19,7 +19,8 @@ import { FaBook } from "react-icons/fa";
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { usePermissions } from "@/app/hooks/usePermissions";
+import { UserData } from "@/interfaces/topoquizz";
+// import { usePermissions } from "@/app/hooks/usePermissions";
 
 
 // const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
@@ -29,7 +30,7 @@ import { usePermissions } from "@/app/hooks/usePermissions";
 
 interface UserMenu{
 
-	userData:any 
+	userData:UserData|null
 }
 
 const UserMenu: React.FC<UserMenu> = ( {userData}) =>{
@@ -71,7 +72,6 @@ const NavBarCustom = () => {
 	const pathname = usePathname()
 	const router = useRouter()
 	const { userData } = useAuthContext();
-	const {translateEnglish} = usePermissions()
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">

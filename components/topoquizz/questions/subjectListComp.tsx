@@ -29,7 +29,7 @@ const SubjectsList: React.FC<ISubjectListProps> = ({ selectedSubject, methodSetS
       setDataFromServer(coursesDataFromFirebase)
       methodSetSelectedSubject(coursesDataFromFirebase[0])
     }
-  }, [coursesDataFromFirebase])
+  }, [coursesDataFromFirebase, methodSetSelectedSubject])
 
   return (
     <div className="flex items-center gap-2">
