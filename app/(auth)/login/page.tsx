@@ -32,7 +32,7 @@ export default function Page() {
 
     return (
         <div className="flex h-screen w-screen items-center justify-center">
-            <form className="w-3/5 md:w-2/5 lg:w-1/5" onSubmit={handleSubmit(onSubmit)}>
+            <form className="w-4/5 md:w-4/5 lg:w-2/5 xl:w-1/5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex flex-col rounded-md p-3 m-5 gap-3">
                     <h1 className="font-bold text-center text-3xl">ADMIN PANEL</h1>
 
