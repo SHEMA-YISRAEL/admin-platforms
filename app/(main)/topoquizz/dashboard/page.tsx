@@ -1,7 +1,4 @@
-// interface DashBoardPageProps {
-    
-// }
- 
+
 const DashBoardPage = () => {
     return (
         <div className="h-screen flex flex-col">
