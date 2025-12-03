@@ -11,7 +11,7 @@ type Inputs = {
 }
 
 export default function Page() {
-  const { login, loading } = useAuth()
+  const { login, loading} = useAuth()
   const [loginError, setLoginError] = useState<string | null>(null)
   const errorFieldRequired = "Este campo es requerido"
 
@@ -36,11 +36,11 @@ export default function Page() {
         <div className="flex flex-col rounded-md p-3 m-5 gap-3">
           <h1 className="font-bold text-center text-3xl">ADMIN PANEL</h1>
 
-          {loginError && (
+          {/* {loginError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
               {loginError}
             </div>
-          )}
+          )} */}
 
           <div>
             <Input
@@ -84,6 +84,10 @@ export default function Page() {
           >
             {loading ? "INICIANDO..." : "INICIAR SESION"}
           </Button>
+          {
+            loginError && <span className="text-xs text-red-500 text-center">{loginError}</span>
+          }
+
         </div>
       </form>
     </div>

@@ -47,10 +47,9 @@ const UserMenu: React.FC<UserMenu> = ( {userData}) =>{
 								// avatarProps={
 								// 	{
 								// 		src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-
 								// 	}
 								// }
-								description={userData?.rol}
+								description={userData?.userName}
 								name={userData?.email}
 							/>
 							<FaAngleDown/>
@@ -112,7 +111,7 @@ const NavBarCustom = () => {
 							</DropdownItem>):<></>
 						}
 						{
-							(userData?.rol==="")?<>
+							(userData?.rol==="admin")?<>
 								<DropdownItem
 									key="dashboard"
 									description="Metricas de la aplicacion con información general de la misma"
@@ -135,7 +134,7 @@ const NavBarCustom = () => {
 				</Dropdown>
 				
 				{
-					userData?.rol==="neurappAdmin"?
+					userData?.rol==="admin"?
 						<NavbarItem>
 							<Link aria-current="page" color="secondary" href="/neurapp" 
 								className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
