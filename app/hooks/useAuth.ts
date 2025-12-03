@@ -1,12 +1,31 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginWithEmailAndPassword, logout as firebaseLogout, getUserData } from '@/lib/firebase/auth';
+import { setUserSession, clearUserSession } from '@/app/actions/auth';
+import type { UserRole } from '@/lib/auth';
 
 interface UseAuthReturn {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
   error: string | null;
+}
+
+// Mapear roles de Firebase a roles del sistema
+function mapFirebaseRoleToUserRole(firebaseRole: string): UserRole | null {
+  switch (firebaseRole) {
+    case 'translator':
+      return 'translator';
+    // Agregar más roles en el futuro:
+    // case 'admin':
+    //   return 'admin';
+    // case 'editor':
+    //   return 'editor';
+    // case 'viewer':
+    //   return 'viewer';
+    default:
+      return null; // Rol no reconocido
+  }
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -24,23 +43,27 @@ export const useAuth = (): UseAuthReturn => {
 
       // Obtener los datos del usuario y sus permisos
       const userData = await getUserData(user.uid);
-      
+
       // Redirigir según los permisos del usuario
       if (!userData) {
         throw new Error('No se pudieron obtener los datos del usuario');
       }
+
+      // Mapear el rol de Firebase al rol del sistema
+      const userRole = mapFirebaseRoleToUserRole(userData.rol || '');
+
+      // Verificar que el rol sea válido
+      if (!userRole) {
+        throw new Error('Usuario sin rol válido o no autorizado');
+      }
+
+      // Guardar las cookies de sesión con el rol del usuario
+      await setUserSession(userRole, userData.userName || user.email || undefined);
+
       // Determinar la ruta según permisos
-      let redirectPath = '/login'; // Por defecto, volver a login si no tiene permisos
+      let redirectPath = '/'; // La raíz redirigirá automáticamente según el rol
 
-      // if (userData.permissions.canViewTopoquizz) {
-      //   redirectPath = '/topoquizz/content';
-      // } else if (userData.permissions.canViewNeurapp) {
-      //   redirectPath = '/neurapp';
-      // } else if (userData.permissions.translateEnglish) {
-      //   redirectPath = '/topoquizz/translate';
-      // }
-
-      if(userData.rol==="translator"){
+      if(userData.rol === "translator"){
         redirectPath = '/topoquizz/translate';
       }
 
@@ -81,7 +104,12 @@ export const useAuth = (): UseAuthReturn => {
       setLoading(true);
       setError(null);
 
+      // Cerrar sesión en Firebase
       await firebaseLogout();
+
+      // Limpiar las cookies de sesión
+      await clearUserSession();
+
       router.push('/login');
     } catch (err) {
       console.error('Error en logout:', err);

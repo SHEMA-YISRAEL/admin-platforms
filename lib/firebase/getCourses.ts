@@ -38,7 +38,7 @@ function useCourses() {
 			}
 		}
 		fetchCourses()
-	}, [])
+	}, [error])
   return {coursesData, loading, error};
 }
 

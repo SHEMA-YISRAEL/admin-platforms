@@ -1,7 +1,6 @@
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-// import { Button } from "@heroui/react";
 import useLessonsByCourse from "@/lib/firebase/getLessonsByCourse";
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
@@ -35,7 +34,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
   useEffect(() => {
     setLessonsDataFromServer([]);
     methodSetLessonSelected(emptyLesson);
-  }, [courseSelected.id]);
+  }, [courseSelected.id, methodSetLessonSelected]);
 
   useEffect(() => {
     
@@ -49,7 +48,7 @@ const LessonsList: React.FC<ILessonsListType> = ({
     } else {
       setLessonsDataFromServer([]);
     }
-  }, [lessonsData])
+  }, [lessonsData, methodSetLessonSelected, selectedLesson])
 
   return (
     <div className="flex items-center gap-2">

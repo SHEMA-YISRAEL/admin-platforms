@@ -29,7 +29,7 @@ const TranslationsListComponent: React.FC<TranslationsListComponentProps> = ({ l
     } else {
       setDataForList([]);
     }
-  }, [questions])
+  }, [questions,lessonSelected])
 
   if (questionsLoading) {
     return (
