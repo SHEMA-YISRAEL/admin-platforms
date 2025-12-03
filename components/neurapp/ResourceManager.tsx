@@ -13,7 +13,7 @@ interface ResourceManagerProps {
 export default function ResourceManager({ type, id }: ResourceManagerProps) {
   if (!id) {
     return (
-      <Card className="2xl:mx-50 mb-3">
+      <Card className="2xl:mx-40 mb-3">
         <CardBody>
           <p className="text-center text-gray-500 py-4">
             Selecciona una {type === 'lesson' ? 'lección' : 'sublección'} para gestionar sus recursos
@@ -24,7 +24,7 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
   }
 
   return (
-    <div className="2xl:mx-50">
+    <div className="2xl:mx-40">
       <h2 className="text-xl font-bold mb-4">Recursos</h2>
       <Tabs aria-label="Resource Types">
         <Tab key="videos" title="Videos">

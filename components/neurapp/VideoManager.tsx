@@ -112,7 +112,7 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="grid gap-3 grid-cols-2">
+        <div className="grid gap-3 grid-cols-1">
           {videos.map((video) => (
             <Card key={video.id}>
               <CardBody>

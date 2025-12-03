@@ -102,7 +102,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-1">
           {flashcards.map((flashcard) => (
             <Card key={flashcard.id}>
               <CardBody>
