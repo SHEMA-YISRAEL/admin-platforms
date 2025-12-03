@@ -88,7 +88,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
     <div className="mt-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Resúmenes</h3>
-        <Button className="bg-green-600 text-white text-sm" size="sm" onPress={handleCreate}>
+        <Button className="bg-blue-500 text-white text-sm" size="sm" onPress={handleCreate}>
           + Nuevo Resumen
         </Button>
       </div>
@@ -102,7 +102,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="grid gap-3 grid-cols-2">
+        <div className="grid gap-3 grid-cols-1">
           {summaries.map((summary) => (
             <Card key={summary.id}>
               <CardBody>
