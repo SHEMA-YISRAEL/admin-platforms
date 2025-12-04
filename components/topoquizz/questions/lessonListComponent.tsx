@@ -39,7 +39,6 @@ const LessonsList: React.FC<ILessonsListType> = ({
   useEffect(() => {
     
     if (lessonsData.length > 0) {
-      console.log(lessonsData)
       setLessonsDataFromServer(lessonsData);
       // Solo seleccionar automáticamente la primera si no hay ninguna seleccionada
       if (!selectedLesson || !selectedLesson.id) {

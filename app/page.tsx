@@ -19,7 +19,6 @@ export default function Home() {
       }
 
       // Si está autenticado, redirigir según permisos
-      console.log('llega aqui')
       if (canViewTopoquizz) {
         router.push('/topoquizz/content');
       } else if (canViewNeurapp) {

@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(firebaseUser);
           // Obtener datos adicionales del usuario desde Firestore
           const data = await getUserData(firebaseUser.uid);
-          console.log(data)
           setUserData(data);
         } else {
           setUser(null);
