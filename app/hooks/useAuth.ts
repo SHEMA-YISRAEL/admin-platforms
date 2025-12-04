@@ -17,8 +17,8 @@ function mapFirebaseRoleToUserRole(firebaseRole: string): UserRole | null {
     case 'translator':
       return 'translator';
     // Agregar más roles en el futuro:
-    // case 'admin':
-    //   return 'admin';
+    case 'admin':
+      return 'admin';
     // case 'editor':
     //   return 'editor';
     // case 'viewer':
@@ -65,6 +65,10 @@ export const useAuth = (): UseAuthReturn => {
 
       if(userData.rol === "translator"){
         redirectPath = '/topoquizz/translate';
+      }
+
+      if(userData.rol === "admin"){
+        redirectPath = '/topoquizz/content';
       }
 
       // Redirigir a la ruta apropiada

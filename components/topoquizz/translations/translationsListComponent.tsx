@@ -25,7 +25,6 @@ const TranslationsListComponent: React.FC<TranslationsListComponentProps> = ({ l
   useEffect(() => {
     if (questions.length > 0) {
       setDataForList(questions);
-      console.log(lessonSelected)
     } else {
       setDataForList([]);
     }

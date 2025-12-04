@@ -93,15 +93,15 @@ export default function SublessonManager({
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4 2xl:mx-50">
+      <div className="flex justify-between items-center mb-4 2xl:mx-40">
         <h2 className="text-xl font-bold">Sublecciones</h2>
-        <Button className="bg-green-600 text-white text-sm" onPress={handleCreate}>
+        <Button className="bg-blue-500 text-white text-sm" onPress={handleCreate}>
           + Nueva Sublección
         </Button>
       </div>
 
       {sublessons.length === 0 ? (
-        <Card className="2xl:mx-50">
+        <Card className="2xl:mx-40">
           <CardBody>
             <p className="text-center text-gray-500 py-4">
               No hay sublecciones. Crea una nueva sublección para comenzar.
@@ -109,7 +109,7 @@ export default function SublessonManager({
           </CardBody>
         </Card>
       ) : (
-        <div className="grid gap-3 2xl:mx-50">
+        <div className="grid gap-3 2xl:mx-40">
           {sublessons.map((sublesson) => (
             <Card key={sublesson.id} isHoverable>
               <CardBody>

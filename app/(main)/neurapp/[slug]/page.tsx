@@ -5,9 +5,7 @@ import { useMemo, useState } from "react";
 import { Tabs, Tab, Card, CardBody } from "@heroui/react";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import useLessons from "@/app/hooks/neurapp/useLessons";
-import useSublessons from "@/app/hooks/neurapp/useSublessons";
 import LessonManager from "@/components/neurapp/LessonManager";
-import SublessonManager from "@/components/neurapp/SublessonManager";
 import ResourceManager from "@/components/neurapp/ResourceManager";
 
 const colors = [
@@ -38,14 +36,7 @@ export default function CoursePage() {
     useLessons(lessonsEnabled ? courseId : 0);
 
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
-  const [activeView, setActiveView] = useState<'lessons' | 'sublessons'>('lessons');
-
-  const {
-    sublessons,
-    loading: sublessonsLoading,
-    setSublessons,
-    error: sublessonsError
-  } = useSublessons(selectedLesson);
+  const [selectedSublesson, setSelectedSublesson] = useState<number | null>(null);
 
   const currentCourse = materias.find(m => String(m.id) === courseKey);
 
@@ -86,79 +77,62 @@ export default function CoursePage() {
       </Tabs>
 
       {/* Dashboard del Curso */}
-      <div className="mt-6 px-4 bg-gray-300">
-        <Card className="2xl:mx-50 mt-3">
-          <CardBody>
-            <h1 className="text-2xl font-bold mb-2">{currentCourse.title}</h1>
-            {currentCourse.description && (
-              <p className="text-gray-600 mb-4">{currentCourse.description}</p>
-            )}
+      <div className="mt-6 px-4">
+        <Card className="max-w-sm 2xl:mx-40 bg-gray-100  w-full mt-3 rounded-lg shadow-md">
+          <CardBody className="p-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-md text-white font-bold ${colors[courseId % colors.length]}`}
+              >
+                {currentCourse.title?.charAt(0)?.toUpperCase() ?? 'C'}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base font-semibold truncate">{currentCourse.title}</h1>
+                {currentCourse.description && (
+                  <p className="text-sm text-gray-500 mt-1 truncate">{currentCourse.description}</p>
+                )}
+              </div>
+            </div>
           </CardBody>
         </Card>
 
-        {/* Tabs de Lecciones/Sublecciones */}
-        <div className="mt-6">
-          <Tabs
-            className="2xl:mx-50"
-            aria-label="Content Type"
-            selectedKey={activeView}
-            onSelectionChange={(key) => {
-              setActiveView(key as 'lessons' | 'sublessons');
-              if (key === 'lessons') setSelectedLesson(null);
-            }}
-          >
-            <Tab key="lessons" title="Lecciones">
-              <div className="mt-4">
-                {lessonsLoading ? (
-                  <p className="text-center text-gray-500 py-8">Cargando lecciones…</p>
-                ) : lessonsError ? (
-                  <p className="text-center text-red-500 py-8">Error: {lessonsError}</p>
-                ) : !lessons || lessons.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">
-                    No hay lecciones en este curso.
-                  </p>
-                ) : (
-                  <LessonManager
-                    courseId={courseId}
-                    lessons={lessons}
-                    loading={false}
-                    onLessonSelect={setSelectedLesson}
-                    onLessonsChange={setLessons}
-                    selectedLessonId={selectedLesson}
-                  />
-                )}
-              </div>
-            </Tab>
+        {/* Layout de 2 columnas: Lecciones/Sublecciones | Recursos */}
+        <div className="mt-6 grid grid-cols-2 lg:grid-cols-2 gap-6">
+          {/* Columna Izquierda: Lecciones y Sublecciones */}
+          <div>
+            {lessonsLoading ? (
+              <p className="text-center text-gray-500 py-8">Cargando lecciones…</p>
+            ) : lessonsError ? (
+              <p className="text-center text-red-500 py-8">Error: {lessonsError}</p>
+            ) : !lessons || lessons.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">
+                No hay lecciones en este curso.
+              </p>
+            ) : (
+              <LessonManager
+                courseId={courseId}
+                lessons={lessons}
+                loading={false}
+                onLessonSelect={(lessonId) => {
+                  setSelectedLesson(lessonId);
+                  setSelectedSublesson(null); // Reset sublesson when changing lesson
+                }}
+                onLessonsChange={setLessons}
+                selectedLessonId={selectedLesson}
+                onSublessonSelect={setSelectedSublesson}
+                selectedSublessonId={selectedSublesson}
+              />
+            )}
+          </div>
 
-            <Tab key="sublessons" title="Sublecciones" isDisabled={!selectedLesson}>
-              <div className="mt-4">
-                {selectedLesson ? (
-                  sublessonsLoading ? (
-                    <p className="text-center text-gray-500 py-8">Cargando sublecciones…</p>
-                  ) : sublessonsError ? (
-                    <p className="text-center text-red-500 py-8">Error: {sublessonsError}</p>
-                  ) : (
-                    <SublessonManager
-                      lessonId={selectedLesson}
-                      sublessons={sublessons}
-                      loading={false}
-                      onSublessonsChange={setSublessons}
-                    />
-                  )
-                ) : (
-                  <p className="text-center text-gray-500 py-8">Selecciona una lección primero</p>
-                )}
-              </div>
-            </Tab>
-          </Tabs>
-        </div>
-
-        {/* Resource Manager */}
-        <div className="mt-6">
-          <ResourceManager
-            type={activeView === 'lessons' ? 'lesson' : 'sublesson'}
-            id={activeView === 'lessons' ? (selectedLesson ?? null) : (selectedLesson ?? null)}
-          />
+          {/* Columna Derecha: Recursos */}
+          <div>
+            <ResourceManager
+              type={selectedSublesson ? "sublesson" : "lesson"}
+              id={selectedSublesson ?? selectedLesson ?? null}
+            />
+          </div>
         </div>
       </div>
     </div>

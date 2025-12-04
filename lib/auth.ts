@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-export type UserRole = 'translator';
+export type UserRole = 'translator' | 'admin';
 // Roles futuros: 'admin' | 'editor' | 'viewer' | etc.
 
 interface AuthCookies {
@@ -79,7 +79,7 @@ export async function hasAccessToRoute(route: string): Promise<boolean> {
   const rolePermissions: Record<UserRole, string[]> = {
     'translator': ['/topoquizz/translate'],
     // Agregar más roles aquí en el futuro:
-    // 'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/neurapp'],
+    'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/neurapp'],
     // 'editor': ['/topoquizz/content', '/topoquizz/translate'],
     // 'viewer': ['/topoquizz/content']
   };

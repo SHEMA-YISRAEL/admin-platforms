@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Definir los roles disponibles
-type UserRole = 'translator';
+type UserRole = 'translator' | 'admin';
 // Roles futuros: 'admin' | 'editor' | 'viewer' | etc.
 
 // Definir permisos por rol
 const rolePermissions: Record<UserRole, string[]> = {
     'translator': ['/topoquizz/translate'],
+
     // Agregar más roles aquí en el futuro:
-    // 'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/neurapp'],
+    'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/neurapp'],
     // 'editor': ['/topoquizz/content', '/topoquizz/translate'],
     // 'viewer': ['/topoquizz/content']
 };
