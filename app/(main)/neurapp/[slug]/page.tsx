@@ -78,25 +78,6 @@ export default function CoursePage() {
 
       {/* Dashboard del Curso */}
       <div className="mt-6 px-4">
-        <Card className="max-w-sm 2xl:mx-40 bg-gray-100  w-full mt-3 rounded-lg shadow-md">
-          <CardBody className="p-3">
-            <div className="flex items-center gap-3">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-md text-white font-bold ${colors[courseId % colors.length]}`}
-              >
-                {currentCourse.title?.charAt(0)?.toUpperCase() ?? 'C'}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <h1 className="text-base font-semibold truncate">{currentCourse.title}</h1>
-                {currentCourse.description && (
-                  <p className="text-sm text-gray-500 mt-1 truncate">{currentCourse.description}</p>
-                )}
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
         {/* Layout de 2 columnas: Lecciones/Sublecciones | Recursos */}
         <div className="mt-6 grid grid-cols-2 lg:grid-cols-2 gap-6">
           {/* Columna Izquierda: Lecciones y Sublecciones */}
