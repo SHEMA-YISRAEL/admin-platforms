@@ -24,7 +24,7 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
   }
 
   return (
-    <div className="2xl:mx-20">
+    <div>
       <h2 className="text-xl font-bold mb-4">Recursos</h2>
       <Tabs aria-label="Resource Types">
         <Tab key="videos" title="Videos">

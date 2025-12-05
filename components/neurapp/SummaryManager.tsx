@@ -82,8 +82,6 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
       const url = editingSummary ? `${baseUrl}/${editingSummary.id}` : baseUrl;
       const method = editingSummary ? 'PATCH' : 'POST';
 
-      console.log('Saving summary:', { url, method, formData });
-
       const response = await fetch(url, {
         method,
         headers: {

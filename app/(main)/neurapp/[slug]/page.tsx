@@ -3,10 +3,19 @@
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Tabs, Tab, Card, CardBody } from "@heroui/react";
+import { Toaster } from "react-hot-toast";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
-import useLessons from "@/app/hooks/neurapp/useLessons";
+import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
+import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 import LessonManager from "@/components/neurapp/LessonManager";
 import ResourceManager from "@/components/neurapp/ResourceManager";
+import LessonInfoPanel from "@/components/neurapp/LessonInfoPanel";
+import SublessonInfoPanel from "@/components/neurapp/SublessonInfoPanel";
+import LessonModal from "@/components/neurapp/LessonModal";
+import SublessonModal from "@/components/neurapp/SublessonModal";
+
+type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
+type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
 
 const colors = [
   "bg-[#C65444]",
@@ -37,6 +46,12 @@ export default function CoursePage() {
 
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   const [selectedSublesson, setSelectedSublesson] = useState<number | null>(null);
+  const [lessonModalState, setLessonModalState] = useState<EditingLessonState | null>(null);
+  const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
+
+  // Hook para las sublecciones de la lección seleccionada
+  const { sublessons, loading: sublessonsLoading, error: sublessonsError, setSublessons } =
+    useSublessons(selectedLesson);
 
   const currentCourse = materias.find(m => String(m.id) === courseKey);
 
@@ -53,6 +68,7 @@ export default function CoursePage() {
 
   return (
     <div className="flex w-full flex-col mt-4">
+      <Toaster position="top-right" />
       {/* Tabs de Materias */}
       <Tabs
         aria-label="Materias"
@@ -78,8 +94,8 @@ export default function CoursePage() {
 
       {/* Dashboard del Curso */}
       <div className="mt-6 px-4">
-        {/* Layout de 2 columnas: Lecciones/Sublecciones | Recursos */}
-        <div className="mt-6 grid grid-cols-2 lg:grid-cols-2 gap-6">
+        {/* Layout de 2 columnas: Lecciones/Sublecciones | Panel Información + Recursos */}
+        <div className="mt-6 grid grid-cols-2 gap-6">
           {/* Columna Izquierda: Lecciones y Sublecciones */}
           <div>
             {lessonsLoading ? (
@@ -97,18 +113,58 @@ export default function CoursePage() {
                 loading={false}
                 onLessonSelect={(lessonId) => {
                   setSelectedLesson(lessonId);
-                  setSelectedSublesson(null); // Reset sublesson when changing lesson
+                  setSelectedSublesson(null);
                 }}
                 onLessonsChange={setLessons}
                 selectedLessonId={selectedLesson}
                 onSublessonSelect={setSelectedSublesson}
                 selectedSublessonId={selectedSublesson}
+                sublessons={sublessons}
+                sublessonsLoading={sublessonsLoading}
+                sublessonsError={sublessonsError}
+                onSublessonsChange={setSublessons}
               />
             )}
           </div>
 
-          {/* Columna Derecha: Recursos */}
-          <div>
+          {/* Columna Derecha: Panel de Información + Recursos */}
+          <div className="flex flex-col gap-6 2xl:mr-40 2xl:-ml-70">
+            {/* Panel de Información de Lección */}
+            {selectedLesson && !selectedSublesson && (
+              <Card className="shadow-lg">
+                <CardBody>
+                  <LessonInfoPanel
+                    lesson={lessons.find(l => l.id === selectedLesson)!}
+                    onEdit={() => {
+                      setLessonModalState({
+                        type: 'edit',
+                        data: lessons.find(l => l.id === selectedLesson) || null
+                      });
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Panel de Información de Sublección */}
+            {selectedSublesson && (
+              <Card className="shadow-lg">
+                <CardBody>
+                  <SublessonInfoPanel
+                    sublesson={sublessons.find(s => s.id === selectedSublesson)!}
+                    onEdit={() => {
+                      setSublessonModalState({
+                        type: 'edit',
+                        data: sublessons.find(s => s.id === selectedSublesson) || null,
+                        lessonId: selectedLesson!
+                      });
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Recursos */}
             <ResourceManager
               type={selectedSublesson ? "sublesson" : "lesson"}
               id={selectedSublesson ?? selectedLesson ?? null}
@@ -116,6 +172,40 @@ export default function CoursePage() {
           </div>
         </div>
       </div>
+
+      {/* Modal para lecciones */}
+      {lessonModalState && (
+        <LessonModal
+          isOpen={true}
+          onClose={() => setLessonModalState(null)}
+          courseId={courseId}
+          lesson={lessonModalState}
+          lessons={lessons}
+          onSave={(savedLesson: LessonData) => {
+            if (lessonModalState.type === 'edit') {
+              const updatedLessons = lessons.map(l =>
+                l.id === savedLesson.id ? savedLesson : l
+              );
+              setLessons(updatedLessons.sort((a, b) => a.order - b.order));
+            } else {
+              setLessons([...lessons, savedLesson].sort((a, b) => a.order - b.order));
+            }
+          }}
+        />
+      )}
+
+      {/* Modal para sublecciones */}
+      {sublessonModalState && (
+        <SublessonModal
+          isOpen={true}
+          onClose={() => setSublessonModalState(null)}
+          lessonId={sublessonModalState.lessonId}
+          sublesson={sublessonModalState}
+          sublessons={sublessons}
+          onSublessonsChange={setSublessons}
+          onSave={() => {}}
+        />
+      )}
     </div>
   );
 }

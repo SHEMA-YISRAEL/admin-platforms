@@ -82,8 +82,6 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
       const url = editingFlashcard ? `${baseUrl}/${editingFlashcard.id}` : baseUrl;
       const method = editingFlashcard ? 'PATCH' : 'POST';
 
-      console.log('Saving flashcard:', { url, method, formData });
-
       const response = await fetch(url, {
         method,
         headers: {

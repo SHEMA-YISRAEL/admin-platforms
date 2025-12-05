@@ -92,8 +92,6 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
         locale: formData.locale
       };
 
-      console.log('Saving video:', { url, method, payload });
-
       const response = await fetch(url, {
         method,
         headers: {
