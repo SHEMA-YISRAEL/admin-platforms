@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 export interface MateriaData {
     id: number;
     title: string;
+    slug: string;
     description: string | null;
     visibility: boolean;
     professorId: number | null;
@@ -11,6 +12,18 @@ export interface MateriaData {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// Función para generar slugs a partir del título
+function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+        .replace(/[^a-z0-9\s-]/g, '') // Eliminar caracteres especiales
+        .replace(/\s+/g, '-') // Reemplazar espacios con guiones
+        .replace(/-+/g, '-'); // Eliminar guiones duplicados
+}
 
 function useMaterias() {
     const [materias, setMaterias] = useState<MateriaData[]>([]);
@@ -31,8 +44,13 @@ function useMaterias() {
 
                 const data: MateriaData[] = await response.json();
 
-                // Filtrar solo los cursos visibles
-                const visibleCourses = data.filter(materia => materia.visibility === true);
+                // Filtrar solo los cursos visibles y agregar slugs
+                const visibleCourses = data
+                    .filter(materia => materia.visibility === true)
+                    .map(materia => ({
+                        ...materia,
+                        slug: generateSlug(materia.title)
+                    }));
 
                 setMaterias(visibleCourses);
             } catch (err) {
