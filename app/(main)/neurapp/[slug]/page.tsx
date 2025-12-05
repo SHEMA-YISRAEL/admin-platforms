@@ -1,8 +1,8 @@
 'use client';
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Tabs, Tab, Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
 import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
@@ -16,30 +16,24 @@ import SublessonModal from "@/components/neurapp/SublessonModal";
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
 type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
 
-const colors = [
-  "bg-[#C65444]",
-  "bg-[#7396C8]",
-  "bg-[#939D5C]",
-  "bg-[#D17B4C]",
-  "bg-[#D0A44D]",
-];
-
 export default function CoursePage() {
   const params = useParams();
-  const router = useRouter();
 
-  // 1) Normalizar slug y forzar string -> number de forma segura
+  // 1) Normalizar slug
   const slugParam = useMemo(
     () => (Array.isArray(params.slug) ? params.slug[0] : params.slug),
     [params.slug]
   );
-  const courseId = useMemo(() => Number(slugParam), [slugParam]);
-  const courseKey = useMemo(() => String(slugParam ?? ""), [slugParam]);
+  const courseSlug = useMemo(() => String(slugParam ?? ""), [slugParam]);
 
   const { materias, loading: materiasLoading, error: materiasError } = useMaterias();
 
-  // 2) Evitar llamar useLessons con NaN
-  const lessonsEnabled = Number.isFinite(courseId) && courseId > 0;
+  // 2) Buscar materia por slug y obtener su ID
+  const currentCourse = materias.find(m => m.slug === courseSlug);
+  const courseId = currentCourse?.id ?? 0;
+
+  // 3) Evitar llamar useLessons con ID inválido
+  const lessonsEnabled = courseId > 0;
   const { lessons, loading: lessonsLoading, setLessons, error: lessonsError } =
     useLessons(lessonsEnabled ? courseId : 0);
 
@@ -52,8 +46,6 @@ export default function CoursePage() {
   const { sublessons, loading: sublessonsLoading, error: sublessonsError, setSublessons } =
     useSublessons(selectedLesson);
 
-  const currentCourse = materias.find(m => String(m.id) === courseKey);
-
   if (materiasLoading) return <div className="p-8 text-center">Cargando...</div>;
   if (materiasError) return <div className="p-8 text-center text-red-500">Error: {materiasError}</div>;
 
@@ -61,37 +53,16 @@ export default function CoursePage() {
     return <div className="p-8 text-center text-red-500">Curso no encontrado</div>;
   }
 
-  const handleTabChange = (key: React.Key) => {
-    router.push(`/neurapp/${String(key)}`);
-  };
-
   return (
-    <div className="flex w-full flex-col mt-4">
-      {/* Tabs de Materias */}
-      <Tabs
-        aria-label="Materias"
-        className="justify-center mb-0"
-        variant="bordered"
-        classNames={{ tabList: "justify-center bg-black" }}
-        selectedKey={courseKey}
-        onSelectionChange={handleTabChange}
-      >
-        {materias.map((materia, index) => (
-          <Tab
-            key={String(materia.id)}
-            title={
-              <span
-                className={`px-2 py-2 text-gray-50 hover:bg-gray-400 hover:text-white font-bold rounded-lg ${colors[index % colors.length]}`}
-              >
-                {materia.title}
-              </span>
-            }
-          />
-        ))}
-      </Tabs>
+    <div className="flex w-full flex-col px-4">
 
       {/* Dashboard del Curso */}
-      <div className="mt-6 px-4">
+      <div className="mt-4">
+        {/* Título de la Materia */}
+        <div className="mb-6 2xl:ml-40">
+          <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
+        </div>
+
         {/* Layout de 2 columnas: Lecciones/Sublecciones | Panel Información + Recursos */}
         <div className="mt-6 grid grid-cols-2 gap-6">
           {/* Columna Izquierda: Lecciones y Sublecciones */}

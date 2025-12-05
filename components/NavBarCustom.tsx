@@ -1,10 +1,10 @@
 'use client'
 
-import { 
-	User, 
+import {
+	User,
 	Dropdown,
-	DropdownTrigger, 
-	DropdownMenu, 
+	DropdownTrigger,
+	DropdownMenu,
 	DropdownItem,
 	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent
 } from "@heroui/react";
@@ -15,11 +15,13 @@ import { FaAngleDown } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 import { FaBook } from "react-icons/fa";
+import { BiSolidBookContent } from "react-icons/bi";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/interfaces/topoquizz";
+import useMaterias from "@/app/hooks/neurapp/useMaterias";
 // import { usePermissions } from "@/app/hooks/usePermissions";
 
 
@@ -67,10 +69,14 @@ const UserMenu: React.FC<UserMenu> = ( {userData}) =>{
 }
 
 const NavBarCustom = () => {
-	
+
 	const pathname = usePathname()
 	const router = useRouter()
 	const { userData } = useAuthContext();
+
+	// Solo cargar materias si el usuario es admin
+	const shouldLoadMaterias = userData?.rol === "admin";
+	const { materias, loading: loadingMaterias } = useMaterias();
 
 	return (
 		<Navbar className="bg-black p-5 text-white font-bold">
@@ -132,16 +138,70 @@ const NavBarCustom = () => {
             }
           </DropdownMenu>
 				</Dropdown>
-				
+
 				{
-					userData?.rol==="admin"?
-						<NavbarItem>
-							<Link aria-current="page" color="secondary" href="/neurapp" 
-								className={`${pathname.includes('/neurapp')?"text-amber-400":""}`}
+					userData?.rol === "admin" ? (
+						<Dropdown>
+							<NavbarItem>
+								<DropdownTrigger>
+									<Button
+										disableRipple
+										className={`p-0 bg-transparent data-[hover=true]:bg-transparent text-1xl font-bold
+											px-2 ${pathname.includes('/neurapp') ? "text-amber-400" : ""}`}
+										endContent={<FaAngleDown />}
+										radius="sm"
+										color="secondary"
+									>
+										NeurApp
+									</Button>
+								</DropdownTrigger>
+							</NavbarItem>
+							<DropdownMenu
+								aria-label="neurapp options"
+								itemClasses={{
+									base: "gap-4",
+								}}
 							>
-								NeurApp
-							</Link>
-						</NavbarItem> :<></>
+								<DropdownItem
+									key="materias-header"
+									description="Seleccionar materia"
+									startContent={<FaBook />}
+									showDivider
+									isReadOnly
+									className="cursor-default opacity-100"
+								>
+									<span className="font-bold">Materias</span>
+								</DropdownItem>
+								{loadingMaterias ? (
+									<DropdownItem key="loading" isReadOnly>
+										Cargando materias...
+									</DropdownItem>
+								) : (
+									<>
+										{materias.map((materia) => (
+											<DropdownItem
+												key={materia.slug}
+												className="pl-8"
+												onClick={() => router.push(`/neurapp/${materia.slug}`)}
+											>
+												{materia.title}
+											</DropdownItem>
+										))}
+									</>
+								)}
+								<DropdownItem
+									key="contenido"
+									description="Gestión de contenido de NeurApp"
+									startContent={<BiSolidBookContent />}
+									onClick={() => router.push('/neurapp/content')}
+									showDivider
+									className="mt-2"
+								>
+									Contenido
+								</DropdownItem>
+							</DropdownMenu>
+						</Dropdown>
+					) : <></>
 				}
 
 			</NavbarContent>
