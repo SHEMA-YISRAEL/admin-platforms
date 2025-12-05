@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip } from "@heroui/react";
-import toast from "react-hot-toast";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip, addToast } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -124,10 +123,10 @@ export default function SublessonModal({
           s.id === savedSublesson.id ? savedSublesson : s
         );
         onSublessonsChange(updatedSublessons.sort((a, b) => a.order - b.order));
-        toast.success('Sublección actualizada exitosamente');
+        addToast({ title: 'Sublección actualizada exitosamente', color: 'success' });
       } else {
         onSublessonsChange([...sublessons, savedSublesson].sort((a, b) => a.order - b.order));
-        toast.success('Sublección creada exitosamente');
+        addToast({ title: 'Sublección creada exitosamente', color: 'success' });
       }
 
       onSave();
@@ -136,7 +135,7 @@ export default function SublessonModal({
       console.error('Error saving sublesson:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar';
       setErrors({ general: errorMessage });
-      toast.error(`Error: ${errorMessage}`);
+      addToast({ title: 'Error', description: errorMessage, color: 'danger' });
     } finally {
       setSaving(false);
     }
