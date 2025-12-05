@@ -3,7 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Tabs, Tab, Card, CardBody } from "@heroui/react";
-import { Toaster } from "react-hot-toast";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
 import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
@@ -68,7 +67,6 @@ export default function CoursePage() {
 
   return (
     <div className="flex w-full flex-col mt-4">
-      <Toaster position="top-right" />
       {/* Tabs de Materias */}
       <Tabs
         aria-label="Materias"

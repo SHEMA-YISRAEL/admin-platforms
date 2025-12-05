@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip } from "@heroui/react";
-import toast from "react-hot-toast";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip, addToast } from "@heroui/react";
 import { LessonData } from "@/app/hooks/neurapp/useLessons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -118,9 +117,9 @@ export default function LessonModal({
       const savedLesson = await response.json();
 
       if (lesson.type === 'edit') {
-        toast.success('Lección actualizada exitosamente');
+        addToast({ title: 'Lección actualizada exitosamente', color: 'success' });
       } else {
-        toast.success('Lección creada exitosamente');
+        addToast({ title: 'Lección creada exitosamente', color: 'success' });
       }
 
       onSave(savedLesson);
@@ -129,7 +128,7 @@ export default function LessonModal({
       console.error('Error saving lesson:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar';
       setErrors({ general: errorMessage });
-      toast.error(`Error: ${errorMessage}`);
+      addToast({ title: 'Error', description: errorMessage, color: 'danger' });
     } finally {
       setSaving(false);
     }
