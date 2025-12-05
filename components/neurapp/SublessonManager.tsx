@@ -50,8 +50,8 @@ export default function SublessonManager({
   const handleSave = async () => {
     try {
       const url = editingSublesson
-        ? `${API_BASE_URL}/lesson/${lessonId}/sublessons/${editingSublesson.id}`
-        : `${API_BASE_URL}/lesson/${lessonId}/sublesson`;
+        ? `${API_BASE_URL}/lessons/${lessonId}/sublessons/${editingSublesson.id}`
+        : `${API_BASE_URL}/lessons/${lessonId}/sublessons`;
 
       const method = editingSublesson ? 'PATCH' : 'POST';
 
