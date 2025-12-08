@@ -157,8 +157,9 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="flex-1 overflow-auto rounded-lg bg-white shadow-sm border border-gray-200">
-          <table className="min-w-full bg-white text-xs">
+        <div className="rounded-lg bg-white shadow-sm border border-gray-200">
+          <div className="max-h-[400px] overflow-y-auto">
+            <table className="min-w-full bg-white text-xs">
             <thead className="bg-gradient-to-r from-teal-500 to-teal-600 text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
@@ -198,6 +199,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
