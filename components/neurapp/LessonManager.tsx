@@ -139,58 +139,60 @@ export default function LessonManager({
           </CardBody>
         </Card>
       ) : (
-        <div className="flex-1 overflow-auto rounded-lg bg-white shadow-md border border-gray-200">
-          <table className="min-w-full bg-white 2xl:text-base text-sm">
-            <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {lessons.map((lesson) => (
-                <Fragment key={lesson.id}>
-                  <tr
-                    className={`hover:bg-blue-50/50 transition-colors cursor-pointer ${
-                      selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
-                    }`}
-                    onClick={() => {
-                      if (selectedLessonId === lesson.id) {
-                        onLessonSelect(null);
-                      } else {
-                        onLessonSelect(lesson.id);
-                      }
-                    }}
-                  >
-                    <td className="px-3 py-2 text-gray-700">
-                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
-                        {lesson.order}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-xs">
-                          {selectedLessonId === lesson.id ? '▼' : '▶'}
+        <div className="rounded-lg bg-white shadow-md border border-gray-200">
+          <div className="max-h-[600px] overflow-y-auto">
+            <table className="min-w-full bg-white 2xl:text-base text-sm">
+              <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 z-10">
+                <tr>
+                  <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
+                  <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {lessons.map((lesson) => (
+                  <Fragment key={lesson.id}>
+                    <tr
+                      className={`hover:bg-blue-50/50 transition-colors cursor-pointer ${
+                        selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
+                      }`}
+                      onClick={() => {
+                        if (selectedLessonId === lesson.id) {
+                          onLessonSelect(null);
+                        } else {
+                          onLessonSelect(lesson.id);
+                        }
+                      }}
+                    >
+                      <td className="px-3 py-2 text-gray-700">
+                        <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                          {lesson.order}
                         </span>
-                        {lesson.title}
-                      </div>
-                    </td>
-                  </tr>
-                  {selectedLessonId === lesson.id && (
-                    <SublessonRow
-                      lessonId={selectedLessonId}
-                      onSublessonSelect={onSublessonSelect}
-                      selectedSublessonId={selectedSublessonId}
-                      sublessons={sublessons}
-                      loading={sublessonsLoading}
-                      error={sublessonsError}
-                      onSublessonsChange={onSublessonsChange}
-                    />
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-xs">
+                            {selectedLessonId === lesson.id ? '▼' : '▶'}
+                          </span>
+                          {lesson.title}
+                        </div>
+                      </td>
+                    </tr>
+                    {selectedLessonId === lesson.id && (
+                      <SublessonRow
+                        lessonId={selectedLessonId}
+                        onSublessonSelect={onSublessonSelect}
+                        selectedSublessonId={selectedSublessonId}
+                        sublessons={sublessons}
+                        loading={sublessonsLoading}
+                        error={sublessonsError}
+                        onSublessonsChange={onSublessonsChange}
+                      />
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

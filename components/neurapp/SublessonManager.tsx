@@ -70,7 +70,7 @@ export default function SublessonManager({
       ) : (
         <div className="overflow-auto rounded-lg bg-white shadow-sm border border-gray-200">
           <table className="min-w-full bg-white text-xs 2xl:text-sm">
-            <thead className="bg-gradient-to-r from-green-500 to-green-600 text-white sticky top-0 z-10">
+            <thead className="bg-gradient-to-r from-green-500 to-green-600 text-white sticky top-0">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
