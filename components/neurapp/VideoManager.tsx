@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
+import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -16,7 +17,13 @@ interface VideoManagerProps {
 export default function VideoManager({ type, id }: VideoManagerProps) {
   const { videos, loading, setVideos } = useVideos(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenDeleteModal,
+    onOpen: onOpenDeleteModal,
+    onClose: onCloseDeleteModal
+  } = useDisclosure();
   const [editingVideo, setEditingVideo] = useState<VideoData | null>(null);
+  const [deletingVideo, setDeletingVideo] = useState<VideoData | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -52,6 +59,55 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
     setErrors({});
     setSuccessMessage(null);
     onOpen();
+  };
+
+  const openDeleteModal = (video: VideoData) => {
+    setDeletingVideo(video);
+    onOpenDeleteModal();
+  }
+
+  const handleDelete = async () => {
+    if (!deletingVideo) return;
+
+    try {
+      const url = `${API_BASE_URL}/videos/${deletingVideo.id}`;
+      const method = 'DELETE';
+
+      const payload = {
+        id: deletingVideo.id
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        }
+        );
+        throw new Error(`Error ${response.status}: ${response.statusText}\n${errorText}`);
+      }
+
+      const updatedVideos = videos.filter(v =>
+        v.id !== deletingVideo.id
+      );
+      setVideos(updatedVideos);
+      setSuccessMessage('Video eliminado exitosamente');
+
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+    } catch (error) {
+      setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
+    }
+    onCloseDeleteModal();
   };
 
   const validateForm = () => {
@@ -148,15 +204,15 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
   return (
     <div className="h-full flex flex-col mt-4">
       {/* Header */}
-        <div className="flex items-end justify-end p-3 mb-2">
-          <Button
-            className="bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm"
-            onPress={handleCreate}
-            size="sm"
-          >
-            + Nuevo Video
-          </Button>
-        </div>
+      <div className="flex items-end justify-end p-3 mb-2">
+        <Button
+          className="bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm"
+          onPress={handleCreate}
+          size="sm"
+        >
+          + Nuevo Video
+        </Button>
+      </div>
 
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
@@ -228,6 +284,14 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
                       onPress={() => handleEdit(video)}
                     >
                       Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      onPress={() => openDeleteModal(video)}
+                    >
+                      Borrar
                     </Button>
                   </td>
                 </tr>
@@ -320,6 +384,13 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <DeleteModal onClick={handleDelete}
+        onClose={onCloseDeleteModal}
+        isOpen={isOpenDeleteModal}
+        dataName={deletingVideo ? deletingVideo.title : ''}
+        dataType={'video'}>
+      </DeleteModal>
     </div>
   );
 }
