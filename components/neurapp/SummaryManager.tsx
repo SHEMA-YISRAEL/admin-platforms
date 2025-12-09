@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
+import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
 
@@ -24,6 +25,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const handleCreate = () => {
     setEditingSummary(null);
@@ -66,6 +68,16 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCopyUrl = async (summaryId: number, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(summaryId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -126,18 +138,15 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
   return (
     <div className="h-full flex flex-col mt-4">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">Resúmenes</h3>
+        <div className="flex items-end justify-end p-3 mb-2">
           <Button
-            className="bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm"
+            className="bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm"
             onPress={handleCreate}
             size="sm"
           >
             + Nuevo Resumen
           </Button>
         </div>
-      </div>
 
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
@@ -157,13 +166,12 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="rounded-lg bg-white shadow-sm border border-gray-200">
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="min-w-full bg-white text-xs">
-            <thead className="bg-gradient-to-r from-teal-500 to-teal-600 text-white sticky top-0 z-10">
+        <div className="flex-1 overflow-auto rounded-lg bg-white shadow-sm border border-gray-200">
+          <table className="min-w-full bg-white text-xs">
+            <thead className="bg-gradient-to-r from-teal-400 to-teal-500 text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Archivo</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Archivo</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -177,8 +185,21 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
                     {summary.title}
                   </td>
-                  <td className="px-3 py-2 text-gray-600 max-w-md">
-                    <span className="line-clamp-1 text-xs">{summary.urlFile}</span>
+                  <td className="px-3 py-2 text-center">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      className={copiedId === summary.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                      onPress={() => handleCopyUrl(summary.id, summary.urlFile)}
+                      title={copiedId === summary.id ? "¡Copiado!" : "Copiar URL"}
+                    >
+                      {copiedId === summary.id ? (
+                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                      ) : (
+                        <ClipboardIcon className="h-4 w-4" />
+                      )}
+                    </Button>
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -199,7 +220,6 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
       )}
 
@@ -219,7 +239,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="Título"
                 placeholder="Título del resumen"
                 value={formData.title}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, title: e.target.value });
                   if (errors.title) setErrors({ ...errors, title: '' });
                 }}
@@ -245,7 +265,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="URL del Archivo"
                 placeholder="URL del archivo del resumen (generada automáticamente)"
                 value={formData.urlFile}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, urlFile: e.target.value });
                   if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                 }}
@@ -259,7 +279,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"
                 value={formData.locale}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, locale: e.target.value });
                   if (errors.locale) setErrors({ ...errors, locale: '' });
                 }}

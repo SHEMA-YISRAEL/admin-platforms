@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardBody } from "@heroui/react";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
@@ -45,6 +45,13 @@ export default function CoursePage() {
   // Hook para las sublecciones de la lección seleccionada
   const { sublessons, loading: sublessonsLoading, error: sublessonsError, setSublessons } =
     useSublessons(selectedLesson);
+
+  // Selection of first lesson by default at LessonManager.tsx
+  useEffect(() => {
+    if (lessons.length > 0 && selectedLesson === null) {
+      setSelectedLesson(lessons[0].id);
+    }
+  }, [lessons, selectedLesson]);
 
   if (materiasLoading) return <div className="p-8 text-center">Cargando...</div>;
   if (materiasError) return <div className="p-8 text-center text-red-500">Error: {materiasError}</div>;

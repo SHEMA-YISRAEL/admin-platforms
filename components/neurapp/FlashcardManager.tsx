@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
+import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
 import FileUploader from "./FileUploader";
 
@@ -24,6 +25,8 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedSide, setCopiedSide] = useState<'obverse' | 'reverse' | null>(null);
 
   const handleCreate = () => {
     setEditingFlashcard(null);
@@ -66,6 +69,20 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCopyUrl = async (flashcardId: number, url: string, side: 'obverse' | 'reverse') => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(flashcardId);
+      setCopiedSide(side);
+      setTimeout(() => {
+        setCopiedId(null);
+        setCopiedSide(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -126,18 +143,15 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
   return (
     <div className="h-full flex flex-col mt-4">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">Flashcards</h3>
+        <div className="flex items-end justify-end p-3 mb-2">
           <Button
-            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-sm"
+            className="bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-sm"
             onPress={handleCreate}
             size="sm"
           >
             + Nueva Flashcard
           </Button>
         </div>
-      </div>
 
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
@@ -157,13 +171,12 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
           </CardBody>
         </Card>
       ) : (
-        <div className="rounded-lg bg-white shadow-sm border border-gray-200">
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="min-w-full bg-white text-xs">
-            <thead className="bg-gradient-to-r from-purple-500 to-purple-600 text-white sticky top-0 z-10">
+        <div className="flex-1 overflow-auto rounded-lg bg-white shadow-sm border border-gray-200">
+          <table className="min-w-full bg-white text-xs">
+            <thead className="bg-gradient-to-r from-purple-400 to-purple-500 text-white sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Anverso</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Reverso</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Anverso</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Reverso</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -174,11 +187,37 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                   key={flashcard.id}
                   className="hover:bg-purple-50/50 transition-colors"
                 >
-                  <td className="px-3 py-2 text-gray-700 max-w-xs">
-                    <span className="line-clamp-1 text-xs">{flashcard.obverse_side_url}</span>
+                  <td className="px-3 py-2 text-center">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      className={copiedId === flashcard.id && copiedSide === 'obverse' ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                      onPress={() => handleCopyUrl(flashcard.id, flashcard.obverse_side_url, 'obverse')}
+                      title={copiedId === flashcard.id && copiedSide === 'obverse' ? "¡Copiado!" : "Copiar URL Anverso"}
+                    >
+                      {copiedId === flashcard.id && copiedSide === 'obverse' ? (
+                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                      ) : (
+                        <ClipboardIcon className="h-4 w-4" />
+                      )}
+                    </Button>
                   </td>
-                  <td className="px-3 py-2 text-gray-700 max-w-xs">
-                    <span className="line-clamp-1 text-xs">{flashcard.reverse_side_url}</span>
+                  <td className="px-3 py-2 text-center">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      className={copiedId === flashcard.id && copiedSide === 'reverse' ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                      onPress={() => handleCopyUrl(flashcard.id, flashcard.reverse_side_url, 'reverse')}
+                      title={copiedId === flashcard.id && copiedSide === 'reverse' ? "¡Copiado!" : "Copiar URL Reverso"}
+                    >
+                      {copiedId === flashcard.id && copiedSide === 'reverse' ? (
+                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                      ) : (
+                        <ClipboardIcon className="h-4 w-4" />
+                      )}
+                    </Button>
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -199,7 +238,6 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
       )}
 
@@ -232,7 +270,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="URL Anverso"
                 placeholder="URL de la imagen del anverso (generada automáticamente)"
                 value={formData.obverse_side_url}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, obverse_side_url: e.target.value });
                   if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                 }}
@@ -259,7 +297,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="URL Reverso"
                 placeholder="URL de la imagen del reverso (generada automáticamente)"
                 value={formData.reverse_side_url}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, reverse_side_url: e.target.value });
                   if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                 }}
@@ -273,7 +311,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"
                 value={formData.locale}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, locale: e.target.value });
                   if (errors.locale) setErrors({ ...errors, locale: '' });
                 }}

@@ -105,9 +105,7 @@ export default function LessonManager({
   return (
     <div className="h-full flex flex-col 2xl:ml-40 2xl:mr-80">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">Lecciones del Curso</h2>
+        <div className="flex items-end justify-end p-3 mb-2">
           <Button
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm"
             onPress={handleCreate}
@@ -116,7 +114,6 @@ export default function LessonManager({
             + Nueva Lección
           </Button>
         </div>
-      </div>
       {error && (
         <div className="flex-shrink-0 mb-3">
           <Card className="border-yellow-500 border-2">
@@ -139,42 +136,41 @@ export default function LessonManager({
           </CardBody>
         </Card>
       ) : (
-        <div className="rounded-lg bg-white shadow-md border border-gray-200">
-          <div className="max-h-[600px] overflow-y-auto">
-            <table className="min-w-full bg-white 2xl:text-base text-sm">
-              <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 z-10">
-                <tr>
-                  <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
-                  <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {lessons.map((lesson) => (
-                  <Fragment key={lesson.id}>
-                    <tr
-                      className={`hover:bg-blue-50/50 transition-colors cursor-pointer ${
-                        selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
-                      }`}
-                      onClick={() => {
-                        if (selectedLessonId === lesson.id) {
-                          onLessonSelect(null);
-                        } else {
-                          onLessonSelect(lesson.id);
-                        }
-                      }}
-                    >
-                      <td className="px-3 py-2 text-gray-700">
-                        <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
-                          {lesson.order}
+        <div className="flex-1 overflow-auto rounded-lg bg-white shadow-md border border-gray-200">
+          <table className="min-w-full bg-white 2xl:text-base text-sm">
+            <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 z-10">
+              <tr>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">LECCIONES</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {lessons.map((lesson) => (
+                <Fragment key={lesson.id}>
+                  <tr
+                    className={`hover:bg-blue-50/50 transition-colors cursor-pointer ${
+                      selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
+                    }`}
+                    onClick={() => {
+                      if (selectedLessonId === lesson.id) {
+                        onLessonSelect(null);
+                      } else {
+                        onLessonSelect(lesson.id);
+                      }
+                    }}
+                  >
+                    <td className="px-3 py-2 text-gray-700">
+                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                        {lesson.order}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 text-xs">
+                          {selectedLessonId === lesson.id ? '▼' : '▶'}
                         </span>
-                      </td>
-                      <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs">
-                            {selectedLessonId === lesson.id ? '▼' : '▶'}
-                          </span>
-                          {lesson.title}
-                        </div>
+                        {lesson.title}
+                      </div>
                       </td>
                     </tr>
                     {selectedLessonId === lesson.id && (
@@ -192,7 +188,6 @@ export default function LessonManager({
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       )}
 
