@@ -238,6 +238,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
