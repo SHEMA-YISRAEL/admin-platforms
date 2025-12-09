@@ -169,25 +169,32 @@ export default function LessonManager({
                         <span className="text-gray-400 text-xs">
                           {selectedLessonId === lesson.id ? '▼' : '▶'}
                         </span>
-                        {lesson.title}
-                      </div>
-                    </td>
-                  </tr>
-                  {selectedLessonId === lesson.id && (
-                    <SublessonRow
-                      lessonId={selectedLessonId}
-                      onSublessonSelect={onSublessonSelect}
-                      selectedSublessonId={selectedSublessonId}
-                      sublessons={sublessons}
-                      loading={sublessonsLoading}
-                      error={sublessonsError}
-                      onSublessonsChange={onSublessonsChange}
-                    />
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-xs">
+                            {selectedLessonId === lesson.id ? '▼' : '▶'}
+                          </span>
+                          {lesson.title}
+                        </div>
+                      </td>
+                    </tr>
+                    {selectedLessonId === lesson.id && (
+                      <SublessonRow
+                        lessonId={selectedLessonId}
+                        onSublessonSelect={onSublessonSelect}
+                        selectedSublessonId={selectedSublessonId}
+                        sublessons={sublessons}
+                        loading={sublessonsLoading}
+                        error={sublessonsError}
+                        onSublessonsChange={onSublessonsChange}
+                      />
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
