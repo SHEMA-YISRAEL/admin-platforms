@@ -105,9 +105,7 @@ export default function LessonManager({
   return (
     <div className="h-full flex flex-col 2xl:ml-40 2xl:mr-80">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">Lecciones del Curso</h2>
+        <div className="flex items-end justify-end p-3 mb-2">
           <Button
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm"
             onPress={handleCreate}
@@ -116,7 +114,6 @@ export default function LessonManager({
             + Nueva Lección
           </Button>
         </div>
-      </div>
       {error && (
         <div className="flex-shrink-0 mb-3">
           <Card className="border-yellow-500 border-2">
@@ -144,7 +141,7 @@ export default function LessonManager({
             <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">LECCIONES</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

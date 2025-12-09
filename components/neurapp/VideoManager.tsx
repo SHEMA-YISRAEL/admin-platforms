@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
+import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 
@@ -25,6 +26,7 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const handleCreate = () => {
     setEditingVideo(null);
@@ -69,6 +71,16 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCopyUrl = async (videoId: number, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(videoId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -136,18 +148,15 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
   return (
     <div className="h-full flex flex-col mt-4">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">Videos</h3>
+        <div className="flex items-end justify-end p-3 mb-2">
           <Button
-            className="bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm"
+            className="bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm"
             onPress={handleCreate}
             size="sm"
           >
             + Nuevo Video
           </Button>
         </div>
-      </div>
 
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
@@ -169,10 +178,10 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
       ) : (
         <div className="flex-1 overflow-auto rounded-lg bg-white shadow-sm border border-gray-200">
           <table className="min-w-full bg-white text-xs">
-            <thead className="bg-gradient-to-r from-red-500 to-red-600 text-white sticky top-0 z-10">
+            <thead className="bg-gradient-to-r from-red-400 to-red-500 text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">URL</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Video</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Duración</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
@@ -187,8 +196,21 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
                     {video.title}
                   </td>
-                  <td className="px-3 py-2 text-gray-600 max-w-md">
-                    <span className="line-clamp-1 text-xs">{video.url}</span>
+                  <td className="px-3 py-2 text-center">
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      isIconOnly
+                      className={copiedId === video.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                      onPress={() => handleCopyUrl(video.id, video.url)}
+                      title={copiedId === video.id ? "¡Copiado!" : "Copiar URL"}
+                    >
+                      {copiedId === video.id ? (
+                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                      ) : (
+                        <ClipboardIcon className="h-4 w-4" />
+                      )}
+                    </Button>
                   </td>
                   <td className="px-3 py-2 text-center text-gray-600">
                     {video.duration ? `${video.duration}s` : '-'}

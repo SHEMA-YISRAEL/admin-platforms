@@ -73,7 +73,7 @@ export default function SublessonManager({
             <thead className="bg-gradient-to-r from-green-500 to-green-600 text-white sticky top-0 z-10">
               <tr>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">#</th>
-                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Sublecciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
