@@ -169,14 +169,8 @@ export default function LessonManager({
                         <span className="text-gray-400 text-xs">
                           {selectedLessonId === lesson.id ? '▼' : '▶'}
                         </span>
-                      </td>
-                      <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs">
-                            {selectedLessonId === lesson.id ? '▼' : '▶'}
-                          </span>
-                          {lesson.title}
-                        </div>
+                        {lesson.title}
+                      </div>
                       </td>
                     </tr>
                     {selectedLessonId === lesson.id && (
@@ -194,7 +188,6 @@ export default function LessonManager({
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       )}
 

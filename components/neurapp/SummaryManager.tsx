@@ -220,7 +220,6 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
       )}
 

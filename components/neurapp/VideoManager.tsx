@@ -234,7 +234,6 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
       )}
 
