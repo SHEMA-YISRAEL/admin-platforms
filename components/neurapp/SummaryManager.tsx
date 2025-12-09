@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
+import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -22,6 +23,12 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
     urlFile: '',
     locale: 'es'
   });
+  const {
+    isOpen: isOpenDeleteModal,
+    onOpen: onOpenDeleteModal,
+    onClose: onCloseDeleteModal
+  } = useDisclosure();
+  const [deletingSummary, setDeletingSummary] = useState<SummaryData | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -49,6 +56,55 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
     setErrors({});
     setSuccessMessage(null);
     onOpen();
+  };
+
+  const openDeleteModal = (summary: SummaryData) => {
+    setDeletingSummary(summary);
+    onOpenDeleteModal();
+  }
+
+  const handleDelete = async () => {
+    if (!deletingSummary) return;
+
+    try {
+      const url = `${API_BASE_URL}/summaries/${deletingSummary.id}`;
+      const method = 'DELETE';
+
+      const payload = {
+        id: deletingSummary.id
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        }
+        );
+        throw new Error(`Error ${response.status}: ${response.statusText}\n${errorText}`);
+      }
+
+      const updatedSummaries = summaries.filter(s =>
+        s.id !== deletingSummary.id
+      );
+      setSummaries(updatedSummaries);
+      setSuccessMessage('Resumen eliminado exitosamente');
+
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+    } catch (error) {
+      setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
+    }
+    onCloseDeleteModal();
   };
 
   const validateForm = () => {
@@ -138,15 +194,15 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
   return (
     <div className="h-full flex flex-col mt-4">
       {/* Header */}
-        <div className="flex items-end justify-end p-3 mb-2">
-          <Button
-            className="bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm"
-            onPress={handleCreate}
-            size="sm"
-          >
-            + Nuevo Resumen
-          </Button>
-        </div>
+      <div className="flex items-end justify-end p-3 mb-2">
+        <Button
+          className="bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm"
+          onPress={handleCreate}
+          size="sm"
+        >
+          + Nuevo Resumen
+        </Button>
+      </div>
 
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
@@ -214,6 +270,14 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                       onPress={() => handleEdit(summary)}
                     >
                       Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      onPress={() => openDeleteModal(summary)}
+                    >
+                      Borrar
                     </Button>
                   </td>
                 </tr>
@@ -299,6 +363,13 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <DeleteModal onClick={handleDelete}
+        onClose={onCloseDeleteModal}
+        isOpen={isOpenDeleteModal}
+        dataName={deletingSummary ? deletingSummary.title : ''}
+        dataType={'resumen'}>
+      </DeleteModal>
     </div>
   );
 }
