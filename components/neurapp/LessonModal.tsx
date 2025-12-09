@@ -151,7 +151,7 @@ export default function LessonModal({
             label="Título"
             placeholder="Título de la lección"
             value={formData.title}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setFormData({ ...formData, title: e.target.value });
               if (errors.title) setErrors({ ...errors, title: '' });
             }}
@@ -164,7 +164,7 @@ export default function LessonModal({
             label="Descripción"
             placeholder="Descripción de la lección (opcional)"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
             minRows={3}
           />
 
@@ -174,7 +174,7 @@ export default function LessonModal({
               label="Orden"
               placeholder="Orden de la lección"
               value={formData.order.toString()}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFormData({ ...formData, order: parseInt(e.target.value) || 1 });
                 if (errors.order) setErrors({ ...errors, order: '' });
               }}

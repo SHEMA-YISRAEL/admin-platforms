@@ -253,7 +253,7 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
                 label="Título"
                 placeholder="Título del video"
                 value={formData.title}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, title: e.target.value });
                   if (errors.title) setErrors({ ...errors, title: '' });
                 }}
@@ -279,7 +279,7 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
                 label="URL"
                 placeholder="URL del video (generada automáticamente)"
                 value={formData.url}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, url: e.target.value });
                   if (errors.url) setErrors({ ...errors, url: '' });
                 }}
@@ -294,13 +294,13 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
                 label="Duración (segundos)"
                 placeholder="Duración en segundos (opcional)"
                 value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, duration: e.target.value })}
               />
               <Input
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"
                 value={formData.locale}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, locale: e.target.value });
                   if (errors.locale) setErrors({ ...errors, locale: '' });
                 }}

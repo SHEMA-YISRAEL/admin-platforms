@@ -239,7 +239,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="Título"
                 placeholder="Título del resumen"
                 value={formData.title}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, title: e.target.value });
                   if (errors.title) setErrors({ ...errors, title: '' });
                 }}
@@ -265,7 +265,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="URL del Archivo"
                 placeholder="URL del archivo del resumen (generada automáticamente)"
                 value={formData.urlFile}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, urlFile: e.target.value });
                   if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                 }}
@@ -279,7 +279,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"
                 value={formData.locale}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, locale: e.target.value });
                   if (errors.locale) setErrors({ ...errors, locale: '' });
                 }}

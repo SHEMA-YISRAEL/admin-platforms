@@ -270,7 +270,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="URL Anverso"
                 placeholder="URL de la imagen del anverso (generada automáticamente)"
                 value={formData.obverse_side_url}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, obverse_side_url: e.target.value });
                   if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                 }}
@@ -297,7 +297,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="URL Reverso"
                 placeholder="URL de la imagen del reverso (generada automáticamente)"
                 value={formData.reverse_side_url}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, reverse_side_url: e.target.value });
                   if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                 }}
@@ -311,7 +311,7 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"
                 value={formData.locale}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, locale: e.target.value });
                   if (errors.locale) setErrors({ ...errors, locale: '' });
                 }}
