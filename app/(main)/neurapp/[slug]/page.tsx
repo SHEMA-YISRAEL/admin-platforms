@@ -46,7 +46,7 @@ export default function CoursePage() {
   const { sublessons, loading: sublessonsLoading, error: sublessonsError, setSublessons } =
     useSublessons(selectedLesson);
 
-  // Seleccionar automáticamente la primera lección cuando las lecciones se cargan
+  // Selection of first lesson by default at LessonManager.tsx
   useEffect(() => {
     if (lessons.length > 0 && selectedLesson === null) {
       setSelectedLesson(lessons[0].id);
