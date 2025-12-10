@@ -25,7 +25,6 @@ interface LessonManagerProps {
   onSublessonsChange: (sublessons: SublessonData[]) => void;
 }
 
-// Componente wrapper para renderizar sublecciones en una fila de tabla
 function SublessonRow({
   lessonId,
   onSublessonSelect,

@@ -70,41 +70,28 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
     if (!deletingVideo) return;
 
     try {
-      const url = `${API_BASE_URL}/videos/${deletingVideo.id}`;
-      const method = 'DELETE';
-
-      const payload = {
-        id: deletingVideo.id
-      };
-
-      const response = await fetch(url, {
-        method,
+      // Delete from backend (which now handles S3 deletion internally)
+      const backendResponse = await fetch(`${API_BASE_URL}/videos/${deletingVideo.id}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        }
-        );
-        throw new Error(`Error ${response.status}: ${response.statusText}\n${errorText}`);
+      if (!backendResponse.ok) {
+        const errorText = await backendResponse.text();
+        throw new Error(errorText || 'Error al eliminar video');
       }
 
-      const updatedVideos = videos.filter(v =>
-        v.id !== deletingVideo.id
-      );
+      // Update local state
+      const updatedVideos = videos.filter(v => v.id !== deletingVideo.id);
       setVideos(updatedVideos);
       setSuccessMessage('Video eliminado exitosamente');
 
       setTimeout(() => setSuccessMessage(null), 3000);
 
     } catch (error) {
+      console.error('Error deleting video:', error);
       setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
     }
     onCloseDeleteModal();
