@@ -30,7 +30,7 @@ interface NewQuestionModalProps {
 }
 
 const emptyQuestion: Omit<QuestionData, 'id' | 'createdAt' | 'updatedAt' | 'lessonId'> = {
-    difficult: 1,
+    difficulty: 1,
     answer: 0,
     enable: true,
     translations: {}
@@ -124,7 +124,7 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
 
         try {
             await addDoc(collection(db, "questions"), {
-                difficult: newQuestion.difficult,
+                difficult: newQuestion.difficulty,
                 answer: newQuestion.answer,
                 enable: newQuestion.enable,
                 lessonId: lessonId,
@@ -198,8 +198,8 @@ const NewQuestionModal: React.FC<NewQuestionModalProps> = ({
                             <>
                                 <Select
                                     label="Dificultad"
-                                    selectedKeys={[newQuestion.difficult.toString()]}
-                                    onChange={(e) => setNewQuestion({ ...newQuestion, difficult: parseInt(e.target.value) })}
+                                    selectedKeys={[newQuestion.difficulty.toString()]}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, difficulty: parseInt(e.target.value) })}
                                 >
                                     <SelectItem key="1" textValue="1">Fácil</SelectItem>
                                     <SelectItem key="2" textValue="2">Medio</SelectItem>

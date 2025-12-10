@@ -128,7 +128,7 @@ const TranslationCard: React.FC<TranslationCardProps> = ({ question, questionNum
     3: { label: "Difícil", color: "danger" as const }
   };
 
-  const config = difficultyConfig[question.difficult as 1 | 2 | 3];
+  const config = difficultyConfig[question.difficulty as 1 | 2 | 3];
 
   // Verificar si tiene traducciones completas
   const translationsCount = question.translations

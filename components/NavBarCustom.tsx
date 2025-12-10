@@ -9,7 +9,7 @@ import {
 	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent
 } from "@heroui/react";
 
-import Link from "next/link";
+// import Link from "next/link";
 
 import { FaAngleDown } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
@@ -75,7 +75,7 @@ const NavBarCustom = () => {
 	const { userData } = useAuthContext();
 
 	// Solo cargar materias si el usuario es admin
-	const shouldLoadMaterias = userData?.rol === "admin";
+	// const shouldLoadMaterias = userData?.rol === "admin";
 	const { materias, loading: loadingMaterias } = useMaterias();
 
 	return (
