@@ -112,7 +112,7 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
       const questionRef = doc(db, "questions", selectedQuestion.id)
 
       await updateDoc(questionRef, {
-        difficult: editedQuestion.difficult,
+        difficult: editedQuestion.difficulty,
         answer: editedQuestion.answer,
         enable: editedQuestion.enable,
         translations: editedQuestion.translations || {}
@@ -180,8 +180,8 @@ const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
             {currentLang === 'es' && (
               <Select
                 label="Dificultad"
-                selectedKeys={editedQuestion ? [editedQuestion.difficult.toString()] : []}
-                onChange={(e) => editedQuestion && setEditedQuestion({ ...editedQuestion, difficult: parseInt(e.target.value) })}
+                selectedKeys={editedQuestion ? [editedQuestion.difficulty.toString()] : []}
+                onChange={(e) => editedQuestion && setEditedQuestion({ ...editedQuestion, difficulty: parseInt(e.target.value) })}
               >
                 <SelectItem key="1" textValue="1">Fácil</SelectItem>
                 <SelectItem key="2" textValue="2">Medio</SelectItem>

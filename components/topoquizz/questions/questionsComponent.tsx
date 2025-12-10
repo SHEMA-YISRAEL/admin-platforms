@@ -12,7 +12,13 @@ interface QuestionsComponentProps {
   selectedLanguage: LanguageCode
 }
 
-const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, filterValue, searchText, selectedLanguage}) => {
+const QuestionsComponent: React.FC<QuestionsComponentProps> = ({
+  lessonSelected, 
+  filterValue, 
+  searchText, 
+  selectedLanguage
+}) => {
+
   const {
     questionsData: questions,
     loading: questionsLoading
@@ -32,7 +38,7 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, 
 
       // Filtrar por dificultad
       if (filterValue.identifier !== -1) {
-        filteredData = filteredData.filter((el) => el.difficult === filterValue.identifier);
+        filteredData = filteredData.filter((el) => el.difficulty === filterValue.identifier);
       }
 
       // Filtrar por texto de búsqueda
@@ -41,7 +47,6 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({lessonSelected, 
           el.translations?.es?.question?.toLowerCase().includes(searchText.toLowerCase())
         );
       }
-
       setDataForTable(filteredData);
     } else {
       setDataForTable([]);

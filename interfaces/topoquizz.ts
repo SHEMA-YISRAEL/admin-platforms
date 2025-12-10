@@ -18,7 +18,7 @@ export interface QuestionData {
     answer: number;
     enable: boolean;
     lessonId: string;
-    difficult: number;
+    difficulty: number;
     translations?: QuestionTranslations;
     createdAt: Date | null;
     updatedAt: Date | null;

@@ -99,8 +99,7 @@ const ContentPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Tabla de preguntas - ocupa el resto del espacio */}
+        
         <div className="flex-1 overflow-hidden px-4 pb-3">
           <QuestionsComponent
             lessonSelected={lessonSelected}

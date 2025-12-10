@@ -67,17 +67,17 @@ const QuestionsTable: React.FC<QuestionsTableProps> = ({ questionsData, isLoadin
         )
       },
     }),
-    columnHelper.accessor('difficult', {
+    columnHelper.accessor('difficulty', {
       header: () => 'Dificultad',
       cell: (info) => {
         const difficultyId = info.getValue() as 1 | 2 | 3
         const config = difficultyConfig[difficultyId]
 
-        return config ? (
+        return config && (
           <Chip size="sm" color={config.color}>
             {config.label}
           </Chip>
-        ) : null
+        )
       },
       footer: info => info.column.id,
       enableSorting: true,
