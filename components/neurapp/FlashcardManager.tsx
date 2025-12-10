@@ -68,41 +68,29 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
     if (!deletingFlashCard) return;
 
     try {
-      const url = `${API_BASE_URL}/flashcards/${deletingFlashCard.id}`;
-      const method = 'DELETE';
-
-      const payload = {
-        id: deletingFlashCard.id
-      };
-
-      const response = await fetch(url, {
-        method,
+      // Delete from backend (backend handles S3 deletion internally)
+      const backendResponse = await fetch(`${API_BASE_URL}/flashcards/${deletingFlashCard.id}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ id: deletingFlashCard.id }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        }
-        );
-        throw new Error(`Error ${response.status}: ${response.statusText}\n${errorText}`);
+      if (!backendResponse.ok) {
+        const errorText = await backendResponse.text();
+        throw new Error(`Error al eliminar flashcard: ${errorText}`);
       }
 
-      const updatedFlashCards = flashcards.filter(f =>
-        f.id !== deletingFlashCard.id
-      );
+      // Update local state
+      const updatedFlashCards = flashcards.filter(f => f.id !== deletingFlashCard.id);
       setFlashcards(updatedFlashCards);
-      setSuccessMessage('Flashcard eliminado exitosamente');
+      setSuccessMessage('Flashcard eliminada exitosamente');
 
       setTimeout(() => setSuccessMessage(null), 3000);
 
     } catch (error) {
+      console.error('Error deleting flashcard:', error);
       setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
     }
     onCloseDeleteModal();

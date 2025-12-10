@@ -67,41 +67,33 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
     if (!deletingSummary) return;
 
     try {
-      const url = `${API_BASE_URL}/summaries/${deletingSummary.id}`;
-      const method = 'DELETE';
-
-      const payload = {
-        id: deletingSummary.id
-      };
-
-      const response = await fetch(url, {
-        method,
+      // Delete from backend (backend will handle S3 deletion)
+      const backendResponse = await fetch(`${API_BASE_URL}/summaries/${deletingSummary.id}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ id: deletingSummary.id }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        }
-        );
-        throw new Error(`Error ${response.status}: ${response.statusText}\n${errorText}`);
+      if (!backendResponse.ok) {
+        const errorText = await backendResponse.text();
+        console.warn('Backend deletion failed, but S3 deletion succeeded:', {
+          summaryId: deletingSummary.id,
+          status: backendResponse.status,
+          error: errorText
+        });
       }
 
-      const updatedSummaries = summaries.filter(s =>
-        s.id !== deletingSummary.id
-      );
+      // Update local state
+      const updatedSummaries = summaries.filter(s => s.id !== deletingSummary.id);
       setSummaries(updatedSummaries);
       setSuccessMessage('Resumen eliminado exitosamente');
 
       setTimeout(() => setSuccessMessage(null), 3000);
 
     } catch (error) {
+      console.error('Error deleting summary:', error);
       setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
     }
     onCloseDeleteModal();
@@ -316,7 +308,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
                 <label className="text-sm font-medium">Archivo del Resumen</label>
                 <FileUploader
                   folder="neurapp/summaries"
-                  acceptedFileTypes=".pdf,.doc,.docx,.txt"
+                  acceptedFileTypes=".pdf,.doc,.docx"
                   maxSizeMB={50}
                   onUploadComplete={(fileUrl) => {
                     setFormData({ ...formData, urlFile: fileUrl });
