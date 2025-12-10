@@ -64,7 +64,8 @@ export default function FileUploader({
         });
       }, 200);
 
-      const response = await fetch('/api/upload', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/s3`, {
         method: 'POST',
         body: formData,
       });
