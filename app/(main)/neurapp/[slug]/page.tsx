@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Card, CardBody } from "@heroui/react";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
@@ -42,14 +42,29 @@ export default function CoursePage() {
   const [lessonModalState, setLessonModalState] = useState<EditingLessonState | null>(null);
   const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
 
+  // Referencia para detectar cambio de curso y controlar selección automática
+  const previousCourseIdRef = useRef<number | null>(null);
+  const shouldAutoSelectRef = useRef<boolean>(true);
+
   // Hook para las sublecciones de la lección seleccionada
   const { sublessons, loading: sublessonsLoading, error: sublessonsError, setSublessons } =
     useSublessons(selectedLesson);
 
-  // Selection of first lesson by default at LessonManager.tsx
+  // Resetear selección cuando cambia el curso
   useEffect(() => {
-    if (lessons.length > 0 && selectedLesson === null) {
+    if (courseId > 0 && previousCourseIdRef.current !== courseId) {
+      setSelectedLesson(null);
+      setSelectedSublesson(null);
+      previousCourseIdRef.current = courseId;
+      shouldAutoSelectRef.current = true; // Habilitar auto-selección al cambiar de curso
+    }
+  }, [courseId]);
+
+  // Seleccionar la primera lección automáticamente solo cuando cambia de curso
+  useEffect(() => {
+    if (lessons.length > 0 && selectedLesson === null && shouldAutoSelectRef.current) {
       setSelectedLesson(lessons[0].id);
+      shouldAutoSelectRef.current = false; // Deshabilitar auto-selección después de la primera vez
     }
   }, [lessons, selectedLesson]);
 
