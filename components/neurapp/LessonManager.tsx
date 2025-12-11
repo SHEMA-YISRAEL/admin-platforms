@@ -125,7 +125,7 @@ export default function LessonManager({
         </div>
       )}
 
-      {/* Tabla de lecciones */}
+      {/* Table of lessons */}
       {lessons.length === 0 ? (
         <Card>
           <CardBody>
@@ -151,7 +151,7 @@ export default function LessonManager({
                       selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
                     }`}
                     onClick={() => {
-                      // Siempre pasar el lessonId, el componente padre decidirá qué hacer
+                      // Always pass the lessonId, the parent component will decide what to do
                       onLessonSelect(lesson.id);
                     }}
                   >
