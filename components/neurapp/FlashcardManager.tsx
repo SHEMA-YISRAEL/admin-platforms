@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
@@ -14,7 +14,11 @@ interface FlashcardManagerProps {
   id: number;
 }
 
-export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
+export interface FlashcardManagerRef {
+  handleCreate: () => void;
+}
+
+const FlashcardManager = forwardRef<FlashcardManagerRef, FlashcardManagerProps>(({ type, id }, ref) => {
   const { flashcards, loading, setFlashcards } = useFlashcards(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editingFlashcard, setEditingFlashcard] = useState<FlashcardData | null>(null);
@@ -46,6 +50,10 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
     setSuccessMessage(null);
     onOpen();
   };
+
+  useImperativeHandle(ref, () => ({
+    handleCreate
+  }));
 
   const handleEdit = (flashcard: FlashcardData) => {
     setEditingFlashcard(flashcard);
@@ -186,17 +194,6 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
 
   return (
     <div className="h-full flex flex-col mt-4">
-      {/* Header */}
-      <div className="flex items-end justify-end p-3 mb-2">
-        <Button
-          className="bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-sm"
-          onPress={handleCreate}
-          size="sm"
-        >
-          + Nueva Flashcard
-        </Button>
-      </div>
-
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
           <Chip color="success" variant="flat">
@@ -392,4 +389,8 @@ export default function FlashcardManager({ type, id }: FlashcardManagerProps) {
       </DeleteModal>
     </div>
   );
-}
+});
+
+FlashcardManager.displayName = 'FlashcardManager';
+
+export default FlashcardManager;

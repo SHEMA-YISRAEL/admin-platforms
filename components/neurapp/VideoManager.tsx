@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
@@ -14,7 +14,11 @@ interface VideoManagerProps {
   id: number;
 }
 
-export default function VideoManager({ type, id }: VideoManagerProps) {
+export interface VideoManagerRef {
+  handleCreate: () => void;
+}
+
+const VideoManager = forwardRef<VideoManagerRef, VideoManagerProps>(({ type, id }, ref) => {
   const { videos, loading, setVideos } = useVideos(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -47,6 +51,10 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
     setSuccessMessage(null);
     onOpen();
   };
+
+  useImperativeHandle(ref, () => ({
+    handleCreate
+  }));
 
   const handleEdit = (video: VideoData) => {
     setEditingVideo(video);
@@ -190,17 +198,6 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
 
   return (
     <div className="h-full flex flex-col mt-4">
-      {/* Header */}
-      <div className="flex items-end justify-end p-3 mb-2">
-        <Button
-          className="bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm"
-          onPress={handleCreate}
-          size="sm"
-        >
-          + Nuevo Video
-        </Button>
-      </div>
-
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
           <Chip color="success" variant="flat">
@@ -380,4 +377,8 @@ export default function VideoManager({ type, id }: VideoManagerProps) {
       </DeleteModal>
     </div>
   );
-}
+});
+
+VideoManager.displayName = 'VideoManager';
+
+export default VideoManager;
