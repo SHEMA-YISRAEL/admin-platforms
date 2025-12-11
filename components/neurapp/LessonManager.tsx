@@ -151,11 +151,8 @@ export default function LessonManager({
                       selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
                     }`}
                     onClick={() => {
-                      if (selectedLessonId === lesson.id) {
-                        onLessonSelect(null);
-                      } else {
-                        onLessonSelect(lesson.id);
-                      }
+                      // Siempre pasar el lessonId, el componente padre decidirá qué hacer
+                      onLessonSelect(lesson.id);
                     }}
                   >
                     <td className="px-3 py-2 text-gray-700">
