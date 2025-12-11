@@ -125,7 +125,7 @@ export default function LessonManager({
         </div>
       )}
 
-      {/* Tabla de lecciones */}
+      {/* Table of lessons */}
       {lessons.length === 0 ? (
         <Card>
           <CardBody>
@@ -151,11 +151,8 @@ export default function LessonManager({
                       selectedLessonId === lesson.id ? 'bg-blue-100/70' : ''
                     }`}
                     onClick={() => {
-                      if (selectedLessonId === lesson.id) {
-                        onLessonSelect(null);
-                      } else {
-                        onLessonSelect(lesson.id);
-                      }
+                      // Always pass the lessonId, the parent component will decide what to do
+                      onLessonSelect(lesson.id);
                     }}
                   >
                     <td className="px-3 py-2 text-gray-700">
