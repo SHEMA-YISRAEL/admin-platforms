@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
@@ -12,9 +12,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface SummaryManagerProps {
   type: 'lesson' | 'sublesson';
   id: number;
+  triggerCreate?: number;
 }
 
-export default function SummaryManager({ type, id }: SummaryManagerProps) {
+export default function SummaryManager({ type, id, triggerCreate }: SummaryManagerProps) {
   const { summaries, loading, setSummaries } = useSummaries(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editingSummary, setEditingSummary] = useState<SummaryData | null>(null);
@@ -33,6 +34,7 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
     setEditingSummary(null);
@@ -45,6 +47,20 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
     setSuccessMessage(null);
     onOpen();
   };
+
+  useEffect(() => {
+    // If the first time it mounts, just save the value without executing
+    if (prevTriggerCreate.current === undefined) {
+      prevTriggerCreate.current = triggerCreate || 0;
+      return;
+    }
+
+    // Only execute when triggerCreate changes and is greater than 0
+    if (triggerCreate && triggerCreate > 0 && triggerCreate !== prevTriggerCreate.current) {
+      prevTriggerCreate.current = triggerCreate;
+      handleCreate();
+    }
+  }, [triggerCreate]);
 
   const handleEdit = (summary: SummaryData) => {
     setEditingSummary(summary);
@@ -185,17 +201,6 @@ export default function SummaryManager({ type, id }: SummaryManagerProps) {
 
   return (
     <div className="h-full flex flex-col mt-4">
-      {/* Header */}
-      <div className="flex items-end justify-end p-3 mb-2">
-        <Button
-          className="bg-gradient-to-r from-teal-400 to-teal-500 text-white shadow-sm"
-          onPress={handleCreate}
-          size="sm"
-        >
-          + Nuevo Resumen
-        </Button>
-      </div>
-
       {successMessage && (
         <div className="flex-shrink-0 mb-3">
           <Chip color="success" variant="flat">

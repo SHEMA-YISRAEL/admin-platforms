@@ -1,6 +1,7 @@
 'use client';
 
-import { Tabs, Tab, Card, CardBody } from "@heroui/react";
+import { useState } from "react";
+import { Tabs, Tab, Card, CardBody, Button } from "@heroui/react";
 import VideoManager from "./VideoManager";
 import FlashcardManager from "./FlashcardManager";
 import SummaryManager from "./SummaryManager";
@@ -11,6 +12,45 @@ interface ResourceManagerProps {
 }
 
 export default function ResourceManager({ type, id }: ResourceManagerProps) {
+  const [selectedTab, setSelectedTab] = useState<string | number>("videos");
+  const [triggerCreate, setTriggerCreate] = useState<{tab: string | number, count: number}>({
+    tab: "videos",
+    count: 0
+  });
+
+  const handleNewResource = () => {
+    setTriggerCreate(prev => ({
+      tab: selectedTab,
+      count: prev.count + 1
+    }));
+  };
+
+  const getButtonConfig = () => {
+    switch (selectedTab) {
+      case "videos":
+        return {
+          label: "+ Nuevo Video",
+          gradient: "from-red-400 to-red-500"
+        };
+      case "flashcards":
+        return {
+          label: "+ Nueva Flashcard",
+          gradient: "from-purple-400 to-purple-500"
+        };
+      case "summaries":
+        return {
+          label: "+ Nuevo Resumen",
+          gradient: "from-teal-400 to-teal-500"
+        };
+      default:
+        return {
+          label: "+ Nuevo",
+          gradient: "from-gray-500 to-gray-600"
+        };
+    }
+  };
+
+  const buttonConfig = getButtonConfig();
   if (!id) {
     return (
       <Card className="2xl:mx-20 mb-3 rounded-lg shadow-md border border-gray-200">
@@ -26,17 +66,51 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Recursos</h2>
-      <Tabs aria-label="Resource Types">
-        <Tab key="videos" title="Videos">
-          <VideoManager type={type} id={id} />
-        </Tab>
-        <Tab key="flashcards" title="Flashcards">
-          <FlashcardManager type={type} id={id} />
-        </Tab>
-        <Tab key="summaries" title="Resúmenes">
-          <SummaryManager type={type} id={id} />
-        </Tab>
-      </Tabs>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex-1">
+          <Tabs
+            aria-label="Resource Types"
+            selectedKey={selectedTab}
+            onSelectionChange={setSelectedTab}
+          >
+            <Tab key="videos" title="Videos" />
+            <Tab key="flashcards" title="Flashcards" />
+            <Tab key="summaries" title="Resúmenes" />
+          </Tabs>
+        </div>
+        <Button
+          className={`bg-gradient-to-r ${buttonConfig.gradient} text-white shadow-sm`}
+          onPress={handleNewResource}
+          size="sm"
+        >
+          {buttonConfig.label}
+        </Button>
+      </div>
+
+      {/* Content below tabs */}
+      <div className="mt-4">
+        {selectedTab === "videos" && (
+          <VideoManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "videos" ? triggerCreate.count : 0}
+          />
+        )}
+        {selectedTab === "flashcards" && (
+          <FlashcardManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "flashcards" ? triggerCreate.count : 0}
+          />
+        )}
+        {selectedTab === "summaries" && (
+          <SummaryManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "summaries" ? triggerCreate.count : 0}
+          />
+        )}
+      </div>
     </div>
   );
 }
