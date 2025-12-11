@@ -50,13 +50,13 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
   };
 
   useEffect(() => {
-    // Si es la primera vez que se monta, solo guardamos el valor sin ejecutar
+    // If the first time it mounts, just save the value without executing
     if (prevTriggerCreate.current === undefined) {
       prevTriggerCreate.current = triggerCreate || 0;
       return;
     }
 
-    // Solo ejecutamos si el valor cambió
+    // Only execute when triggerCreate changes and is greater than 0
     if (triggerCreate && triggerCreate > 0 && triggerCreate !== prevTriggerCreate.current) {
       prevTriggerCreate.current = triggerCreate;
       handleCreate();
