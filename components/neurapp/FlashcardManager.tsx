@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
@@ -12,13 +12,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface FlashcardManagerProps {
   type: 'lesson' | 'sublesson';
   id: number;
+  triggerCreate?: number;
 }
 
-export interface FlashcardManagerRef {
-  handleCreate: () => void;
-}
-
-const FlashcardManager = forwardRef<FlashcardManagerRef, FlashcardManagerProps>(({ type, id }, ref) => {
+export default function FlashcardManager({ type, id, triggerCreate }: FlashcardManagerProps) {
   const { flashcards, loading, setFlashcards } = useFlashcards(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editingFlashcard, setEditingFlashcard] = useState<FlashcardData | null>(null);
@@ -38,6 +35,7 @@ const FlashcardManager = forwardRef<FlashcardManagerRef, FlashcardManagerProps>(
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [copiedSide, setCopiedSide] = useState<'obverse' | 'reverse' | null>(null);
+  const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
     setEditingFlashcard(null);
@@ -51,9 +49,19 @@ const FlashcardManager = forwardRef<FlashcardManagerRef, FlashcardManagerProps>(
     onOpen();
   };
 
-  useImperativeHandle(ref, () => ({
-    handleCreate
-  }));
+  useEffect(() => {
+    // Si es la primera vez que se monta, solo guardamos el valor sin ejecutar
+    if (prevTriggerCreate.current === undefined) {
+      prevTriggerCreate.current = triggerCreate || 0;
+      return;
+    }
+
+    // Solo ejecutamos si el valor cambió
+    if (triggerCreate && triggerCreate > 0 && triggerCreate !== prevTriggerCreate.current) {
+      prevTriggerCreate.current = triggerCreate;
+      handleCreate();
+    }
+  }, [triggerCreate]);
 
   const handleEdit = (flashcard: FlashcardData) => {
     setEditingFlashcard(flashcard);
@@ -389,8 +397,4 @@ const FlashcardManager = forwardRef<FlashcardManagerRef, FlashcardManagerProps>(
       </DeleteModal>
     </div>
   );
-});
-
-FlashcardManager.displayName = 'FlashcardManager';
-
-export default FlashcardManager;
+}

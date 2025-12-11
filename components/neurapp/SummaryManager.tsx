@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
@@ -12,13 +12,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface SummaryManagerProps {
   type: 'lesson' | 'sublesson';
   id: number;
+  triggerCreate?: number;
 }
 
-export interface SummaryManagerRef {
-  handleCreate: () => void;
-}
-
-const SummaryManager = forwardRef<SummaryManagerRef, SummaryManagerProps>(({ type, id }, ref) => {
+export default function SummaryManager({ type, id, triggerCreate }: SummaryManagerProps) {
   const { summaries, loading, setSummaries } = useSummaries(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [editingSummary, setEditingSummary] = useState<SummaryData | null>(null);
@@ -37,6 +34,7 @@ const SummaryManager = forwardRef<SummaryManagerRef, SummaryManagerProps>(({ typ
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
     setEditingSummary(null);
@@ -50,9 +48,19 @@ const SummaryManager = forwardRef<SummaryManagerRef, SummaryManagerProps>(({ typ
     onOpen();
   };
 
-  useImperativeHandle(ref, () => ({
-    handleCreate
-  }));
+  useEffect(() => {
+    // Si es la primera vez que se monta, solo guardamos el valor sin ejecutar
+    if (prevTriggerCreate.current === undefined) {
+      prevTriggerCreate.current = triggerCreate || 0;
+      return;
+    }
+
+    // Solo ejecutamos si el valor cambió
+    if (triggerCreate && triggerCreate > 0 && triggerCreate !== prevTriggerCreate.current) {
+      prevTriggerCreate.current = triggerCreate;
+      handleCreate();
+    }
+  }, [triggerCreate]);
 
   const handleEdit = (summary: SummaryData) => {
     setEditingSummary(summary);
@@ -361,8 +369,4 @@ const SummaryManager = forwardRef<SummaryManagerRef, SummaryManagerProps>(({ typ
       </DeleteModal>
     </div>
   );
-});
-
-SummaryManager.displayName = 'SummaryManager';
-
-export default SummaryManager;
+}

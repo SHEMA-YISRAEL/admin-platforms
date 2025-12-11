@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
@@ -12,13 +12,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface VideoManagerProps {
   type: 'lesson' | 'sublesson';
   id: number;
+  triggerCreate?: number;
 }
 
-export interface VideoManagerRef {
-  handleCreate: () => void;
-}
-
-const VideoManager = forwardRef<VideoManagerRef, VideoManagerProps>(({ type, id }, ref) => {
+export default function VideoManager({ type, id, triggerCreate }: VideoManagerProps) {
   const { videos, loading, setVideos } = useVideos(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -38,6 +35,7 @@ const VideoManager = forwardRef<VideoManagerRef, VideoManagerProps>(({ type, id 
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
     setEditingVideo(null);
@@ -52,9 +50,19 @@ const VideoManager = forwardRef<VideoManagerRef, VideoManagerProps>(({ type, id 
     onOpen();
   };
 
-  useImperativeHandle(ref, () => ({
-    handleCreate
-  }));
+  useEffect(() => {
+    // If the first time it mounts, just save the value without executing
+    if (prevTriggerCreate.current === undefined) {
+      prevTriggerCreate.current = triggerCreate || 0;
+      return;
+    }
+
+    // Only execute when triggerCreate changes and is greater than 0
+    if (triggerCreate && triggerCreate > 0 && triggerCreate !== prevTriggerCreate.current) {
+      prevTriggerCreate.current = triggerCreate;
+      handleCreate();
+    }
+  }, [triggerCreate]);
 
   const handleEdit = (video: VideoData) => {
     setEditingVideo(video);
@@ -377,8 +385,4 @@ const VideoManager = forwardRef<VideoManagerRef, VideoManagerProps>(({ type, id 
       </DeleteModal>
     </div>
   );
-});
-
-VideoManager.displayName = 'VideoManager';
-
-export default VideoManager;
+}

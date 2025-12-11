@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Tabs, Tab, Card, CardBody, Button } from "@heroui/react";
 import VideoManager from "./VideoManager";
 import FlashcardManager from "./FlashcardManager";
@@ -13,18 +13,16 @@ interface ResourceManagerProps {
 
 export default function ResourceManager({ type, id }: ResourceManagerProps) {
   const [selectedTab, setSelectedTab] = useState<string | number>("videos");
-  const videoManagerRef = useRef<{ handleCreate: () => void }>(null);
-  const flashcardManagerRef = useRef<{ handleCreate: () => void }>(null);
-  const summaryManagerRef = useRef<{ handleCreate: () => void }>(null);
+  const [triggerCreate, setTriggerCreate] = useState<{tab: string | number, count: number}>({
+    tab: "videos",
+    count: 0
+  });
 
   const handleNewResource = () => {
-    if (selectedTab === "videos") {
-      videoManagerRef.current?.handleCreate();
-    } else if (selectedTab === "flashcards") {
-      flashcardManagerRef.current?.handleCreate();
-    } else if (selectedTab === "summaries") {
-      summaryManagerRef.current?.handleCreate();
-    }
+    setTriggerCreate(prev => ({
+      tab: selectedTab,
+      count: prev.count + 1
+    }));
   };
 
   const getButtonConfig = () => {
@@ -92,13 +90,25 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
       {/* Content below tabs */}
       <div className="mt-4">
         {selectedTab === "videos" && (
-          <VideoManager ref={videoManagerRef} type={type} id={id} />
+          <VideoManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "videos" ? triggerCreate.count : 0}
+          />
         )}
         {selectedTab === "flashcards" && (
-          <FlashcardManager ref={flashcardManagerRef} type={type} id={id} />
+          <FlashcardManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "flashcards" ? triggerCreate.count : 0}
+          />
         )}
         {selectedTab === "summaries" && (
-          <SummaryManager ref={summaryManagerRef} type={type} id={id} />
+          <SummaryManager
+            type={type}
+            id={id}
+            triggerCreate={triggerCreate.tab === "summaries" ? triggerCreate.count : 0}
+          />
         )}
       </div>
     </div>
