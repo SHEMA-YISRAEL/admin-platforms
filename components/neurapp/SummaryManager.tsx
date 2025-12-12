@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
-import { ClipboardIcon, ClipboardDocumentCheckIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon, EyeIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
+import SummaryPreviewModal from "./SummaryPreviewModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -15,6 +16,12 @@ const AVAILABLE_LANGUAGES = [
   { value: 'en', label: 'English' },
   { value: 'pt', label: 'Português' },
 ];
+
+// Helper function to format file size
+const formatFileSize = (mb: number | null | undefined): string => {
+  if (!mb || mb <= 0) return '-';
+  return `${mb.toFixed(2)} MB`;
+};
 
 interface SummaryManagerProps {
   type: 'lesson' | 'sublesson';
@@ -30,6 +37,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     title: '',
     urlFile: '',
     description: '',
+    size: null as number | null,
     locale: 'es'
   });
   const {
@@ -38,10 +46,15 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     onClose: onCloseDeleteModal
   } = useDisclosure();
   const [deletingSummary, setDeletingSummary] = useState<SummaryData | null>(null);
+  const {
+    isOpen: isPreviewOpen,
+    onOpen: onOpenPreview,
+    onClose: onClosePreview
+  } = useDisclosure();
+  const [previewSummary, setPreviewSummary] = useState<SummaryData | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
@@ -50,6 +63,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
       title: '',
       urlFile: '',
       description: '',
+      size: null,
       locale: 'es'
     });
     setErrors({});
@@ -77,6 +91,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
       title: summary.title,
       urlFile: summary.urlFile,
       description: summary.description || '',
+      size: summary.size || null,
       locale: summary.locale
     });
     setErrors({});
@@ -88,6 +103,11 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     setDeletingSummary(summary);
     onOpenDeleteModal();
   }
+
+  const handlePreview = (summary: SummaryData) => {
+    setPreviewSummary(summary);
+    onOpenPreview();
+  };
 
   const handleDelete = async () => {
     if (!deletingSummary) return;
@@ -138,16 +158,6 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCopyUrl = async (summaryId: number, url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiedId(summaryId);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-    }
   };
 
   const handleSave = async () => {
@@ -232,6 +242,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Descripción</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Tamaño</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -254,6 +265,11 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                     {summary.description || '-'}
                   </td>
                   <td className="px-3 py-2 text-center">
+                    <Chip size="sm" color="primary" variant="flat">
+                      {formatFileSize(summary.size)}
+                    </Chip>
+                  </td>
+                  <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
                       {summary.locale}
                     </Chip>
@@ -264,25 +280,21 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                         size="sm"
                         variant="flat"
                         isIconOnly
-                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        onPress={() => window.open(summary.urlFile, '_blank')}
-                        title="Ver resumen"
+                        className="bg-purple-50 text-purple-600 hover:bg-purple-100"
+                        onPress={() => handlePreview(summary)}
+                        title="Previsualizar"
                       >
-                        <DocumentTextIcon className="h-4 w-4" />
+                        <EyeIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="flat"
                         isIconOnly
-                        className={copiedId === summary.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
-                        onPress={() => handleCopyUrl(summary.id, summary.urlFile)}
-                        title={copiedId === summary.id ? "¡Copiado!" : "Copiar URL"}
+                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        onPress={() => window.open(summary.urlFile, '_blank')}
+                        title="Abrir en nueva ventana"
                       >
-                        {copiedId === summary.id ? (
-                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                        ) : (
-                          <ClipboardIcon className="h-4 w-4" />
-                        )}
+                        <DocumentTextIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
@@ -353,7 +365,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   acceptedFileTypes=".pdf,.doc,.docx"
                   maxSizeMB={50}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    setFormData({ ...formData, urlFile: fileUrl });
+                    setFormData({ ...formData, urlFile: fileUrl, size: fileSize || null });
                     if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                   }}
                 />
@@ -371,6 +383,30 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   input: "bg-gray-50 cursor-not-allowed"
                 }}
               />
+
+              {formData.urlFile && (
+                <Button
+                  color="secondary"
+                  variant="flat"
+                  startContent={<EyeIcon className="h-4 w-4" />}
+                  onPress={() => {
+                    const tempSummary: SummaryData = {
+                      id: editingSummary?.id || 0,
+                      title: formData.title || 'Vista Previa',
+                      urlFile: formData.urlFile,
+                      description: formData.description || null,
+                      locale: formData.locale,
+                      order: editingSummary?.order || 0,
+                      createdAt: editingSummary?.createdAt || new Date().toISOString(),
+                      updatedAt: editingSummary?.updatedAt || new Date().toISOString(),
+                    };
+                    handlePreview(tempSummary);
+                  }}
+                  className="w-full"
+                >
+                  Previsualizar Resumen
+                </Button>
+              )}
 
               <Select
                 label="Idioma"
@@ -409,6 +445,17 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
         dataName={deletingSummary ? deletingSummary.title : ''}
         dataType={'resumen'}>
       </DeleteModal>
+
+      {previewSummary && (
+        <SummaryPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={onClosePreview}
+          title={previewSummary.title}
+          description={previewSummary.description}
+          urlFile={previewSummary.urlFile}
+          locale={previewSummary.locale}
+        />
+      )}
     </div>
   );
 }
