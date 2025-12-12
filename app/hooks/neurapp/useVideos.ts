@@ -4,8 +4,10 @@ export interface VideoData {
     id: number;
     title: string;
     url: string;
+    description: string | null;
     duration: number | null;
     locale: string | null;
+    order: number;
     createdAt: string;
     updatedAt: string;
 }

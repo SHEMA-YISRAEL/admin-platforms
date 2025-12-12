@@ -6,7 +6,7 @@ import { FiUpload, FiX, FiCheck } from 'react-icons/fi';
 
 interface FileUploaderProps {
   folder?: string;
-  onUploadComplete: (fileUrl: string, fileName: string) => void;
+  onUploadComplete: (fileUrl: string, fileName: string, duration?: number) => void;
   acceptedFileTypes?: string;
   maxSizeMB?: number;
   className?: string;
@@ -18,6 +18,7 @@ interface UploadedFileInfo {
   originalName: string;
   size: number;
   type: string;
+  duration?: number;
 }
 
 export default function FileUploader({
@@ -32,6 +33,32 @@ export default function FileUploader({
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const extractVideoDuration = (file: File): Promise<number | null> => {
+    return new Promise((resolve) => {
+      // Check if it's a video file
+      if (!file.type.startsWith('video/')) {
+        resolve(null);
+        return;
+      }
+
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        const duration = Math.round(video.duration);
+        resolve(duration);
+      };
+
+      video.onerror = () => {
+        window.URL.revokeObjectURL(video.src);
+        resolve(null);
+      };
+
+      video.src = URL.createObjectURL(file);
+    });
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -49,6 +76,9 @@ export default function FileUploader({
     setProgress(0);
 
     try {
+      // Extract video duration from file before uploading
+      const duration = await extractVideoDuration(file);
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', folder);
@@ -80,7 +110,8 @@ export default function FileUploader({
       const data = await response.json();
       setProgress(100);
       setUploadedFile(data);
-      onUploadComplete(data.url, data.fileName);
+      // Use the duration extracted from the frontend
+      onUploadComplete(data.url, data.fileName, duration || undefined);
 
       // Resetear después de 2 segundos
       setTimeout(() => {

@@ -223,6 +223,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
           <table className="min-w-full bg-white text-xs">
             <thead className="bg-gradient-to-r from-teal-400 to-teal-500 text-white sticky top-0 z-10">
               <tr>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Archivo</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
@@ -235,6 +236,11 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   key={summary.id}
                   className="hover:bg-teal-50/50 transition-colors"
                 >
+                  <td className="px-3 py-2 text-center">
+                    <span className="inline-block bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs font-semibold">
+                      {summary.order}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
                     {summary.title}
                   </td>
