@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
+import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon, PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
@@ -9,17 +9,28 @@ import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+// Available languages
+const AVAILABLE_LANGUAGES = [
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'English' },
+  { value: 'pt', label: 'Português' },
+];
+
+// Helper function to format size in MB
+const formatSize = (mb: number | null | undefined): string => {
+  if (!mb || mb <= 0) return '-';
+  return `${mb.toFixed(2)} MB`;
+};
+
 // Helper function to format duration in HH:MM:SS
 const formatDuration = (seconds: number | null | undefined): string => {
   if (!seconds || seconds <= 0) return '-';
+  const sec = Math.floor(seconds % 60);
+  const min = Math.floor((seconds / 60) % 60);
+  const hour = Math.floor(seconds / 3600);
 
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-
-  const pad = (num: number) => num.toString().padStart(2, '0');
-
-  return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+  const pad = (v: number) => String(v).padStart(2, '0');
+  return `${pad(hour)}:${pad(min)}:${pad(sec)}`;
 };
 
 interface VideoManagerProps {
@@ -43,6 +54,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     url: '',
     description: '',
     duration: '',
+    size: '',
     locale: 'es'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,6 +70,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
       url: '',
       description: '',
       duration: '',
+      size: '',
       locale: 'es'
     });
     setErrors({});
@@ -86,6 +99,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
       url: video.url,
       description: video.description || '',
       duration: video.duration?.toString() || '',
+      size: video.size?.toString() || '',
       locale: video.locale || 'es'
     });
     setErrors({});
@@ -137,11 +151,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     }
 
     if (!formData.url.trim()) {
-      newErrors.url = 'La URL es requerida';
-    }
-
-    if (!formData.locale.trim()) {
-      newErrors.locale = 'El idioma es requerido';
+      newErrors.url = 'Debes cargar un archivo de video';
     }
 
     setErrors(newErrors);
@@ -177,6 +187,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         url: formData.url,
         description: formData.description || null,
         duration: formData.duration ? parseInt(formData.duration) : null,
+        size: formData.size ? parseFloat(formData.size) : null,
         locale: formData.locale
       };
 
@@ -249,6 +260,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Descripción</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Duración</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Tamaño</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -272,6 +284,9 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   </td>
                   <td className="px-3 py-2 text-center text-gray-600">
                     {formatDuration(video.duration)}
+                  </td>
+                  <td className="px-3 py-2 text-center text-gray-600">
+                    {formatSize(video.size)}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -372,10 +387,11 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   folder="neurapp/videos"
                   acceptedFileTypes="video/*"
                   maxSizeMB={500}
-                  onUploadComplete={(fileUrl, fileName, duration) => {
+                  onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
                     setFormData({
                       ...formData,
                       url: fileUrl,
+                      size: fileSize ? (fileSize / (1024 * 1024)).toFixed(2) : '',
                       duration: duration ? duration.toString() : ''
                     });
                     if (errors.url) setErrors({ ...errors, url: '' });
@@ -387,36 +403,77 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 label="URL"
                 placeholder="URL del video (generada automáticamente)"
                 value={formData.url}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, url: e.target.value });
-                  if (errors.url) setErrors({ ...errors, url: '' });
-                }}
-                isRequired
+                isReadOnly
                 isInvalid={!!errors.url}
                 errorMessage={errors.url}
-                description="La URL se generará automáticamente al subir el archivo"
+                description="La URL se genera automáticamente al subir el archivo"
+                classNames={{
+                  input: "bg-gray-50 cursor-not-allowed"
+                }}
               />
 
-              {formData.duration && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-700">
-                    <strong>Duración detectada:</strong> {formatDuration(parseInt(formData.duration))}
-                  </p>
+              {(formData.size || formData.duration) && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-1">
+                  {formData.size && (
+                    <p className="text-sm text-blue-700">
+                      <strong>Tamaño detectado:</strong> {formData.size} MB
+                    </p>
+                  )}
+                  {formData.duration && (
+                    <p className="text-sm text-blue-700">
+                      <strong>Duración detectada:</strong> {formatDuration(parseInt(formData.duration))}
+                    </p>
+                  )}
                 </div>
               )}
 
               <Input
+                label="Duración (segundos)"
+                placeholder="Duración del video en segundos (generada automáticamente)"
+                type="number"
+                value={formData.duration}
+                isReadOnly
+                isInvalid={!!errors.duration}
+                errorMessage={errors.duration}
+                description="La duración se detecta automáticamente al subir el archivo"
+                classNames={{
+                  input: "bg-gray-50 cursor-not-allowed"
+                }}
+              />
+
+              <Input
+                label="Tamaño (MB)"
+                placeholder="Tamaño del video en MB (generado automáticamente)"
+                type="number"
+                step="0.01"
+                value={formData.size}
+                isReadOnly
+                isInvalid={!!errors.size}
+                errorMessage={errors.size}
+                description="El tamaño se detecta automáticamente al subir el archivo"
+                classNames={{
+                  input: "bg-gray-50 cursor-not-allowed"
+                }}
+              />
+
+              <Select
                 label="Idioma"
-                placeholder="Código de idioma (ej: es, en)"
-                value={formData.locale}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, locale: e.target.value });
-                  if (errors.locale) setErrors({ ...errors, locale: '' });
+                placeholder="Selecciona un idioma"
+                selectedKeys={[formData.locale]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData({ ...formData, locale: selected });
                 }}
                 isRequired
                 isInvalid={!!errors.locale}
                 errorMessage={errors.locale}
-              />
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
           </ModalBody>
           <ModalFooter>

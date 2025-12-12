@@ -6,7 +6,7 @@ import { FiUpload, FiX, FiCheck } from 'react-icons/fi';
 
 interface FileUploaderProps {
   folder?: string;
-  onUploadComplete: (fileUrl: string, fileName: string, duration?: number) => void;
+  onUploadComplete: (fileUrl: string, fileName: string, fileSize?: number, duration?: number) => void;
   acceptedFileTypes?: string;
   maxSizeMB?: number;
   className?: string;
@@ -18,8 +18,33 @@ interface UploadedFileInfo {
   originalName: string;
   size: number;
   type: string;
-  duration?: number;
 }
+
+/**
+ * Extrae la duración de un archivo de video de forma instantánea
+ * @param file - Archivo de video
+ * @returns Duración en segundos
+ */
+const extractVideoDuration = (file: File): Promise<number> => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+
+    video.onloadedmetadata = function() {
+      URL.revokeObjectURL(video.src);
+      const duration = Math.floor(video.duration); // Duración en segundos
+      resolve(duration);
+    };
+
+    video.onerror = function() {
+      URL.revokeObjectURL(video.src);
+      // Si falla, simplemente devolver 0 en lugar de rechazar
+      resolve(0);
+    };
+
+    video.src = URL.createObjectURL(file);
+  });
+};
 
 export default function FileUploader({
   folder = 'resources',
@@ -33,32 +58,6 @@ export default function FileUploader({
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const extractVideoDuration = (file: File): Promise<number | null> => {
-    return new Promise((resolve) => {
-      // Check if it's a video file
-      if (!file.type.startsWith('video/')) {
-        resolve(null);
-        return;
-      }
-
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-
-      video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        const duration = Math.round(video.duration);
-        resolve(duration);
-      };
-
-      video.onerror = () => {
-        window.URL.revokeObjectURL(video.src);
-        resolve(null);
-      };
-
-      video.src = URL.createObjectURL(file);
-    });
-  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -76,8 +75,8 @@ export default function FileUploader({
     setProgress(0);
 
     try {
-      // Extract video duration from file before uploading
-      const duration = await extractVideoDuration(file);
+      // Store file size for later use
+      const fileSize = file.size;
 
       const formData = new FormData();
       formData.append('file', file);
@@ -95,10 +94,19 @@ export default function FileUploader({
       }, 200);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/s3`, {
+
+      // Iniciar ambas operaciones en paralelo
+      const uploadPromise = fetch(`${apiUrl}/s3`, {
         method: 'POST',
         body: formData,
       });
+
+      const durationPromise = file.type.startsWith('video/')
+        ? extractVideoDuration(file)
+        : Promise.resolve(undefined);
+
+      // Esperar a que AMBAS terminen en paralelo
+      const [response, videoDuration] = await Promise.all([uploadPromise, durationPromise]);
 
       clearInterval(progressInterval);
 
@@ -110,8 +118,8 @@ export default function FileUploader({
       const data = await response.json();
       setProgress(100);
       setUploadedFile(data);
-      // Use the duration extracted from the frontend
-      onUploadComplete(data.url, data.fileName, duration || undefined);
+      // Pass the file size and duration
+      onUploadComplete(data.url, data.fileName, fileSize, videoDuration);
 
       // Resetear después de 2 segundos
       setTimeout(() => {
