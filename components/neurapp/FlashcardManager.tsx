@@ -224,6 +224,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
           <table className="min-w-full bg-white text-xs">
             <thead className="bg-gradient-to-r from-purple-400 to-purple-500 text-white sticky top-0 z-10">
               <tr>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Anverso</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Reverso</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
@@ -236,6 +237,11 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   key={flashcard.id}
                   className="hover:bg-purple-50/50 transition-colors"
                 >
+                  <td className="px-3 py-2 text-center">
+                    <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
+                      {flashcard.order}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-center">
                     <Button
                       size="sm"

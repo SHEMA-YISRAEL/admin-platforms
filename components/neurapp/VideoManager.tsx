@@ -2,12 +2,25 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
-import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import { ClipboardIcon, ClipboardDocumentCheckIcon, PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// Helper function to format duration in HH:MM:SS
+const formatDuration = (seconds: number | null | undefined): string => {
+  if (!seconds || seconds <= 0) return '-';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const pad = (num: number) => num.toString().padStart(2, '0');
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+};
 
 interface VideoManagerProps {
   type: 'lesson' | 'sublesson';
@@ -28,6 +41,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   const [formData, setFormData] = useState({
     title: '',
     url: '',
+    description: '',
     duration: '',
     locale: 'es'
   });
@@ -42,6 +56,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     setFormData({
       title: '',
       url: '',
+      description: '',
       duration: '',
       locale: 'es'
     });
@@ -69,6 +84,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     setFormData({
       title: video.title,
       url: video.url,
+      description: video.description || '',
       duration: video.duration?.toString() || '',
       locale: video.locale || 'es'
     });
@@ -159,6 +175,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
       const payload = {
         title: formData.title,
         url: formData.url,
+        description: formData.description || null,
         duration: formData.duration ? parseInt(formData.duration) : null,
         locale: formData.locale
       };
@@ -228,8 +245,9 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
           <table className="min-w-full bg-white text-xs">
             <thead className="bg-gradient-to-r from-red-400 to-red-500 text-white sticky top-0 z-10">
               <tr>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Video</th>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Descripción</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Duración</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
@@ -241,27 +259,19 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   key={video.id}
                   className="hover:bg-red-50/50 transition-colors"
                 >
+                  <td className="px-3 py-2 text-center">
+                    <span className="inline-block bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">
+                      {video.order}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
                     {video.title}
                   </td>
-                  <td className="px-3 py-2 text-center">
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      isIconOnly
-                      className={copiedId === video.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
-                      onPress={() => handleCopyUrl(video.id, video.url)}
-                      title={copiedId === video.id ? "¡Copiado!" : "Copiar URL"}
-                    >
-                      {copiedId === video.id ? (
-                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                      ) : (
-                        <ClipboardIcon className="h-4 w-4" />
-                      )}
-                    </Button>
+                  <td className="px-3 py-2 text-gray-600 max-w-xs truncate">
+                    {video.description || '-'}
                   </td>
                   <td className="px-3 py-2 text-center text-gray-600">
-                    {video.duration ? `${video.duration}s` : '-'}
+                    {formatDuration(video.duration)}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -269,22 +279,48 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                     </Chip>
                   </td>
                   <td className="px-3 py-2 text-center">
-                    <Button
-                      size="sm"
-                      className="bg-warning-50 text-warning-600 hover:bg-warning-100"
-                      variant="flat"
-                      onPress={() => handleEdit(video)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      onPress={() => openDeleteModal(video)}
-                    >
-                      Borrar
-                    </Button>
+                    <div className="flex gap-1 justify-center">
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        isIconOnly
+                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        onPress={() => window.open(video.url, '_blank')}
+                        title="Ver video"
+                      >
+                        <PlayIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        isIconOnly
+                        className={copiedId === video.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                        onPress={() => handleCopyUrl(video.id, video.url)}
+                        title={copiedId === video.id ? "¡Copiado!" : "Copiar URL"}
+                      >
+                        {copiedId === video.id ? (
+                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                        ) : (
+                          <ClipboardIcon className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-warning-50 text-warning-600 hover:bg-warning-100"
+                        variant="flat"
+                        onPress={() => handleEdit(video)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        onPress={() => openDeleteModal(video)}
+                      >
+                        Borrar
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -318,14 +354,30 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 errorMessage={errors.title}
               />
 
+              <Input
+                label="Descripción"
+                placeholder="Descripción del video (opcional)"
+                value={formData.description}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFormData({ ...formData, description: e.target.value });
+                  if (errors.description) setErrors({ ...errors, description: '' });
+                }}
+                isInvalid={!!errors.description}
+                errorMessage={errors.description}
+              />
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Video</label>
                 <FileUploader
                   folder="neurapp/videos"
                   acceptedFileTypes="video/*"
                   maxSizeMB={500}
-                  onUploadComplete={(fileUrl) => {
-                    setFormData({ ...formData, url: fileUrl });
+                  onUploadComplete={(fileUrl, fileName, duration) => {
+                    setFormData({
+                      ...formData,
+                      url: fileUrl,
+                      duration: duration ? duration.toString() : ''
+                    });
                     if (errors.url) setErrors({ ...errors, url: '' });
                   }}
                 />
@@ -345,13 +397,14 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 description="La URL se generará automáticamente al subir el archivo"
               />
 
-              <Input
-                type="number"
-                label="Duración (segundos)"
-                placeholder="Duración en segundos (opcional)"
-                value={formData.duration}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, duration: e.target.value })}
-              />
+              {formData.duration && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-700">
+                    <strong>Duración detectada:</strong> {formatDuration(parseInt(formData.duration))}
+                  </p>
+                </div>
+              )}
+
               <Input
                 label="Idioma"
                 placeholder="Código de idioma (ej: es, en)"

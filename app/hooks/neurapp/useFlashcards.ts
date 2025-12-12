@@ -5,6 +5,7 @@ export interface FlashcardData {
     obverse_side_url: string;
     reverse_side_url: string;
     locale: string;
+    order: number;
     createdAt: string;
     updatedAt: string;
 }
