@@ -386,7 +386,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 <FileUploader
                   folder="neurapp/videos"
                   acceptedFileTypes="video/*"
-                  maxSizeMB={500}
+                  maxSizeMB={2048}
                   onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
                     setFormData({
                       ...formData,
