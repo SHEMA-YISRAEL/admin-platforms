@@ -4,6 +4,7 @@ export interface SummaryData {
     id: number;
     title: string;
     urlFile: string;
+    description?: string | null;
     locale: string;
     order: number;
     createdAt: string;

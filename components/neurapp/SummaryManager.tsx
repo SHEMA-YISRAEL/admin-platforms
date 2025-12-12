@@ -1,13 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
-import { ClipboardIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
+import { ClipboardIcon, ClipboardDocumentCheckIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// Available languages
+const AVAILABLE_LANGUAGES = [
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'English' },
+  { value: 'pt', label: 'Português' },
+];
 
 interface SummaryManagerProps {
   type: 'lesson' | 'sublesson';
@@ -22,6 +29,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
   const [formData, setFormData] = useState({
     title: '',
     urlFile: '',
+    description: '',
     locale: 'es'
   });
   const {
@@ -41,6 +49,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     setFormData({
       title: '',
       urlFile: '',
+      description: '',
       locale: 'es'
     });
     setErrors({});
@@ -67,6 +76,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     setFormData({
       title: summary.title,
       urlFile: summary.urlFile,
+      description: summary.description || '',
       locale: summary.locale
     });
     setErrors({});
@@ -120,14 +130,6 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
 
     if (!formData.title.trim()) {
       newErrors.title = 'El título es requerido';
-    }
-
-    if (!formData.urlFile.trim()) {
-      newErrors.urlFile = 'La URL del archivo es requerida';
-    }
-
-    if (!formData.locale.trim()) {
-      newErrors.locale = 'El idioma es requerido';
     }
 
     setErrors(newErrors);
@@ -225,7 +227,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
               <tr>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
-                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">URL Archivo</th>
+                <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Descripción</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -244,21 +246,8 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
                     {summary.title}
                   </td>
-                  <td className="px-3 py-2 text-center">
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      isIconOnly
-                      className={copiedId === summary.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
-                      onPress={() => handleCopyUrl(summary.id, summary.urlFile)}
-                      title={copiedId === summary.id ? "¡Copiado!" : "Copiar URL"}
-                    >
-                      {copiedId === summary.id ? (
-                        <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                      ) : (
-                        <ClipboardIcon className="h-4 w-4" />
-                      )}
-                    </Button>
+                  <td className="px-3 py-2 text-gray-600 max-w-xs truncate">
+                    {summary.description || '-'}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -266,22 +255,48 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                     </Chip>
                   </td>
                   <td className="px-3 py-2 text-center">
-                    <Button
-                      size="sm"
-                      className="bg-warning-50 text-warning-600 hover:bg-warning-100"
-                      variant="flat"
-                      onPress={() => handleEdit(summary)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      onPress={() => openDeleteModal(summary)}
-                    >
-                      Borrar
-                    </Button>
+                    <div className="flex gap-1 justify-center">
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        isIconOnly
+                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        onPress={() => window.open(summary.urlFile, '_blank')}
+                        title="Ver resumen"
+                      >
+                        <DocumentTextIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        isIconOnly
+                        className={copiedId === summary.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
+                        onPress={() => handleCopyUrl(summary.id, summary.urlFile)}
+                        title={copiedId === summary.id ? "¡Copiado!" : "Copiar URL"}
+                      >
+                        {copiedId === summary.id ? (
+                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                        ) : (
+                          <ClipboardIcon className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-warning-50 text-warning-600 hover:bg-warning-100"
+                        variant="flat"
+                        onPress={() => handleEdit(summary)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        onPress={() => openDeleteModal(summary)}
+                      >
+                        Borrar
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -315,6 +330,18 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                 errorMessage={errors.title}
               />
 
+              <Input
+                label="Descripción"
+                placeholder="Descripción del resumen (opcional)"
+                value={formData.description}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFormData({ ...formData, description: e.target.value });
+                  if (errors.description) setErrors({ ...errors, description: '' });
+                }}
+                isInvalid={!!errors.description}
+                errorMessage={errors.description}
+              />
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Archivo del Resumen</label>
                 <FileUploader
@@ -332,28 +359,33 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                 label="URL del Archivo"
                 placeholder="URL del archivo del resumen (generada automáticamente)"
                 value={formData.urlFile}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, urlFile: e.target.value });
-                  if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
-                }}
-                isRequired
+                isReadOnly
                 isInvalid={!!errors.urlFile}
                 errorMessage={errors.urlFile}
-                description="La URL se generará automáticamente al subir el archivo"
+                description="La URL se genera automáticamente al subir el archivo"
+                classNames={{
+                  input: "bg-gray-50 cursor-not-allowed"
+                }}
               />
 
-              <Input
+              <Select
                 label="Idioma"
-                placeholder="Código de idioma (ej: es, en)"
-                value={formData.locale}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, locale: e.target.value });
-                  if (errors.locale) setErrors({ ...errors, locale: '' });
+                placeholder="Selecciona un idioma"
+                selectedKeys={[formData.locale]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData({ ...formData, locale: selected });
                 }}
                 isRequired
                 isInvalid={!!errors.locale}
                 errorMessage={errors.locale}
-              />
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
           </ModalBody>
           <ModalFooter>

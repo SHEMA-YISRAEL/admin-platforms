@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 
 export interface FlashcardData {
     id: number;
+    title?: string | null;
     obverse_side_url: string;
     reverse_side_url: string;
+    description?: string | null;
     locale: string;
     order: number;
     createdAt: string;

@@ -1,13 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@heroui/react";
+import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
 import { ClipboardIcon, ClipboardDocumentCheckIcon, PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// Available languages
+const AVAILABLE_LANGUAGES = [
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'English' },
+  { value: 'pt', label: 'Português' },
+];
 
 // Helper function to format duration in HH:MM:SS
 const formatDuration = (seconds: number | null | undefined): string => {
@@ -134,14 +141,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
     if (!formData.title.trim()) {
       newErrors.title = 'El título es requerido';
-    }
-
-    if (!formData.url.trim()) {
-      newErrors.url = 'La URL es requerida';
-    }
-
-    if (!formData.locale.trim()) {
-      newErrors.locale = 'El idioma es requerido';
     }
 
     setErrors(newErrors);
@@ -387,14 +386,13 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 label="URL"
                 placeholder="URL del video (generada automáticamente)"
                 value={formData.url}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, url: e.target.value });
-                  if (errors.url) setErrors({ ...errors, url: '' });
-                }}
-                isRequired
+                isReadOnly
                 isInvalid={!!errors.url}
                 errorMessage={errors.url}
-                description="La URL se generará automáticamente al subir el archivo"
+                description="La URL se genera automáticamente al subir el archivo"
+                classNames={{
+                  input: "bg-gray-50 cursor-not-allowed"
+                }}
               />
 
               {formData.duration && (
@@ -405,18 +403,24 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 </div>
               )}
 
-              <Input
+              <Select
                 label="Idioma"
-                placeholder="Código de idioma (ej: es, en)"
-                value={formData.locale}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData({ ...formData, locale: e.target.value });
-                  if (errors.locale) setErrors({ ...errors, locale: '' });
+                placeholder="Selecciona un idioma"
+                selectedKeys={[formData.locale]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData({ ...formData, locale: selected });
                 }}
                 isRequired
                 isInvalid={!!errors.locale}
                 errorMessage={errors.locale}
-              />
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
           </ModalBody>
           <ModalFooter>
