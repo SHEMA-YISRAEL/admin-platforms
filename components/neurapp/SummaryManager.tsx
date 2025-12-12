@@ -132,6 +132,10 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
       newErrors.title = 'El título es requerido';
     }
 
+    if (!formData.urlFile.trim()) {
+      newErrors.urlFile = 'Debes cargar un archivo de resumen';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -348,7 +352,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   folder="neurapp/summaries"
                   acceptedFileTypes=".pdf,.doc,.docx"
                   maxSizeMB={50}
-                  onUploadComplete={(fileUrl) => {
+                  onUploadComplete={(fileUrl, fileName, fileSize) => {
                     setFormData({ ...formData, urlFile: fileUrl });
                     if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                   }}

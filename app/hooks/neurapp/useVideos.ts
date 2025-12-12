@@ -6,6 +6,7 @@ export interface VideoData {
     url: string;
     description: string | null;
     duration: number | null;
+    size: number | null;
     locale: string | null;
     order: number;
     createdAt: string;

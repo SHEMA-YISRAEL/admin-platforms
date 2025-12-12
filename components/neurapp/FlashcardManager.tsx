@@ -132,6 +132,14 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
       newErrors.title = 'El título es requerido';
     }
 
+    if (!formData.obverse_side_url.trim()) {
+      newErrors.obverse_side_url = 'Debes cargar la imagen del anverso';
+    }
+
+    if (!formData.reverse_side_url.trim()) {
+      newErrors.reverse_side_url = 'Debes cargar la imagen del reverso';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -376,7 +384,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   folder="neurapp/flashcards"
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
-                  onUploadComplete={(fileUrl) => {
+                  onUploadComplete={(fileUrl, fileName, fileSize) => {
                     setFormData({ ...formData, obverse_side_url: fileUrl });
                     if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                   }}
@@ -402,7 +410,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   folder="neurapp/flashcards"
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
-                  onUploadComplete={(fileUrl) => {
+                  onUploadComplete={(fileUrl, fileName, fileSize) => {
                     setFormData({ ...formData, reverse_side_url: fileUrl });
                     if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                   }}
