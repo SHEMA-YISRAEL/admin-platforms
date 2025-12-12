@@ -189,16 +189,6 @@ const NavBarCustom = () => {
 										))}
 									</>
 								)}
-								<DropdownItem
-									key="contenido"
-									description="Gestión de contenido de NeurApp"
-									startContent={<BiSolidBookContent />}
-									onClick={() => router.push('/neurapp/content')}
-									showDivider
-									className="mt-2"
-								>
-									Contenido
-								</DropdownItem>
 							</DropdownMenu>
 						</Dropdown>
 					) : <></>
