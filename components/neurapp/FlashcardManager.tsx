@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
-import { ClipboardIcon, ClipboardDocumentCheckIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, EyeIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
+import FlashcardPreviewModal from "./FlashcardPreviewModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -15,6 +16,12 @@ const AVAILABLE_LANGUAGES = [
   { value: 'en', label: 'English' },
   { value: 'pt', label: 'Português' },
 ];
+
+// Helper function to format file size
+const formatFileSize = (mb: number | null | undefined): string => {
+  if (!mb || mb <= 0) return '-';
+  return `${mb.toFixed(2)} MB`;
+};
 
 interface FlashcardManagerProps {
   type: 'lesson' | 'sublesson';
@@ -31,6 +38,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
     obverse_side_url: '',
     reverse_side_url: '',
     description: '',
+    size: null as number | null,
     locale: 'es'
   });
   const {
@@ -39,11 +47,15 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
     onClose: onCloseDeleteModal
   } = useDisclosure();
   const [deletingFlashCard, setDeletingFlashCard] = useState<FlashcardData | null>(null);
+  const {
+    isOpen: isPreviewOpen,
+    onOpen: onOpenPreview,
+    onClose: onClosePreview
+  } = useDisclosure();
+  const [previewFlashcard, setPreviewFlashcard] = useState<FlashcardData | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [copiedSide, setCopiedSide] = useState<'obverse' | 'reverse' | null>(null);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
@@ -53,6 +65,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
       obverse_side_url: '',
       reverse_side_url: '',
       description: '',
+      size: null,
       locale: 'es'
     });
     setErrors({});
@@ -81,6 +94,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
       obverse_side_url: flashcard.obverse_side_url,
       reverse_side_url: flashcard.reverse_side_url,
       description: flashcard.description || '',
+      size: flashcard.size || null,
       locale: flashcard.locale
     });
     setErrors({});
@@ -92,6 +106,11 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
     setDeletingFlashCard(flashCard);
     onOpenDeleteModal();
   }
+
+  const handlePreview = (flashcard: FlashcardData) => {
+    setPreviewFlashcard(flashcard);
+    onOpenPreview();
+  };
 
   const handleDelete = async () => {
     if (!deletingFlashCard) return;
@@ -142,20 +161,6 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCopyUrl = async (flashcardId: number, url: string, side: 'obverse' | 'reverse') => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiedId(flashcardId);
-      setCopiedSide(side);
-      setTimeout(() => {
-        setCopiedId(null);
-        setCopiedSide(null);
-      }, 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-    }
   };
 
   const handleSave = async () => {
@@ -240,6 +245,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">#</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Título</th>
                 <th className="px-3 py-2 text-left uppercase tracking-tight font-semibold">Descripción</th>
+                <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Tamaño</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Idioma</th>
                 <th className="px-3 py-2 text-center uppercase tracking-tight font-semibold">Acciones</th>
               </tr>
@@ -262,6 +268,11 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                     {flashcard.description || '-'}
                   </td>
                   <td className="px-3 py-2 text-center">
+                    <Chip size="sm" color="primary" variant="flat">
+                      {formatFileSize(flashcard.size)}
+                    </Chip>
+                  </td>
+                  <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
                       {flashcard.locale}
                     </Chip>
@@ -272,25 +283,21 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         size="sm"
                         variant="flat"
                         isIconOnly
-                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        onPress={() => window.open(flashcard.obverse_side_url, '_blank')}
-                        title="Ver anverso"
+                        className="bg-purple-50 text-purple-600 hover:bg-purple-100"
+                        onPress={() => handlePreview(flashcard)}
+                        title="Previsualizar flashcard"
                       >
-                        <PhotoIcon className="h-4 w-4" />
+                        <EyeIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="flat"
                         isIconOnly
-                        className={copiedId === flashcard.id && copiedSide === 'obverse' ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600 hover:bg-orange-100"}
-                        onPress={() => handleCopyUrl(flashcard.id, flashcard.obverse_side_url, 'obverse')}
-                        title={copiedId === flashcard.id && copiedSide === 'obverse' ? "¡Copiado!" : "Copiar URL Anverso"}
+                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        onPress={() => window.open(flashcard.obverse_side_url, '_blank')}
+                        title="Ver anverso en nueva ventana"
                       >
-                        {copiedId === flashcard.id && copiedSide === 'obverse' ? (
-                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                        ) : (
-                          <ClipboardIcon className="h-4 w-4" />
-                        )}
+                        <PhotoIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
@@ -298,23 +305,9 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         isIconOnly
                         className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
                         onPress={() => window.open(flashcard.reverse_side_url, '_blank')}
-                        title="Ver reverso"
+                        title="Ver reverso en nueva ventana"
                       >
                         <PhotoIcon className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        isIconOnly
-                        className={copiedId === flashcard.id && copiedSide === 'reverse' ? "bg-green-50 text-green-600" : "bg-pink-50 text-pink-600 hover:bg-pink-100"}
-                        onPress={() => handleCopyUrl(flashcard.id, flashcard.reverse_side_url, 'reverse')}
-                        title={copiedId === flashcard.id && copiedSide === 'reverse' ? "¡Copiado!" : "Copiar URL Reverso"}
-                      >
-                        {copiedId === flashcard.id && copiedSide === 'reverse' ? (
-                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                        ) : (
-                          <ClipboardIcon className="h-4 w-4" />
-                        )}
                       </Button>
                       <Button
                         size="sm"
@@ -385,7 +378,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    setFormData({ ...formData, obverse_side_url: fileUrl });
+                    setFormData({ ...formData, obverse_side_url: fileUrl, size: fileSize || null });
                     if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                   }}
                 />
@@ -411,7 +404,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    setFormData({ ...formData, reverse_side_url: fileUrl });
+                    setFormData({ ...formData, reverse_side_url: fileUrl, size: fileSize || null });
                     if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                   }}
                 />
@@ -429,6 +422,31 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   input: "bg-gray-50 cursor-not-allowed"
                 }}
               />
+
+              {formData.obverse_side_url && formData.reverse_side_url && (
+                <Button
+                  color="secondary"
+                  variant="flat"
+                  startContent={<EyeIcon className="h-4 w-4" />}
+                  onPress={() => {
+                    const tempFlashcard: FlashcardData = {
+                      id: editingFlashcard?.id || 0,
+                      title: formData.title || null,
+                      obverse_side_url: formData.obverse_side_url,
+                      reverse_side_url: formData.reverse_side_url,
+                      description: formData.description || null,
+                      locale: formData.locale,
+                      order: editingFlashcard?.order || 0,
+                      createdAt: editingFlashcard?.createdAt || new Date().toISOString(),
+                      updatedAt: editingFlashcard?.updatedAt || new Date().toISOString(),
+                    };
+                    handlePreview(tempFlashcard);
+                  }}
+                  className="w-full"
+                >
+                  Previsualizar Flashcard
+                </Button>
+              )}
 
               <Select
                 label="Idioma"
@@ -467,6 +485,18 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
         dataName=''
         dataType={'flashcard'}>
       </DeleteModal>
+
+      {previewFlashcard && (
+        <FlashcardPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={onClosePreview}
+          title={previewFlashcard.title}
+          description={previewFlashcard.description}
+          obverseSideUrl={previewFlashcard.obverse_side_url}
+          reverseSideUrl={previewFlashcard.reverse_side_url}
+          locale={previewFlashcard.locale}
+        />
+      )}
     </div>
   );
 }

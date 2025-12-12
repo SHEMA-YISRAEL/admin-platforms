@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip, Select, SelectItem } from "@heroui/react";
-import { ClipboardIcon, ClipboardDocumentCheckIcon, PlayIcon } from "@heroicons/react/24/outline";
+import { PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
@@ -60,7 +60,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
@@ -156,16 +155,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCopyUrl = async (videoId: number, url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiedId(videoId);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-    }
   };
 
   const handleSave = async () => {
@@ -286,7 +275,9 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                     {formatDuration(video.duration)}
                   </td>
                   <td className="px-3 py-2 text-center text-gray-600">
-                    {formatSize(video.size)}
+                    <Chip size="sm" color="primary" variant="flat">
+                      {formatSize(video.size)}
+                    </Chip>  
                   </td>
                   <td className="px-3 py-2 text-center">
                     <Chip size="sm" color="default" variant="flat">
@@ -304,20 +295,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                         title="Ver video"
                       >
                         <PlayIcon className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        isIconOnly
-                        className={copiedId === video.id ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}
-                        onPress={() => handleCopyUrl(video.id, video.url)}
-                        title={copiedId === video.id ? "¡Copiado!" : "Copiar URL"}
-                      >
-                        {copiedId === video.id ? (
-                          <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                        ) : (
-                          <ClipboardIcon className="h-4 w-4" />
-                        )}
                       </Button>
                       <Button
                         size="sm"

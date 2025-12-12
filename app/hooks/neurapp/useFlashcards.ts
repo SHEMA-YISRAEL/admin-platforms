@@ -6,6 +6,7 @@ export interface FlashcardData {
     obverse_side_url: string;
     reverse_side_url: string;
     description?: string | null;
+    size?: number | null;
     locale: string;
     order: number;
     createdAt: string;
