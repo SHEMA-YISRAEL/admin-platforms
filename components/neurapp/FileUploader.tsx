@@ -25,7 +25,7 @@ export default function FileUploader({
   folder = 'resources',
   onUploadComplete,
   acceptedFileTypes = '*',
-  maxSizeMB = 50,
+  maxSizeMB = 2048,
   className = '',
 }: FileUploaderProps) {
   const [uploading, setUploading] = useState(false);
