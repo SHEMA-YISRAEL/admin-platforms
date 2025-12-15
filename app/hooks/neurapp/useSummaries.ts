@@ -5,6 +5,7 @@ export interface SummaryData {
     title: string;
     urlFile: string;
     description?: string | null;
+    size?: number | null;
     locale: string;
     order: number;
     createdAt: string;
