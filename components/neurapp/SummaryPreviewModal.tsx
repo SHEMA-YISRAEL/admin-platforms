@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
-import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 interface SummaryPreviewModalProps {
   isOpen: boolean;
@@ -29,6 +29,9 @@ export default function SummaryPreviewModal({
 }: SummaryPreviewModalProps) {
   const [iframeError, setIframeError] = useState(false);
 
+  // Validate URL
+  const hasValidUrl = urlFile && urlFile.trim() !== '';
+
   // Extract file extension from URL (before query parameters)
   const getFileExtension = (url: string): string => {
     try {
@@ -40,28 +43,9 @@ export default function SummaryPreviewModal({
     }
   };
 
-  const fileExtension = getFileExtension(urlFile);
+  const fileExtension = hasValidUrl ? getFileExtension(urlFile) : '';
   const isPdf = fileExtension === 'pdf';
-
-  const handleDownload = async () => {
-    try {
-      const response = await fetch(urlFile);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title}.${fileExtension}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      // Fallback: open in new window
-      window.open(urlFile, '_blank');
-    }
-  };
-
+  
   return (
     <Modal
       isOpen={isOpen}
@@ -87,7 +71,20 @@ export default function SummaryPreviewModal({
           )}
         </ModalHeader>
         <ModalBody className="p-6">
-          {isPdf && !iframeError ? (
+          {!hasValidUrl ? (
+            <div className="flex flex-col items-center justify-center p-12 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border-2 border-dashed border-orange-200 min-h-[400px]">
+              <div className="text-center space-y-4 max-w-md">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    No hay resumen disponible
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    No se encontró ningún archivo para mostrar en la vista previa.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : isPdf && !iframeError ? (
             <div className="w-full" style={{ height: '70vh' }}>
               <iframe
                 src={`${urlFile}#toolbar=0&navpanes=0&scrollbar=1`}
@@ -121,7 +118,7 @@ export default function SummaryPreviewModal({
                 <div className="pt-4 space-y-3">
                   <p className="text-sm text-gray-500">
                     {iframeError
-                      ? 'No se pudo cargar la vista previa. Descarga o abre el archivo para verlo.'
+                      ? 'No se pudo cargar la vista previa. Abre el archivo para verlo.'
                       : 'Haz clic en uno de los botones para ver el documento.'}
                   </p>
 
@@ -134,16 +131,6 @@ export default function SummaryPreviewModal({
                     >
                       Abrir en nueva pestaña
                     </Button>
-
-                    <Button
-                      color="secondary"
-                      variant="flat"
-                      size="lg"
-                      startContent={<ArrowDownTrayIcon className="w-5 h-5" />}
-                      onPress={handleDownload}
-                    >
-                      Descargar
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -154,16 +141,8 @@ export default function SummaryPreviewModal({
           <Button color="danger" variant="light" onPress={onClose}>
             Cerrar
           </Button>
-          {isPdf && !iframeError && (
+          {hasValidUrl && isPdf && !iframeError && (
             <>
-              <Button
-                color="secondary"
-                variant="flat"
-                startContent={<ArrowDownTrayIcon className="w-4 h-4" />}
-                onPress={handleDownload}
-              >
-                Descargar
-              </Button>
               <Button
                 color="primary"
                 onPress={() => window.open(urlFile, '_blank')}

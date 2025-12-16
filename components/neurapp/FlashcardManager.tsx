@@ -334,7 +334,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingFlashcard ? 'Editar Flashcard' : 'Nueva Flashcard'}

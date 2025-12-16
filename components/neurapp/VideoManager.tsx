@@ -321,7 +321,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingVideo ? 'Editar Video' : 'Nuevo Video'}
@@ -389,49 +389,20 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 }}
               />
 
-              {(formData.size || formData.duration) && (
+              {formData.url && (
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-1">
                   {formData.size && (
                     <p className="text-sm text-blue-700">
-                      <strong>Tamaño detectado:</strong> {formData.size} MB
+                      <strong>Tamaño:</strong> {formData.size} MB
                     </p>
                   )}
                   {formData.duration && (
                     <p className="text-sm text-blue-700">
-                      <strong>Duración detectada:</strong> {formatDuration(parseInt(formData.duration))}
+                      <strong>Duración:</strong> {formatDuration(parseInt(formData.duration))}
                     </p>
                   )}
                 </div>
               )}
-
-              <Input
-                label="Duración (segundos)"
-                placeholder="Duración del video en segundos (generada automáticamente)"
-                type="number"
-                value={formData.duration}
-                isReadOnly
-                isInvalid={!!errors.duration}
-                errorMessage={errors.duration}
-                description="La duración se detecta automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
-
-              <Input
-                label="Tamaño (MB)"
-                placeholder="Tamaño del video en MB (generado automáticamente)"
-                type="number"
-                step="0.01"
-                value={formData.size}
-                isReadOnly
-                isInvalid={!!errors.size}
-                errorMessage={errors.size}
-                description="El tamaño se detecta automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
 
               <Select
                 label="Idioma"
