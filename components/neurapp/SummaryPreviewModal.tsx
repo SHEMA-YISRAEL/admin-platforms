@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import { useSignedUrls } from '@/app/hooks/neurapp/useSignedUrls';
 
 interface SummaryPreviewModalProps {
   isOpen: boolean;
@@ -28,9 +29,31 @@ export default function SummaryPreviewModal({
   locale,
 }: SummaryPreviewModalProps) {
   const [iframeError, setIframeError] = useState(false);
+  const [signedUrl, setSignedUrl] = useState<string>('');
+  const [loadingUrl, setLoadingUrl] = useState(false);
+  const { getSignedUrl } = useSignedUrls();
 
   // Validate URL
   const hasValidUrl = urlFile && urlFile.trim() !== '';
+
+  // Load signed URL when modal opens and URL is available
+  useEffect(() => {
+    if (isOpen && hasValidUrl) {
+      setLoadingUrl(true);
+      getSignedUrl(urlFile)
+        .then((signed) => {
+          console.log('✅ Signed URL obtained for summary:', signed);
+          setSignedUrl(signed);
+          setLoadingUrl(false);
+        })
+        .catch((error) => {
+          console.error('❌ Error getting signed URL for summary:', error);
+          // Fallback to original URL if signing fails
+          setSignedUrl(urlFile);
+          setLoadingUrl(false);
+        });
+    }
+  }, [isOpen, urlFile, hasValidUrl, getSignedUrl]);
 
   // Extract file extension from URL (before query parameters)
   const getFileExtension = (url: string): string => {
@@ -84,10 +107,17 @@ export default function SummaryPreviewModal({
                 </div>
               </div>
             </div>
+          ) : loadingUrl ? (
+            <div className="flex flex-col items-center justify-center p-12 min-h-[400px]">
+              <div className="text-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-gray-600">Cargando previsualización...</p>
+              </div>
+            </div>
           ) : isPdf && !iframeError ? (
             <div className="w-full" style={{ height: '70vh' }}>
               <iframe
-                src={`${urlFile}#toolbar=0&navpanes=0&scrollbar=1`}
+                src={`${signedUrl || urlFile}#toolbar=0&navpanes=0&scrollbar=1`}
                 className="w-full h-full border border-gray-200 rounded-lg"
                 title={title}
                 onError={() => setIframeError(true)}
@@ -127,7 +157,7 @@ export default function SummaryPreviewModal({
                       color="primary"
                       size="lg"
                       startContent={<DocumentTextIcon className="w-5 h-5" />}
-                      onPress={() => window.open(urlFile, '_blank')}
+                      onPress={() => window.open(signedUrl || urlFile, '_blank')}
                     >
                       Abrir en nueva pestaña
                     </Button>
@@ -141,11 +171,11 @@ export default function SummaryPreviewModal({
           <Button color="danger" variant="light" onPress={onClose}>
             Cerrar
           </Button>
-          {hasValidUrl && isPdf && !iframeError && (
+          {hasValidUrl && isPdf && !iframeError && !loadingUrl && (
             <>
               <Button
                 color="primary"
-                onPress={() => window.open(urlFile, '_blank')}
+                onPress={() => window.open(signedUrl || urlFile, '_blank')}
               >
                 Abrir en nueva ventana
               </Button>

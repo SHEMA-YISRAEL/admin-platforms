@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react';
 import Image from 'next/image';
+import { useSignedUrls } from '@/app/hooks/neurapp/useSignedUrls';
 
 interface FlashcardPreviewModalProps {
   isOpen: boolean;
@@ -23,9 +24,20 @@ const LANGUAGE_LABELS: Record<string, string> = {
 const isAllowedImageDomain = (url: string): boolean => {
   try {
     const urlObj = new URL(url);
-    const allowedDomains = [process.env.NEXT_PUBLIC_NEURAPP_S3_DOMAIN || ''];
+    // List of allowed domains for images
+    const allowedDomains = [
+      process.env.NEXT_PUBLIC_NEURAPP_S3_DOMAIN,
+    ].filter(Boolean);
+
+    console.log('🔍 Validating image domain:', {
+      url,
+      hostname: urlObj.hostname,
+      allowedDomains,
+      isAllowed: allowedDomains.includes(urlObj.hostname)
+    });
     return allowedDomains.includes(urlObj.hostname);
-  } catch {
+  } catch (error) {
+    console.error('❌ Error parsing URL:', url, error);
     return false;
   }
 };
@@ -34,10 +46,17 @@ const isAllowedImageDomain = (url: string): boolean => {
 function SafeImage({ src, alt }: { src: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
   const isAllowed = isAllowedImageDomain(src);
+
+  console.log('🖼️ SafeImage render:', { src, isAllowed, hasError });
+
   if (hasError || !isAllowed) {
     return (
       <div className="w-full h-64 flex items-center justify-center bg-gray-200 text-gray-500">
-        Imagen no disponible
+        <div className="text-center">
+          <p>Imagen no disponible</p>
+          {!isAllowed && <p className="text-xs mt-2">Dominio no permitido</p>}
+          {hasError && <p className="text-xs mt-2">Error al cargar la imagen</p>}
+        </div>
       </div>
     );
   }
@@ -50,7 +69,11 @@ function SafeImage({ src, alt }: { src: string; alt: string }) {
       className="w-full h-auto object-contain"
       style={{ maxHeight: '500px' }}
       priority
-      onError={() => setHasError(true)}
+      onError={() => {
+        console.error('❌ Image failed to load:', src);
+        setHasError(true);
+      }}
+      onLoad={() => console.log('✅ Image loaded successfully:', src)}
     />
   );
 }
@@ -65,11 +88,37 @@ export default function FlashcardPreviewModal({
   locale,
 }: FlashcardPreviewModalProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [signedObverseUrl, setSignedObverseUrl] = useState<string>('');
+  const [signedReverseUrl, setSignedReverseUrl] = useState<string>('');
+  const [loadingUrls, setLoadingUrls] = useState(false);
+  const { getSignedUrl } = useSignedUrls();
 
   // Validate URLs
   const hasValidUrls = obverseSideUrl && reverseSideUrl &&
                        obverseSideUrl.trim() !== '' &&
                        reverseSideUrl.trim() !== '';
+
+  // Load signed URLs when modal opens and URLs are available
+  useEffect(() => {
+    if (isOpen && hasValidUrls) {
+      setLoadingUrls(true);
+      Promise.all([
+        getSignedUrl(obverseSideUrl),
+        getSignedUrl(reverseSideUrl)
+      ]).then(([obverse, reverse]) => {
+        console.log('✅ Signed URLs obtained:', { obverse, reverse });
+        setSignedObverseUrl(obverse);
+        setSignedReverseUrl(reverse);
+        setLoadingUrls(false);
+      }).catch(error => {
+        console.error('❌ Error getting signed URLs:', error);
+        // Fallback to original URLs if signing fails
+        setSignedObverseUrl(obverseSideUrl);
+        setSignedReverseUrl(reverseSideUrl);
+        setLoadingUrls(false);
+      });
+    }
+  }, [isOpen, obverseSideUrl, reverseSideUrl, hasValidUrls, getSignedUrl]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -118,6 +167,13 @@ export default function FlashcardPreviewModal({
                 </div>
               </div>
             </div>
+          ) : loadingUrls ? (
+            <div className="flex flex-col items-center justify-center p-12 min-h-[400px]">
+              <div className="text-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-gray-600">Cargando previsualización...</p>
+              </div>
+            </div>
           ) : (
             <div className="flex flex-col items-center gap-4">
               <div className="flex items-center gap-2 text-sm font-medium">
@@ -135,7 +191,7 @@ export default function FlashcardPreviewModal({
                     <div className="w-full animate-in fade-in duration-300">
                       <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden shadow-lg">
                         <SafeImage
-                          src={obverseSideUrl}
+                          src={signedObverseUrl || obverseSideUrl}
                           alt="Anverso de la flashcard"
                         />
                       </div>
@@ -145,7 +201,7 @@ export default function FlashcardPreviewModal({
                     <div className="w-full animate-in fade-in duration-300">
                       <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden shadow-lg">
                         <SafeImage
-                          src={reverseSideUrl}
+                          src={signedReverseUrl || reverseSideUrl}
                           alt="Reverso de la flashcard"
                         />
                       </div>
@@ -169,19 +225,19 @@ export default function FlashcardPreviewModal({
           <Button color="danger" variant="light" onPress={handleClose}>
             Cerrar
           </Button>
-          {hasValidUrls && (
+          {hasValidUrls && !loadingUrls && (
             <>
               <Button
                 color="default"
                 variant="flat"
-                onPress={() => window.open(obverseSideUrl, '_blank')}
+                onPress={() => window.open(signedObverseUrl || obverseSideUrl, '_blank')}
               >
                 Abrir Anverso
               </Button>
               <Button
                 color="default"
                 variant="flat"
-                onPress={() => window.open(reverseSideUrl, '_blank')}
+                onPress={() => window.open(signedReverseUrl || reverseSideUrl, '_blank')}
               >
                 Abrir Reverso
               </Button>
