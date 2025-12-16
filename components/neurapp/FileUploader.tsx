@@ -57,6 +57,8 @@ export default function FileUploader({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileMetadata, setFileMetadata] = useState<{ size: number; duration?: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,11 +73,30 @@ export default function FileUploader({
     }
 
     setError(null);
+    setSelectedFile(file);
+
+    // Extract metadata
+    const fileSizeBytes = file.size;
+    let videoDuration: number | undefined;
+
+    if (file.type.startsWith('video/')) {
+      videoDuration = await extractVideoDuration(file);
+    }
+
+    setFileMetadata({
+      size: fileSizeBytes,
+      duration: videoDuration,
+    });
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!selectedFile) return;
+
     setUploading(true);
     setProgress(0);
 
     try {
-      const fileSizeBytes = file.size;
+      const fileSizeBytes = selectedFile.size;
       const fileSizeMB = fileSizeBytes / (1024 * 1024); // Convertir a MB
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -86,8 +107,8 @@ export default function FileUploader({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
           folder: folder,
         }),
       });
@@ -100,7 +121,7 @@ export default function FileUploader({
       const { uploadUrl, fileUrl, fileName: uniqueFileName } = await presignedResponse.json();
 
       // Step 2: Upload file to S3 using the presigned URL
-      const uploadPromise = new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         // Events to track progress
@@ -129,40 +150,46 @@ export default function FileUploader({
 
         // Upload the file directly to S3
         xhr.open('PUT', uploadUrl);
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.send(file);
+        xhr.setRequestHeader('Content-Type', selectedFile.type);
+        xhr.send(selectedFile);
       });
-
-      // Extract duration of video in parallel (if it's a video)
-      const durationPromise = file.type.startsWith('video/')
-        ? extractVideoDuration(file)
-        : Promise.resolve(undefined);
-
-      // Wait for BOTH operations to complete in parallel
-      const [, videoDuration] = await Promise.all([uploadPromise, durationPromise]);
 
       setProgress(100);
 
       const uploadedFileInfo: UploadedFileInfo = {
         url: fileUrl,
         fileName: uniqueFileName,
-        originalName: file.name,
+        originalName: selectedFile.name,
         size: fileSizeBytes,
-        type: file.type,
+        type: selectedFile.type,
       };
 
       setUploadedFile(uploadedFileInfo);
+
+      // Usar la duración extraída previamente si existe
+      const videoDuration = fileMetadata?.duration;
       onUploadComplete(fileUrl, uniqueFileName, fileSizeMB, videoDuration);
 
       // Resetear después de 2 segundos
       setTimeout(() => {
         setProgress(0);
         setUploading(false);
+        setSelectedFile(null);
+        setFileMetadata(null);
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setUploading(false);
       setProgress(0);
+    }
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedFile(null);
+    setFileMetadata(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -175,6 +202,18 @@ export default function FileUploader({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -191,27 +230,70 @@ export default function FileUploader({
       <Button
         color="primary"
         onClick={handleButtonClick}
-        disabled={uploading}
+        disabled={uploading || selectedFile !== null}
         startContent={uploading ? null : <FiUpload />}
       >
         {uploading ? 'Subiendo...' : 'Seleccionar archivo'}
       </Button>
 
-      {uploading && (
-        <Card className="mt-4">
+      {selectedFile && fileMetadata && !uploadedFile && (
+        <Card className="mt-4 border-primary-500">
           <CardBody>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  Subiendo archivo...
-                </span>
-                <span className="text-sm font-semibold">{progress}%</span>
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">{selectedFile.name}</p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-medium">Tamaño:</span> {formatFileSize(fileMetadata.size)}
+                    </p>
+                    {fileMetadata.duration !== undefined && fileMetadata.duration > 0 && (
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">Duración:</span> {formatDuration(fileMetadata.duration)}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-600">
+                      <span className="font-medium">Tipo:</span> {selectedFile.type || 'Desconocido'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <Progress
-                value={progress}
-                color={progress === 100 ? 'success' : 'primary'}
-                className="w-full"
-              />
+              {!uploading && (
+                <div className="flex gap-2">
+                  <Button
+                    color="primary"
+                    size="sm"
+                    onPress={handleConfirmUpload}
+                    className="flex-1"
+                  >
+                    Confirmar y Subir
+                  </Button>
+                  <Button
+                    color="danger"
+                    variant="flat"
+                    size="sm"
+                    onPress={handleCancelSelection}
+                    startContent={<FiX />}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+              {uploading && (
+                <div className="space-y-2 pt-2 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">
+                      Subiendo archivo...
+                    </span>
+                    <span className="text-sm font-semibold">{progress}%</span>
+                  </div>
+                  <Progress
+                    value={progress}
+                    color={progress === 100 ? 'success' : 'primary'}
+                    className="w-full"
+                  />
+                </div>
+              )}
             </div>
           </CardBody>
         </Card>
