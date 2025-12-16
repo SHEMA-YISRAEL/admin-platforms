@@ -368,7 +368,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                     setFormData({
                       ...formData,
                       url: fileUrl,
-                      size: fileSize ? (fileSize / (1024 * 1024)).toFixed(2) : '',
+                      size: fileSize ? fileSize.toFixed(2) : '',
                       duration: duration ? duration.toString() : ''
                     });
                     if (errors.url) setErrors({ ...errors, url: '' });
@@ -388,21 +388,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   input: "bg-gray-50 cursor-not-allowed"
                 }}
               />
-
-              {formData.url && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-1">
-                  {formData.size && (
-                    <p className="text-sm text-blue-700">
-                      <strong>Tamaño:</strong> {formData.size} MB
-                    </p>
-                  )}
-                  {formData.duration && (
-                    <p className="text-sm text-blue-700">
-                      <strong>Duración:</strong> {formatDuration(parseInt(formData.duration))}
-                    </p>
-                  )}
-                </div>
-              )}
 
               <Select
                 label="Idioma"
