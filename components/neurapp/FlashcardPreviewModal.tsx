@@ -20,35 +20,10 @@ const LANGUAGE_LABELS: Record<string, string> = {
   'pt': 'Português',
 };
 
-// Verificar si la URL es de un dominio permitido en next.config
-const isAllowedImageDomain = (url: string): boolean => {
-  try {
-    const urlObj = new URL(url);
-    const allowedDomains = ['neurapp-resources.s3.us-east-2.amazonaws.com'];
-    return allowedDomains.includes(urlObj.hostname);
-  } catch {
-    return false;
-  }
-};
 
-// Componente para renderizar imagen de forma segura
+// Component to safely load an image
 function SafeImage({ src, alt }: { src: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
-  const isAllowed = isAllowedImageDomain(src);
-
-  // If not allowed domain or has error, usar img normal
-  if (!isAllowed || hasError) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className="w-full h-auto object-contain"
-        style={{ maxHeight: '500px' }}
-      />
-    );
-  }
-
-  // If allowed, usar Image de Next.js
   return (
     <Image
       src={src}

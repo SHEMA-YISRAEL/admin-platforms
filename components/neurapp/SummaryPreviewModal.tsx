@@ -45,26 +45,7 @@ export default function SummaryPreviewModal({
 
   const fileExtension = hasValidUrl ? getFileExtension(urlFile) : '';
   const isPdf = fileExtension === 'pdf';
-
-  const handleDownload = async () => {
-    try {
-      const response = await fetch(urlFile);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title}.${fileExtension}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      // Fallback: open in new window
-      window.open(urlFile, '_blank');
-    }
-  };
-
+  
   return (
     <Modal
       isOpen={isOpen}
