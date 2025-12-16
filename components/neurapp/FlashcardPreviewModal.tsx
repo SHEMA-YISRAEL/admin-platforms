@@ -20,10 +20,27 @@ const LANGUAGE_LABELS: Record<string, string> = {
   'pt': 'Português',
 };
 
+const isAllowedImageDomain = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    const allowedDomains = [process.env.NEXT_PUBLIC_NEURAPP_S3_DOMAIN || ''];
+    return allowedDomains.includes(urlObj.hostname);
+  } catch {
+    return false;
+  }
+};
 
 // Component to safely load an image
 function SafeImage({ src, alt }: { src: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
+  const isAllowed = isAllowedImageDomain(src);
+  if (hasError || !isAllowed) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center bg-gray-200 text-gray-500">
+        Imagen no disponible
+      </div>
+    );
+  }
   return (
     <Image
       src={src}
