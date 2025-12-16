@@ -10,8 +10,7 @@ interface UseSignedUrlsResult {
 }
 
 /**
- * Hook para obtener URLs firmadas de S3
- * Cachea las URLs firmadas para evitar múltiples llamadas
+ * Hook to obtain signed URLs for S3 resources.
  */
 export function useSignedUrls(): UseSignedUrlsResult {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
@@ -19,12 +18,12 @@ export function useSignedUrls(): UseSignedUrlsResult {
   const [error, setError] = useState<string | null>(null);
 
   const getSignedUrl = async (url: string): Promise<string> => {
-    // Si ya tenemos la URL firmada en cache, devolverla
+    // If URL is already cached, return it
     if (signedUrls[url]) {
       return signedUrls[url];
     }
 
-    // Si no es una URL de S3, devolverla tal cual
+    // If URL does not appear to be an S3 URL, return it as is
     if (!url.includes('s3.amazonaws.com')) {
       return url;
     }
@@ -48,7 +47,7 @@ export function useSignedUrls(): UseSignedUrlsResult {
       const data = await response.json();
       const signedUrl = data.signedUrl || url;
 
-      // Guardar en cache
+      // Save signed URL in state
       setSignedUrls(prev => ({ ...prev, [url]: signedUrl }));
 
       return signedUrl;
@@ -56,7 +55,7 @@ export function useSignedUrls(): UseSignedUrlsResult {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
       setError(errorMessage);
       console.error('Error getting signed URL:', err);
-      // En caso de error, devolver la URL original
+      // In case of error, return the original URL
       return url;
     } finally {
       setLoading(false);
