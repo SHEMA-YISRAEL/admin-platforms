@@ -24,10 +24,10 @@ const LANGUAGE_LABELS: Record<string, string> = {
 const isAllowedImageDomain = (url: string): boolean => {
   try {
     const urlObj = new URL(url);
-    // Lista de dominios permitidos - incluye el dominio de la variable de entorno y alternativas
+    // List of allowed domains for images
     const allowedDomains = [
       process.env.NEXT_PUBLIC_NEURAPP_S3_DOMAIN,
-    ].filter(Boolean); // Elimina valores undefined o vacíos
+    ].filter(Boolean);
 
     console.log('🔍 Validating image domain:', {
       url,

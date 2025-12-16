@@ -414,7 +414,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Sumar el tamaño del nuevo archivo al tamaño existente (si hay)
+                    // Add the uploaded file URL to form data
                     const currentSize = formData.size || 0;
                     const newSize = currentSize + (fileSize || 0);
                     setFormData({ ...formData, obverse_side_url: fileUrl, size: newSize });
@@ -443,7 +443,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Sumar el tamaño del nuevo archivo al tamaño existente (si hay)
+                    // Add the size of the new file to the existing size (if any)
                     const currentSize = formData.size || 0;
                     const newSize = currentSize + (fileSize || 0);
                     setFormData({ ...formData, reverse_side_url: fileUrl, size: newSize });
