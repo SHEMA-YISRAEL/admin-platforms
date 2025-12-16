@@ -75,7 +75,8 @@ export default function FileUploader({
     setProgress(0);
 
     try {
-      const fileSize = file.size;
+      const fileSizeBytes = file.size;
+      const fileSizeMB = fileSizeBytes / (1024 * 1024); // Convertir a MB
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
       // Step 1: Get presigned URL from backend
@@ -146,12 +147,12 @@ export default function FileUploader({
         url: fileUrl,
         fileName: uniqueFileName,
         originalName: file.name,
-        size: fileSize,
+        size: fileSizeBytes,
         type: file.type,
       };
 
       setUploadedFile(uploadedFileInfo);
-      onUploadComplete(fileUrl, uniqueFileName, fileSize, videoDuration);
+      onUploadComplete(fileUrl, uniqueFileName, fileSizeMB, videoDuration);
 
       // Resetear después de 2 segundos
       setTimeout(() => {

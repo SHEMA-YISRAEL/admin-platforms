@@ -294,7 +294,25 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         variant="flat"
                         isIconOnly
                         className="bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        onPress={() => window.open(flashcard.obverse_side_url, '_blank')}
+                        onPress={async () => {
+                          // Get signed URL before opening
+                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                          try {
+                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ fileUrl: flashcard.obverse_side_url }),
+                            });
+                            if (response.ok) {
+                              const { signedUrl } = await response.json();
+                              window.open(signedUrl, '_blank');
+                            } else {
+                              window.open(flashcard.obverse_side_url, '_blank');
+                            }
+                          } catch {
+                            window.open(flashcard.obverse_side_url, '_blank');
+                          }
+                        }}
                         title="Ver anverso en nueva ventana"
                       >
                         <PhotoIcon className="h-4 w-4" />
@@ -304,7 +322,25 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         variant="flat"
                         isIconOnly
                         className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                        onPress={() => window.open(flashcard.reverse_side_url, '_blank')}
+                        onPress={async () => {
+                          // Get signed URL before opening
+                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                          try {
+                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ fileUrl: flashcard.reverse_side_url }),
+                            });
+                            if (response.ok) {
+                              const { signedUrl } = await response.json();
+                              window.open(signedUrl, '_blank');
+                            } else {
+                              window.open(flashcard.reverse_side_url, '_blank');
+                            }
+                          } catch {
+                            window.open(flashcard.reverse_side_url, '_blank');
+                          }
+                        }}
                         title="Ver reverso en nueva ventana"
                       >
                         <PhotoIcon className="h-4 w-4" />
@@ -378,7 +414,10 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    setFormData({ ...formData, obverse_side_url: fileUrl, size: fileSize || null });
+                    // Sumar el tamaño del nuevo archivo al tamaño existente (si hay)
+                    const currentSize = formData.size || 0;
+                    const newSize = currentSize + (fileSize || 0);
+                    setFormData({ ...formData, obverse_side_url: fileUrl, size: newSize });
                     if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                   }}
                 />
@@ -404,7 +443,10 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   acceptedFileTypes="image/*"
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    setFormData({ ...formData, reverse_side_url: fileUrl, size: fileSize || null });
+                    // Sumar el tamaño del nuevo archivo al tamaño existente (si hay)
+                    const currentSize = formData.size || 0;
+                    const newSize = currentSize + (fileSize || 0);
+                    setFormData({ ...formData, reverse_side_url: fileUrl, size: newSize });
                     if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                   }}
                 />

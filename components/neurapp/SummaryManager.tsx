@@ -291,7 +291,25 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                         variant="flat"
                         isIconOnly
                         className="bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        onPress={() => window.open(summary.urlFile, '_blank')}
+                        onPress={async () => {
+                          // Get signed URL before opening
+                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                          try {
+                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ fileUrl: summary.urlFile }),
+                            });
+                            if (response.ok) {
+                              const { signedUrl } = await response.json();
+                              window.open(signedUrl, '_blank');
+                            } else {
+                              window.open(summary.urlFile, '_blank');
+                            }
+                          } catch {
+                            window.open(summary.urlFile, '_blank');
+                          }
+                        }}
                         title="Abrir en nueva ventana"
                       >
                         <DocumentTextIcon className="h-4 w-4" />
