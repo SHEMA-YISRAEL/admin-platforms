@@ -75,51 +75,83 @@ export default function FileUploader({
     setProgress(0);
 
     try {
-      // Store file size for later use
       const fileSize = file.size;
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', folder);
-
-      // Simular progreso mientras se sube
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-      // Iniciar ambas operaciones en paralelo
-      const uploadPromise = fetch(`${apiUrl}/s3`, {
+      // Step 1: Get presigned URL from backend
+      const presignedResponse = await fetch(`${apiUrl}/s3/presigned-url`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          folder: folder,
+        }),
       });
 
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json();
+        throw new Error(errorData.error || 'Error al obtener URL presignada');
+      }
+
+      const { uploadUrl, fileUrl, fileName: uniqueFileName } = await presignedResponse.json();
+
+      // Step 2: Upload file to S3 using the presigned URL
+      const uploadPromise = new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        // Events to track progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            setProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Error al subir a S3: ${xhr.statusText}`));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Error de red al subir a S3'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Carga cancelada'));
+        });
+
+        // Upload the file directly to S3
+        xhr.open('PUT', uploadUrl);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(file);
+      });
+
+      // Extract duration of video in parallel (if it's a video)
       const durationPromise = file.type.startsWith('video/')
         ? extractVideoDuration(file)
         : Promise.resolve(undefined);
 
-      // Esperar a que AMBAS terminen en paralelo
-      const [response, videoDuration] = await Promise.all([uploadPromise, durationPromise]);
+      // Wait for BOTH operations to complete in parallel
+      const [, videoDuration] = await Promise.all([uploadPromise, durationPromise]);
 
-      clearInterval(progressInterval);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al subir el archivo');
-      }
-
-      const data = await response.json();
       setProgress(100);
-      setUploadedFile(data);
-      // Pass the file size and duration
-      onUploadComplete(data.url, data.fileName, fileSize, videoDuration);
+
+      const uploadedFileInfo: UploadedFileInfo = {
+        url: fileUrl,
+        fileName: uniqueFileName,
+        originalName: file.name,
+        size: fileSize,
+        type: file.type,
+      };
+
+      setUploadedFile(uploadedFileInfo);
+      onUploadComplete(fileUrl, uniqueFileName, fileSize, videoDuration);
 
       // Resetear después de 2 segundos
       setTimeout(() => {

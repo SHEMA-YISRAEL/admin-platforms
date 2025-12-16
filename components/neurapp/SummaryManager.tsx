@@ -321,7 +321,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingSummary ? 'Editar Resumen' : 'Nuevo Resumen'}
