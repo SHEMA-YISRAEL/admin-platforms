@@ -210,7 +210,7 @@ export default function UsersPage() {
           <div className="mb-6 2xl:mx-40">
             <Input
               isClearable
-              placeholder="Buscar por nombre, apellido o email..."
+              placeholder="Buscar por nombre"
               startContent={<MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />}
               value={globalFilter ?? ''}
               onClear={() => setGlobalFilter('')}
@@ -383,66 +383,61 @@ export default function UsersPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        size="2xl"
+        size="3xl"
         scrollBehavior="inside"
+        classNames={{
+          backdrop: "bg-gradient-to-t from-gray-400/80 to-purple-100/20 backdrop-opacity-20",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-white" />
+              {/* Header con diseño mejorado */}
+              <ModalHeader className="flex flex-col gap-0 border-b border-gray-100 bg-gradient-to-r from-blue-50 via-purple-100 to-pink-100 pb-4 pt-4">
+                <div className="flex items-start gap-4">
+                  <div className="relative">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
+                      <UserIcon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1">
+                      {selectedUser?.categoryId === 3 && (
+                        <div className="w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
+                          <CheckBadgeIcon className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
                       {selectedUser?.name} {selectedUser?.lastName}
                     </h2>
-                    <p className="text-sm text-gray-500 font-normal">{selectedUser?.email}</p>
-                  </div>
-                </div>
-              </ModalHeader>
-              <ModalBody className="py-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* ID */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      ID de Usuario
-                    </span>
-                    <span className="text-base text-gray-900 font-medium">
-                      #{selectedUser?.id}
-                    </span>
-                  </div>
-
-                  {/* Categoría */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Categoría
-                    </span>
-                    <div className="flex items-center">
+                    <p className="text-sm text-gray-600 font-medium">{selectedUser?.email}</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-gray-500">ID: #{selectedUser?.id}</span>
+                      <span className="text-gray-300">•</span>
                       {selectedUser?.categoryId === 3 ? (
                         <Chip
                           size="sm"
                           color="success"
                           variant="flat"
-                          startContent={<CheckBadgeIcon className="w-4 h-4" />}
+                          startContent={<CheckBadgeIcon className="w-3.5 h-3.5" />}
                           className="font-semibold"
                         >
-                          Premium
+                          Usuario Premium
                         </Chip>
                       ) : selectedUser?.categoryId === 1 || selectedUser?.categoryId === 2 ? (
                         <Chip
                           size="sm"
                           color="default"
                           variant="flat"
-                          startContent={<StarIcon className="w-4 h-4" />}
+                          startContent={<StarIcon className="w-3.5 h-3.5" />}
                         >
-                          Free
+                          Usuario Free
                         </Chip>
                       ) : (
                         <Chip
                           size="sm"
-                          color="default"
+                          color="warning"
                           variant="flat"
                         >
                           Sin categoría
@@ -450,122 +445,211 @@ export default function UsersPage() {
                       )}
                     </div>
                   </div>
+                </div>
+              </ModalHeader>
 
-                  {/* Nombre */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Nombre
-                    </span>
-                    <span className="text-base text-gray-900">
-                      {selectedUser?.name || <span className="text-gray-400">No especificado</span>}
-                    </span>
-                  </div>
-
-                  {/* Apellido */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Apellido
-                    </span>
-                    <span className="text-base text-gray-900">
-                      {selectedUser?.lastName || <span className="text-gray-400">No especificado</span>}
-                    </span>
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex flex-col gap-1 md:col-span-2">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Correo Electrónico
-                    </span>
-                    <span className="text-base text-gray-900">
-                      {selectedUser?.email || <span className="text-gray-400">No especificado</span>}
-                    </span>
-                  </div>
-
-                  {/* Fecha de Nacimiento */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Fecha de Nacimiento
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-base text-gray-900">
-                        {selectedUser?.dateOfBirth ? (
-                          new Date(selectedUser.dateOfBirth).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric'
-                          })
-                        ) : (
-                          <span className="text-gray-400">No especificada</span>
-                        )}
-                      </span>
+              {/* Body con cards para cada sección */}
+              <ModalBody className="py-3 bg-gray-50/50">
+                <div className="space-y-2">
+                  {/* Información Personal */}
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+                      <UserIcon className="w-4 h-4 text-blue-600" />
+                      Información Personal
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Nombre
+                        </span>
+                        <span className="text-base text-gray-900 font-medium block">
+                          {selectedUser?.name || <span className="text-gray-400">No especificado</span>}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Apellido
+                        </span>
+                        <span className="text-base text-gray-900 font-medium block">
+                          {selectedUser?.lastName || <span className="text-gray-400">No especificado</span>}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5 md:col-span-2">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Correo Electrónico
+                        </span>
+                        <span className="text-base text-gray-900 font-medium block break-all">
+                          {selectedUser?.email || <span className="text-gray-400">No especificado</span>}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Fecha de Nacimiento
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <CalendarIcon className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <span className="text-base text-gray-900 font-medium">
+                            {selectedUser?.dateOfBirth ? (
+                              new Date(selectedUser.dateOfBirth).toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric'
+                              })
+                            ) : (
+                              <span className="text-gray-400">No especificada</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* ID de Categoría */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      ID de Categoría
-                    </span>
-                    <span className="text-base text-gray-900">
-                      {selectedUser?.categoryId ?? <span className="text-gray-400">No asignada</span>}
-                    </span>
-                  </div>
-
-                  {/* Fecha de Registro */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Fecha de Registro
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <ClockIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-base text-gray-900">
-                        {selectedUser?.createdAt ? (
-                          new Date(selectedUser.createdAt).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        ) : (
-                          <span className="text-gray-400">No disponible</span>
-                        )}
-                      </span>
+                  {/* Información de Cuenta */}
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+                      <StarIcon className="w-4 h-4 text-purple-600" />
+                      Información de Cuenta
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Categoría de Usuario
+                        </span>
+                        <div className="flex items-center">
+                          {selectedUser?.categoryId === 3 ? (
+                            <Chip
+                              size="md"
+                              color="success"
+                              variant="flat"
+                              startContent={<CheckBadgeIcon className="w-4 h-4" />}
+                              className="font-semibold"
+                            >
+                              Premium
+                            </Chip>
+                          ) : selectedUser?.categoryId === 1 || selectedUser?.categoryId === 2 ? (
+                            <Chip
+                              size="md"
+                              color="default"
+                              variant="flat"
+                              startContent={<StarIcon className="w-4 h-4" />}
+                            >
+                              Free
+                            </Chip>
+                          ) : (
+                            <Chip
+                              size="md"
+                              color="warning"
+                              variant="flat"
+                            >
+                              Sin categoría
+                            </Chip>
+                          )}
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          ID de Categoría
+                        </span>
+                        <span className="text-base text-gray-900 font-medium">
+                          {selectedUser?.categoryId ?? <span className="text-gray-400">No asignada</span>}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Última Actualización */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                      Última Actualización
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <ClockIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-base text-gray-900">
-                        {selectedUser?.updatedAt ? (
-                          new Date(selectedUser.updatedAt).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        ) : (
-                          <span className="text-gray-400">No disponible</span>
-                        )}
-                      </span>
+                  {/* Información de Actividad */}
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+                      <ClockIcon className="w-4 h-4 text-indigo-600" />
+                      Actividad
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Fecha de Registro
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <ClockIcon className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-base text-gray-900 font-medium">
+                              {selectedUser?.createdAt ? (
+                                new Date(selectedUser.createdAt).toLocaleDateString('es-ES', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })
+                              ) : (
+                                <span className="text-gray-400">No disponible</span>
+                              )}
+                            </span>
+                            {selectedUser?.createdAt && (
+                              <span className="text-xs text-gray-500">
+                                {new Date(selectedUser.createdAt).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs uppercase tracking-wider text-gray-500 font-semibold block">
+                          Última Actualización
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                            <ClockIcon className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-base text-gray-900 font-medium">
+                              {selectedUser?.updatedAt ? (
+                                new Date(selectedUser.updatedAt).toLocaleDateString('es-ES', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })
+                              ) : (
+                                <span className="text-gray-400">No disponible</span>
+                              )}
+                            </span>
+                            {selectedUser?.updatedAt && (
+                              <span className="text-xs text-gray-500">
+                                {new Date(selectedUser.updatedAt).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </ModalBody>
-              <ModalFooter className="border-t">
+
+              {/* Footer mejorado */}
+              <ModalFooter className="border-t border-gray-100 bg-gray-50/50">
                 <Button
-                  color="primary"
-                  variant="flat"
+                  color="default"
+                  variant="light"
                   onPress={onClose}
+                  className="font-medium"
                 >
                   Cerrar
+                </Button>
+                <Button
+                  color="primary"
+                  variant="shadow"
+                  onPress={onClose}
+                  className="font-medium"
+                >
+                  Aceptar
                 </Button>
               </ModalFooter>
             </>
