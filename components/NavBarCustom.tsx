@@ -15,7 +15,7 @@ import { FaAngleDown } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 import { FaBook } from "react-icons/fa";
-import { BiSolidBookContent } from "react-icons/bi";
+import { FaUsers } from "react-icons/fa";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
@@ -162,6 +162,14 @@ const NavBarCustom = () => {
 									base: "gap-4",
 								}}
 							>
+								<DropdownItem
+									key="usuarios"
+									description="Gestión de usuarios del sistema"
+									startContent={<FaUsers />}
+									onClick={() => router.push('/neurapp/usuarios')}
+								>
+									Usuarios
+								</DropdownItem>
 								<DropdownItem
 									key="materias-header"
 									description="Seleccionar materia"
