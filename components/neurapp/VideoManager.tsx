@@ -361,7 +361,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
               <div className="space-y-2">
                 <label className="text-sm font-medium">Video</label>
                 <FileUploader
-                  folder="neurapp/videos"
+                  folder="neurapp/videos/uploads"
                   acceptedFileTypes="video/*"
                   maxSizeMB={2048}
                   onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
