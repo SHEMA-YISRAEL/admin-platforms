@@ -141,30 +141,21 @@ export default function CoursePage() {
         <div className="mt-6 grid grid-cols-2 gap-6">
           {/* Left Column: Lessons and Sublessons */}
           <div>
-            {lessonsLoading ? (
-              <p className="text-center text-gray-500 py-8">Cargando lecciones…</p>
-            ) : lessonsError ? (
-              <p className="text-center text-red-500 py-8">Error: {lessonsError}</p>
-            ) : !lessons || lessons.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
-                No hay lecciones en este curso.
-              </p>
-            ) : (
-              <LessonManager
-                courseId={courseId}
-                lessons={lessons}
-                loading={false}
-                onLessonSelect={handleLessonSelect}
-                onLessonsChange={setLessons}
-                selectedLessonId={expandedLesson}
-                onSublessonSelect={handleSublessonSelect}
-                selectedSublessonId={selectedSublesson}
-                sublessons={sublessons}
-                sublessonsLoading={sublessonsLoading}
-                sublessonsError={sublessonsError}
-                onSublessonsChange={setSublessons}
-              />
-            )}
+            <LessonManager
+              courseId={courseId}
+              lessons={lessons}
+              loading={lessonsLoading}
+              error={lessonsError}
+              onLessonSelect={handleLessonSelect}
+              onLessonsChange={setLessons}
+              selectedLessonId={expandedLesson}
+              onSublessonSelect={handleSublessonSelect}
+              selectedSublessonId={selectedSublesson}
+              sublessons={sublessons}
+              sublessonsLoading={sublessonsLoading}
+              sublessonsError={sublessonsError}
+              onSublessonsChange={setSublessons}
+            />
           </div>
 
           {/* Right Column: Info Panel + Resources */}
