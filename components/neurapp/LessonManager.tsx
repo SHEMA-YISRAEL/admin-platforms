@@ -44,7 +44,7 @@ function SublessonRow({
   return (
     <tr>
       <td colSpan={3} className="px-0 py-0 bg-gray-50">
-        <div className="px-6 py-4">
+        <div>
           <SublessonManager
             sublessons={sublessons}
             loading={loading}
