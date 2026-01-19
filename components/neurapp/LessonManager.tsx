@@ -178,7 +178,7 @@ export default function LessonManager({
                           </span>
                           {lesson.title}
                         </div>
-                          <button onClick={() => handleCreateSublesson(lesson.id)} className="cursor-pointer bg-gray-200/75 hover:bg-blue-100 flex justify-center items-center rounded-full w-6 h-6">+</button>
+                          <button onClick={(e) => { e.stopPropagation(); handleCreateSublesson(lesson.id); }} className="cursor-pointer bg-gray-200/75 hover:bg-blue-100 flex justify-center items-center rounded-full w-6 h-6">+</button>
                       </div>
                       </td>
                     </tr>
