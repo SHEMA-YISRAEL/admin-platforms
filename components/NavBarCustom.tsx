@@ -189,7 +189,7 @@ const NavBarCustom = () => {
 										{materias.map((materia) => (
 											<DropdownItem
 												key={materia.slug}
-												className="pl-8"
+												className={`pl-8 ${pathname.includes(`/neurapp/${materia.slug}`) ? "bg-gray-400/30" : ""}`}
 												onClick={() => router.push(`/neurapp/${materia.slug}`)}
 											>
 												{materia.title}
