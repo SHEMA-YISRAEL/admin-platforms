@@ -1,45 +1,22 @@
 'use client';
 
-import { useState } from "react";
-import { Button } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
-import SublessonModal from "./SublessonModal";
-
-type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
 
 interface SublessonManagerProps {
-  lessonId: number;
   sublessons: SublessonData[];
   loading: boolean;
   error?: string | null;
-  onSublessonsChange: (sublessons: SublessonData[]) => void;
   onSublessonSelect?: (sublessonId: number | null) => void;
   selectedSublessonId?: number | null;
 }
 
 export default function SublessonManager({
-  lessonId,
   sublessons,
   loading,
   error,
   onSublessonSelect,
   selectedSublessonId,
-  onSublessonsChange
 }: SublessonManagerProps) {
-  const [modalState, setModalState] = useState<{ isOpen: boolean; sublesson: EditingSublessonState } | null>(null);
-
-  const handleCreate = () => {
-    setModalState({ isOpen: true, sublesson: { type: 'create', data: null, lessonId } });
-  };
-
-  const handleModalClose = () => {
-    setModalState(null);
-  };
-
-  const handleSave = () => {
-    setModalState(null);
-  };
-
   if (loading) {
     return <div className="text-center py-2 text-sm text-gray-500">Cargando sublecciones...</div>;
   }
@@ -56,14 +33,9 @@ export default function SublessonManager({
 
   return (
     <div className="border-l-2 border-green-300 pl-4">
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-sm font-semibold text-gray-700">
-          Sublecciones {sublessons.length > 0 && `(${sublessons.length})`}
-        </h4>
-        <Button size="sm" className="bg-green-500 text-white text-xs" onPress={handleCreate}>
-          + Sublección
-        </Button>
-      </div>
+      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+        Sublecciones {sublessons.length > 0 && `(${sublessons.length})`}
+      </h4>
 
       {sublessons.length === 0 ? (
         <p className="text-xs text-gray-500 py-2">No hay sublecciones creadas para esta lección</p>
@@ -100,19 +72,6 @@ export default function SublessonManager({
             </tbody>
           </table>
         </div>
-      )}
-
-      {/* Modal para crear/editar sublección */}
-      {modalState && (
-        <SublessonModal
-          isOpen={modalState.isOpen}
-          onClose={handleModalClose}
-          lessonId={lessonId}
-          sublesson={modalState.sublesson}
-          sublessons={sublessons}
-          onSublessonsChange={onSublessonsChange}
-          onSave={handleSave}
-        />
       )}
     </div>
   );
