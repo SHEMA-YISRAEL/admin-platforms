@@ -227,7 +227,7 @@ export default function FileUploader({
         className="hidden"
       />
 
-      {!selectedFile && (
+      {!selectedFile && !uploadedFile && (
         <Button
           color="primary"
           onClick={handleButtonClick}
