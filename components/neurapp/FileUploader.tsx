@@ -227,73 +227,88 @@ export default function FileUploader({
         className="hidden"
       />
 
-      <Button
-        color="primary"
-        onClick={handleButtonClick}
-        disabled={uploading || selectedFile !== null}
-        startContent={uploading ? null : <FiUpload />}
-      >
-        {uploading ? 'Subiendo...' : 'Seleccionar archivo'}
-      </Button>
+      {!selectedFile && (
+        <Button
+          color="primary"
+          onClick={handleButtonClick}
+          disabled={uploading}
+          startContent={<FiUpload />}
+        >
+          Seleccionar archivo
+        </Button>
+      )}
 
       {selectedFile && fileMetadata && !uploadedFile && (
-        <Card className="mt-4 border-primary-500">
+        <Card className="mt-4 border-primary-500 relative">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            className="absolute top-2 right-2 z-10"
+            onPress={handleCancelSelection}
+            disabled={uploading}
+          >
+            <FiX className="w-4 h-4" />
+          </Button>
           <CardBody>
-            <div className="space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">{selectedFile.name}</p>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs text-gray-600">
-                      <span className="font-medium">Tamaño:</span> {formatFileSize(fileMetadata.size)}
-                    </p>
-                    {fileMetadata.duration !== undefined && fileMetadata.duration > 0 && (
-                      <p className="text-xs text-gray-600">
-                        <span className="font-medium">Duración:</span> {formatDuration(fileMetadata.duration)}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-600">
-                      <span className="font-medium">Tipo:</span> {selectedFile.type || 'Desconocido'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              {!uploading && (
-                <div className="flex gap-2">
-                  <Button
-                    color="primary"
-                    size="sm"
-                    onPress={handleConfirmUpload}
-                    className="flex-1"
-                  >
-                    Confirmar y Subir
-                  </Button>
-                  <Button
-                    color="danger"
-                    variant="flat"
-                    size="sm"
-                    onPress={handleCancelSelection}
-                    startContent={<FiX />}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              )}
-              {uploading && (
-                <div className="space-y-2 pt-2 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      Subiendo archivo...
-                    </span>
-                    <span className="text-sm font-semibold">{progress}%</span>
-                  </div>
-                  <Progress
-                    value={progress}
-                    color={progress === 100 ? 'success' : 'primary'}
-                    className="w-full"
+            <div className="flex gap-4">
+              {URL.createObjectURL(selectedFile) && (
+                <div className="flex-shrink-0">
+                  <video
+                    src={URL.createObjectURL(selectedFile)}
+                    className="w-46 h-32 object-cover rounded-lg bg-black"
+                    controls
+                    muted
                   />
                 </div>
               )}
+              
+              <div className="flex-1 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{selectedFile.name}</p>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">Tamaño:</span> {formatFileSize(fileMetadata.size)}
+                      </p>
+                      {fileMetadata.duration !== undefined && fileMetadata.duration > 0 && (
+                        <p className="text-xs text-gray-600">
+                          <span className="font-medium">Duración:</span> {formatDuration(fileMetadata.duration)}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">Tipo:</span> {selectedFile.type || 'Desconocido'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {!uploading && (
+                  <div className='flex justify-end'>
+                    <Button
+                      color="primary"
+                      size="sm"
+                      onPress={handleConfirmUpload}
+                    >
+                      Confirmar y Subir
+                    </Button>
+                  </div>
+                )}
+                {uploading && (
+                  <div className="space-y-2 pt-2 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">
+                        Subiendo archivo...
+                      </span>
+                      <span className="text-sm font-semibold">{progress}%</span>
+                    </div>
+                    <Progress
+                      value={progress}
+                      color={progress === 100 ? 'success' : 'primary'}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardBody>
         </Card>

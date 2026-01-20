@@ -358,37 +358,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 errorMessage={errors.description}
               />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Video</label>
-                <FileUploader
-                  folder="neurapp/videos/uploads"
-                  acceptedFileTypes="video/*"
-                  maxSizeMB={2048}
-                  onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
-                    setFormData({
-                      ...formData,
-                      url: fileUrl,
-                      size: fileSize ? fileSize.toFixed(2) : '',
-                      duration: duration ? duration.toString() : ''
-                    });
-                    if (errors.url) setErrors({ ...errors, url: '' });
-                  }}
-                />
-              </div>
-
-              <Input
-                label="URL"
-                placeholder="URL del video (generada automáticamente)"
-                value={formData.url}
-                isReadOnly
-                isInvalid={!!errors.url}
-                errorMessage={errors.url}
-                description="La URL se genera automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
-
               <Select
                 label="Idioma"
                 placeholder="Selecciona un idioma"
@@ -407,6 +376,25 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   </SelectItem>
                 ))}
               </Select>
+              
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Video</label>
+                <FileUploader
+                  folder="neurapp/videos/uploads"
+                  acceptedFileTypes="video/*"
+                  maxSizeMB={2048}
+                  onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
+                    setFormData({
+                      ...formData,
+                      url: fileUrl,
+                      size: fileSize ? fileSize.toFixed(2) : '',
+                      duration: duration ? duration.toString() : ''
+                    });
+                    if (errors.url) setErrors({ ...errors, url: '' });
+                  }}
+                />
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
