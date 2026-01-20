@@ -111,6 +111,27 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     onOpenDeleteModal();
   }
 
+  const deleteVideoByUrl = async (videoUrl: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/videos/delete/url`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoUrl }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar el video por url');
+      }
+
+    } catch (error) {
+      setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar video por url'});
+    }
+  }
+
+
   const handleDelete = async () => {
     if (!deletingVideo) return;
 
@@ -155,6 +176,15 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCancel = async () => {
+    if (formData.url && !editingVideo) {
+      console.log("Eliminando video subido no guardado:", formData.url.replace(/^https?:\/\//, ''));
+      
+      await deleteVideoByUrl(formData.url);
+    }
+    onClose();
   };
 
   const handleSave = async () => {
@@ -398,7 +428,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
+            <Button color="danger" variant="light" onPress={handleCancel} isDisabled={saving}>
               Cancelar
             </Button>
             <Button color="primary" onPress={handleSave} isLoading={saving}>
