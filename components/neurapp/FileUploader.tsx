@@ -7,6 +7,7 @@ import { FiUpload, FiX, FiCheck } from 'react-icons/fi';
 interface FileUploaderProps {
   folder?: string;
   onUploadComplete: (fileUrl: string, fileName: string, fileSize?: number, duration?: number) => void;
+  onUploadingChange?: (isUploading: boolean) => void;
   acceptedFileTypes?: string;
   maxSizeMB?: number;
   className?: string;
@@ -49,6 +50,7 @@ const extractVideoDuration = (file: File): Promise<number> => {
 export default function FileUploader({
   folder = 'resources',
   onUploadComplete,
+  onUploadingChange,
   acceptedFileTypes = '*',
   maxSizeMB = 2048,
   className = '',
@@ -94,6 +96,7 @@ export default function FileUploader({
 
     setUploading(true);
     setProgress(0);
+    onUploadingChange?.(true);
 
     try {
       const fileSizeBytes = selectedFile.size;
@@ -165,6 +168,7 @@ export default function FileUploader({
       };
 
       setUploadedFile(uploadedFileInfo);
+      onUploadingChange?.(false);
 
       // Usar la duración extraída previamente si existe
       const videoDuration = fileMetadata?.duration;
@@ -181,6 +185,7 @@ export default function FileUploader({
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setUploading(false);
       setProgress(0);
+      onUploadingChange?.(false);
     }
   };
 
@@ -240,16 +245,17 @@ export default function FileUploader({
 
       {selectedFile && fileMetadata && !uploadedFile && (
         <Card className="mt-4 border-primary-500 relative">
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            className="absolute top-2 right-2 z-10"
-            onPress={handleCancelSelection}
-            disabled={uploading}
-          >
-            <FiX className="w-4 h-4" />
-          </Button>
+          {!uploading && (
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="absolute top-2 right-2 z-10"
+              onPress={handleCancelSelection}
+            >
+              <FiX className="w-4 h-4" />
+            </Button>
+          )}
           <CardBody>
             <div className="flex gap-4">
               {URL.createObjectURL(selectedFile) && (

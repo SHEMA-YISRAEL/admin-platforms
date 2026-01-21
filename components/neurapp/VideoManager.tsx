@@ -47,6 +47,11 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     onOpen: onOpenDeleteModal,
     onClose: onCloseDeleteModal
   } = useDisclosure();
+  const {
+    isOpen: isOpenCancelWarning,
+    onOpen: onOpenCancelWarning,
+    onClose: onCloseCancelWarning
+  } = useDisclosure();
   const [editingVideo, setEditingVideo] = useState<VideoData | null>(null);
   const [deletingVideo, setDeletingVideo] = useState<VideoData | null>(null);
   const [formData, setFormData] = useState({
@@ -60,6 +65,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
@@ -74,6 +80,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     });
     setErrors({});
     setSuccessMessage(null);
+    setIsUploading(false);
     onOpen();
   };
 
@@ -178,12 +185,20 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCancel = async () => {
+  const handleCancelClick = () => {
+    if (isUploading || formData.url) {
+      onOpenCancelWarning();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    onCloseCancelWarning();
     if (formData.url && !editingVideo) {
-      console.log("Eliminando video subido no guardado:", formData.url.replace(/^https?:\/\//, ''));
-      
       await deleteVideoByUrl(formData.url);
     }
+    setIsUploading(false);
     onClose();
   };
 
@@ -351,7 +366,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
+      <Modal isOpen={isOpen} onClose={handleCancelClick} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingVideo ? 'Editar Video' : 'Nuevo Video'}
@@ -423,12 +438,13 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                     });
                     if (errors.url) setErrors({ ...errors, url: '' });
                   }}
+                  onUploadingChange={setIsUploading}
                 />
               </div>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={handleCancel} isDisabled={saving}>
+            <Button color="danger" variant="light" onPress={handleCancelClick} isDisabled={saving}>
               Cancelar
             </Button>
             <Button color="primary" onPress={handleSave} isLoading={saving}>
@@ -444,6 +460,32 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         dataName={deletingVideo ? deletingVideo.title : ''}
         dataType={'video'}>
       </DeleteModal>
+
+      <Modal isOpen={isOpenCancelWarning} onClose={onCloseCancelWarning} size="sm">
+        <ModalContent>
+          <ModalHeader>
+            {isUploading ? 'Video en proceso de subida' : 'Video subido'}
+          </ModalHeader>
+          <ModalBody>
+            <p className="text-gray-600">
+              {isUploading
+                ? 'Hay un video siendo subido actualmente. Si cancelas, se perderá el progreso de la subida.'
+                : 'Ya hay un video subido. Si cancelas, el video será eliminado y no se guardará.'}
+            </p>
+            <p className="text-gray-600 mt-2 font-medium">
+              ¿Estás seguro de que deseas cancelar?
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={handleConfirmCancel}>
+              Sí, cancelar
+            </Button>
+            <Button color="primary" onPress={onCloseCancelWarning}>
+              Continuar editando
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
