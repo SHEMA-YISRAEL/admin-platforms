@@ -7,6 +7,7 @@ import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards"
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
 import FlashcardPreviewModal from "./FlashcardPreviewModal";
+import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -53,6 +54,12 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
     onClose: onClosePreview
   } = useDisclosure();
   const [previewFlashcard, setPreviewFlashcard] = useState<FlashcardData | null>(null);
+  const {
+    isOpen: isOpenCancelWarning,
+    onOpen: onOpenCancelWarning,
+    onClose: onCloseCancelWarning
+  } = useDisclosure();
+  const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -142,6 +149,47 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
       setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
     }
     onCloseDeleteModal();
+  };
+
+  const deleteFileByUrl = async (fileUrl: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/flashcards/delete/url`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: fileUrl }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar el archivo por url');
+      }
+    } catch (error) {
+      console.error('Error deleting file by url:', error);
+    }
+  };
+
+  const handleCancelClick = () => {
+    const hasNewObverse = formData.obverse_side_url && formData.obverse_side_url !== editingFlashcard?.obverse_side_url;
+    const hasNewReverse = formData.reverse_side_url && formData.reverse_side_url !== editingFlashcard?.reverse_side_url;
+    if (isUploading || hasNewObverse || hasNewReverse) {
+      onOpenCancelWarning();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    onCloseCancelWarning();
+    if (formData.obverse_side_url && formData.obverse_side_url !== editingFlashcard?.obverse_side_url) {
+      await deleteFileByUrl(formData.obverse_side_url);
+    }
+    if (formData.reverse_side_url && formData.reverse_side_url !== editingFlashcard?.reverse_side_url) {
+      await deleteFileByUrl(formData.reverse_side_url);
+    }
+    setIsUploading(false);
+    onClose();
   };
 
   const validateForm = () => {
@@ -370,7 +418,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
+      <Modal isOpen={isOpen} onClose={handleCancelClick} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingFlashcard ? 'Editar Flashcard' : 'Nueva Flashcard'}
@@ -406,6 +454,24 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 isInvalid={!!errors.description}
                 errorMessage={errors.description}
               />
+              <Select
+                label="Idioma"
+                placeholder="Selecciona un idioma"
+                selectedKeys={[formData.locale]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData({ ...formData, locale: selected });
+                }}
+                isRequired
+                isInvalid={!!errors.locale}
+                errorMessage={errors.locale}
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </Select>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Imagen Anverso</label>
@@ -420,21 +486,12 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                     setFormData({ ...formData, obverse_side_url: fileUrl, size: newSize });
                     if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
                   }}
+                  onUploadingChange={setIsUploading}
                 />
+                {errors.obverse_side_url && (
+                  <p className="text-tiny text-danger">{errors.obverse_side_url}</p>
+                )}
               </div>
-
-              <Input
-                label="URL Anverso"
-                placeholder="URL de la imagen del anverso (generada automáticamente)"
-                value={formData.obverse_side_url}
-                isReadOnly
-                isInvalid={!!errors.obverse_side_url}
-                errorMessage={errors.obverse_side_url}
-                description="La URL se genera automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Imagen Reverso</label>
@@ -449,21 +506,12 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                     setFormData({ ...formData, reverse_side_url: fileUrl, size: newSize });
                     if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
                   }}
+                  onUploadingChange={setIsUploading}
                 />
+                {errors.reverse_side_url && (
+                  <p className="text-tiny text-danger">{errors.reverse_side_url}</p>
+                )}
               </div>
-
-              <Input
-                label="URL Reverso"
-                placeholder="URL de la imagen del reverso (generada automáticamente)"
-                value={formData.reverse_side_url}
-                isReadOnly
-                isInvalid={!!errors.reverse_side_url}
-                errorMessage={errors.reverse_side_url}
-                description="La URL se genera automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
 
               {formData.obverse_side_url && formData.reverse_side_url && (
                 <Button
@@ -489,29 +537,10 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   Previsualizar Flashcard
                 </Button>
               )}
-
-              <Select
-                label="Idioma"
-                placeholder="Selecciona un idioma"
-                selectedKeys={[formData.locale]}
-                onSelectionChange={(keys) => {
-                  const selected = Array.from(keys)[0] as string;
-                  setFormData({ ...formData, locale: selected });
-                }}
-                isRequired
-                isInvalid={!!errors.locale}
-                errorMessage={errors.locale}
-              >
-                {AVAILABLE_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.value}>
-                    {lang.label}
-                  </SelectItem>
-                ))}
-              </Select>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
+            <Button color="danger" variant="light" onPress={handleCancelClick} isDisabled={saving}>
               Cancelar
             </Button>
             <Button color="primary" onPress={handleSave} isLoading={saving}>
@@ -539,6 +568,14 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
           locale={previewFlashcard.locale}
         />
       )}
+
+      <UploadCancelWarningModal
+        isOpen={isOpenCancelWarning}
+        onClose={onCloseCancelWarning}
+        onConfirmCancel={handleConfirmCancel}
+        isUploading={isUploading}
+        resourceType="imagen"
+      />
     </div>
   );
 }
