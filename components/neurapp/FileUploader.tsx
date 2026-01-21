@@ -258,18 +258,39 @@ export default function FileUploader({
           )}
           <CardBody>
             <div className="flex gap-4">
-              {URL.createObjectURL(selectedFile) && (
-                <div className="flex-shrink-0">
+              <div className="flex-shrink-0">
+                {selectedFile.type.startsWith('video/') && (
                   <video
                     src={URL.createObjectURL(selectedFile)}
                     className="w-46 h-32 object-cover rounded-lg bg-black"
                     controls
                     muted
                   />
-                </div>
-              )}
+                )}
+                {selectedFile.type.startsWith('image/') && (
+                  <img
+                    src={URL.createObjectURL(selectedFile)}
+                    alt={selectedFile.name}
+                    className="w-46 h-32 object-cover rounded-lg"
+                  />
+                )}
+                {selectedFile.type === 'application/pdf' && (
+                  <div className="w-46 h-32 flex items-center justify-center bg-gray-100 rounded-lg">
+                    <div className="text-center">
+                      <svg
+                        className="w-12 h-12 mx-auto text-red-500"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 9h2v5h-2v-5zm-2 3h1v2H8v-2zm6 0h1v2h-1v-2z" />
+                      </svg>
+                      <span className="text-xs text-gray-600 mt-1 block">PDF</span>
+                    </div>
+                  </div>
+                )}
+              </div>
               
-              <div className="flex-1 space-y-3">
+              <div className="flex flex-col flex-1 justify-between">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-gray-900">{selectedFile.name}</p>
