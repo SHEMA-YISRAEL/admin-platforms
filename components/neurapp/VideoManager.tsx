@@ -187,7 +187,8 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   };
 
   const handleCancelClick = () => {
-    if (isUploading || formData.url) {
+    const hasNewUpload = formData.url && formData.url !== editingVideo?.url;
+    if (isUploading || hasNewUpload) {
       onOpenCancelWarning();
     } else {
       onClose();
@@ -196,7 +197,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
   const handleConfirmCancel = async () => {
     onCloseCancelWarning();
-    if (formData.url && !editingVideo) {
+    if (formData.url && formData.url !== editingVideo?.url) {
       await deleteVideoByUrl(formData.url);
     }
     setIsUploading(false);
@@ -441,6 +442,9 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   }}
                   onUploadingChange={setIsUploading}
                 />
+                {errors.url && (
+                  <p className="text-tiny text-danger">{errors.url}</p>
+                )}
               </div>
             </div>
           </ModalBody>
