@@ -6,6 +6,7 @@ import { PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
+import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -461,31 +462,13 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         dataType={'video'}>
       </DeleteModal>
 
-      <Modal isOpen={isOpenCancelWarning} onClose={onCloseCancelWarning} size="sm">
-        <ModalContent>
-          <ModalHeader>
-            {isUploading ? 'Video en proceso de subida' : 'Video subido'}
-          </ModalHeader>
-          <ModalBody>
-            <p className="text-gray-600">
-              {isUploading
-                ? 'Hay un video siendo subido actualmente. Si cancelas, se perderá el progreso de la subida.'
-                : 'Ya hay un video subido. Si cancelas, el video será eliminado y no se guardará.'}
-            </p>
-            <p className="text-gray-600 mt-2 font-medium">
-              ¿Estás seguro de que deseas cancelar?
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onPress={handleConfirmCancel}>
-              Sí, cancelar
-            </Button>
-            <Button color="primary" onPress={onCloseCancelWarning}>
-              Continuar editando
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <UploadCancelWarningModal
+        isOpen={isOpenCancelWarning}
+        onClose={onCloseCancelWarning}
+        onConfirmCancel={handleConfirmCancel}
+        isUploading={isUploading}
+        resourceType="video"
+      />
     </div>
   );
 }
