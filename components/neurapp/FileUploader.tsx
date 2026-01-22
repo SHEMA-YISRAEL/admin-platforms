@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Button, Progress, Card, CardBody } from '@heroui/react';
+import { Button, Progress, Card, CardBody, Spinner } from '@heroui/react';
 import { FiUpload, FiX, FiCheck } from 'react-icons/fi';
+import { FileTypeCategory, formatAllowedTypes } from '@/constants/file-types';
+import { validateFileType } from '@/utils/file-validation';
 
 interface FileUploaderProps {
   folder?: string;
@@ -11,6 +13,8 @@ interface FileUploaderProps {
   acceptedFileTypes?: string;
   maxSizeMB?: number;
   className?: string;
+  fileTypeCategory?: FileTypeCategory;
+  onValidationError?: (error: string) => void;
 }
 
 interface UploadedFileInfo {
@@ -54,8 +58,11 @@ export default function FileUploader({
   acceptedFileTypes = '*',
   maxSizeMB = 2048,
   className = '',
+  fileTypeCategory,
+  onValidationError,
 }: FileUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
@@ -67,14 +74,27 @@ export default function FileUploader({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validar tamaño del archivo
+    setError(null);
+
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       setError(`El archivo excede el tamaño máximo de ${maxSizeMB}MB`);
       return;
     }
 
-    setError(null);
+    if (fileTypeCategory) {
+      setValidating(true);
+      const validationResult = await validateFileType(file, fileTypeCategory);
+      setValidating(false);
+
+      if (!validationResult.isValid) {
+        const errorMsg = validationResult.error || 'Tipo de archivo no válido';
+        setError(errorMsg);
+        onValidationError?.(errorMsg);
+        return;
+      }
+    }
+
     setSelectedFile(file);
 
     // Extract metadata
@@ -233,14 +253,21 @@ export default function FileUploader({
       />
 
       {!selectedFile && !uploadedFile && (
-        <Button
-          color="primary"
-          onClick={handleButtonClick}
-          disabled={uploading}
-          startContent={<FiUpload />}
-        >
-          Seleccionar archivo
-        </Button>
+        <div>
+          <Button
+            color="primary"
+            onClick={handleButtonClick}
+            disabled={uploading || validating}
+            startContent={validating ? <Spinner size="sm" /> : <FiUpload />}
+          >
+            {validating ? 'Verificando archivo...' : 'Seleccionar archivo'}
+          </Button>
+          {fileTypeCategory && (
+            <p className="text-xs text-gray-500 mt-1">
+              Archivos permitidos: {formatAllowedTypes(fileTypeCategory)} (máx. {maxSizeMB >= 1024 ? `${(maxSizeMB / 1024).toFixed(0)} GB` : `${maxSizeMB} MB`})
+            </p>
+          )}
+        </div>
       )}
 
       {selectedFile && fileMetadata && !uploadedFile && (

@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
+import { VIDEO_FILE_TYPES } from "@/constants/file-types";
 import DeleteModal from "../shared/DeleteModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
@@ -250,7 +251,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         setVideos(updatedVideos);
         setSuccessMessage('Video actualizado exitosamente');
       } else {
-        setVideos([...videos, savedVideo]);
+        setVideos([...videos, savedVideo].sort((a, b) => a.order - b.order));
         setSuccessMessage('Video creado exitosamente');
       }
 
@@ -302,14 +303,14 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {videos.map((video) => (
+              {videos.map((video, index) => (
                 <tr
                   key={video.id}
                   className="hover:bg-red-50/50 transition-colors"
                 >
                   <td className="px-3 py-2 text-center">
                     <span className="inline-block bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">
-                      {video.order}
+                      {video.order ?? (index + 1)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
@@ -429,8 +430,9 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 <label className="text-sm font-medium">Video</label>
                 <FileUploader
                   folder="neurapp/videos/uploads"
-                  acceptedFileTypes="video/*"
-                  maxSizeMB={2048}
+                  acceptedFileTypes={VIDEO_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="video"
+                  maxSizeMB={VIDEO_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
                     setFormData({
                       ...formData,
@@ -441,6 +443,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                     if (errors.url) setErrors({ ...errors, url: '' });
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, url: error }))}
                 />
                 {errors.url && (
                   <p className="text-tiny text-danger">{errors.url}</p>

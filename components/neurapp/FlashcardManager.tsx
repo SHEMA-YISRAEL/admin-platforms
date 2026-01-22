@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { PhotoIcon, EyeIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
 import FileUploader from "./FileUploader";
+import { IMAGE_FILE_TYPES } from "@/constants/file-types";
 import DeleteModal from "../shared/DeleteModal";
 import FlashcardPreviewModal from "./FlashcardPreviewModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
@@ -248,7 +249,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
         setFlashcards(updatedFlashcards);
         setSuccessMessage('Flashcard actualizada exitosamente');
       } else {
-        setFlashcards([...flashcards, savedFlashcard]);
+        setFlashcards([...flashcards, savedFlashcard].sort((a, b) => a.order - b.order));
         setSuccessMessage('Flashcard creada exitosamente');
       }
 
@@ -299,14 +300,14 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {flashcards.map((flashcard) => (
+              {flashcards.map((flashcard, index) => (
                 <tr
                   key={flashcard.id}
                   className="hover:bg-purple-50/50 transition-colors"
                 >
                   <td className="px-3 py-2 text-center">
                     <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
-                      {flashcard.order}
+                      {flashcard.order ?? (index + 1)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
@@ -477,16 +478,19 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 <label className="text-sm font-medium">Imagen Anverso</label>
                 <FileUploader
                   folder="neurapp/flashcards"
-                  acceptedFileTypes="image/*"
-                  maxSizeMB={10}
+                  acceptedFileTypes={IMAGE_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="image"
+                  maxSizeMB={IMAGE_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Add the uploaded file URL to form data
-                    const currentSize = formData.size || 0;
-                    const newSize = currentSize + (fileSize || 0);
-                    setFormData({ ...formData, obverse_side_url: fileUrl, size: newSize });
-                    if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
+                    setFormData(prev => ({
+                      ...prev,
+                      obverse_side_url: fileUrl,
+                      size: (prev.size || 0) + (fileSize || 0)
+                    }));
+                    setErrors(prevErrors => ({ ...prevErrors, obverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, obverse_side_url: error }))}
                 />
                 {errors.obverse_side_url && (
                   <p className="text-tiny text-danger">{errors.obverse_side_url}</p>
@@ -497,16 +501,19 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 <label className="text-sm font-medium">Imagen Reverso</label>
                 <FileUploader
                   folder="neurapp/flashcards"
-                  acceptedFileTypes="image/*"
-                  maxSizeMB={10}
+                  acceptedFileTypes={IMAGE_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="image"
+                  maxSizeMB={IMAGE_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Add the size of the new file to the existing size (if any)
-                    const currentSize = formData.size || 0;
-                    const newSize = currentSize + (fileSize || 0);
-                    setFormData({ ...formData, reverse_side_url: fileUrl, size: newSize });
-                    if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
+                    setFormData(prev => ({
+                      ...prev,
+                      reverse_side_url: fileUrl,
+                      size: (prev.size || 0) + (fileSize || 0)
+                    }));
+                    setErrors(prevErrors => ({ ...prevErrors, reverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, reverse_side_url: error }))}
                 />
                 {errors.reverse_side_url && (
                   <p className="text-tiny text-danger">{errors.reverse_side_url}</p>
