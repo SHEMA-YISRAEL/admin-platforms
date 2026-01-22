@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { DocumentTextIcon, EyeIcon } from "@heroicons/react/24/outline";
 import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
+import { DOCUMENT_FILE_TYPES } from "@/constants/file-types";
 import DeleteModal from "../shared/DeleteModal";
 import SummaryPreviewModal from "./SummaryPreviewModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
@@ -443,13 +444,15 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                 <label className="text-sm font-medium">Archivo del Resumen</label>
                 <FileUploader
                   folder="neurapp/summaries"
-                  acceptedFileTypes=".pdf"
-                  maxSizeMB={50}
+                  acceptedFileTypes={DOCUMENT_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="document"
+                  maxSizeMB={DOCUMENT_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
                     setFormData({ ...formData, urlFile: fileUrl, size: fileSize || null });
                     if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, urlFile: error }))}
                 />
                 {errors.urlFile && (
                   <p className="text-tiny text-danger">{errors.urlFile}</p>

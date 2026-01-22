@@ -5,6 +5,7 @@ import { Card, CardBody, Button, Input, Modal, ModalContent, ModalHeader, ModalB
 import { PhotoIcon, EyeIcon } from "@heroicons/react/24/outline";
 import useFlashcards, { FlashcardData } from "@/app/hooks/neurapp/useFlashcards";
 import FileUploader from "./FileUploader";
+import { IMAGE_FILE_TYPES } from "@/constants/file-types";
 import DeleteModal from "../shared/DeleteModal";
 import FlashcardPreviewModal from "./FlashcardPreviewModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
@@ -477,10 +478,10 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 <label className="text-sm font-medium">Imagen Anverso</label>
                 <FileUploader
                   folder="neurapp/flashcards"
-                  acceptedFileTypes="image/*"
-                  maxSizeMB={10}
+                  acceptedFileTypes={IMAGE_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="image"
+                  maxSizeMB={IMAGE_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Add the uploaded file URL to form data
                     setFormData(prev => ({
                       ...prev,
                       obverse_side_url: fileUrl,
@@ -489,6 +490,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                     setErrors(prevErrors => ({ ...prevErrors, obverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, obverse_side_url: error }))}
                 />
                 {errors.obverse_side_url && (
                   <p className="text-tiny text-danger">{errors.obverse_side_url}</p>
@@ -499,10 +501,10 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                 <label className="text-sm font-medium">Imagen Reverso</label>
                 <FileUploader
                   folder="neurapp/flashcards"
-                  acceptedFileTypes="image/*"
-                  maxSizeMB={10}
+                  acceptedFileTypes={IMAGE_FILE_TYPES.acceptAttribute}
+                  fileTypeCategory="image"
+                  maxSizeMB={IMAGE_FILE_TYPES.maxSizeMB}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
-                    // Add the size of the new file to the existing size (if any)
                     setFormData(prev => ({
                       ...prev,
                       reverse_side_url: fileUrl,
@@ -511,6 +513,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                     setErrors(prevErrors => ({ ...prevErrors, reverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
+                  onValidationError={(error) => setErrors(prev => ({ ...prev, reverse_side_url: error }))}
                 />
                 {errors.reverse_side_url && (
                   <p className="text-tiny text-danger">{errors.reverse_side_url}</p>
