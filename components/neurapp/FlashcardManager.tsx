@@ -481,10 +481,12 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
                     // Add the uploaded file URL to form data
-                    const currentSize = formData.size || 0;
-                    const newSize = currentSize + (fileSize || 0);
-                    setFormData({ ...formData, obverse_side_url: fileUrl, size: newSize });
-                    if (errors.obverse_side_url) setErrors({ ...errors, obverse_side_url: '' });
+                    setFormData(prev => ({
+                      ...prev,
+                      obverse_side_url: fileUrl,
+                      size: (prev.size || 0) + (fileSize || 0)
+                    }));
+                    setErrors(prevErrors => ({ ...prevErrors, obverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
                 />
@@ -501,10 +503,12 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   maxSizeMB={10}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
                     // Add the size of the new file to the existing size (if any)
-                    const currentSize = formData.size || 0;
-                    const newSize = currentSize + (fileSize || 0);
-                    setFormData({ ...formData, reverse_side_url: fileUrl, size: newSize });
-                    if (errors.reverse_side_url) setErrors({ ...errors, reverse_side_url: '' });
+                    setFormData(prev => ({
+                      ...prev,
+                      reverse_side_url: fileUrl,
+                      size: (prev.size || 0) + (fileSize || 0)
+                    }));
+                    setErrors(prevErrors => ({ ...prevErrors, reverse_side_url: '' }));
                   }}
                   onUploadingChange={setIsUploading}
                 />
