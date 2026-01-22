@@ -248,7 +248,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
         setFlashcards(updatedFlashcards);
         setSuccessMessage('Flashcard actualizada exitosamente');
       } else {
-        setFlashcards([...flashcards, savedFlashcard]);
+        setFlashcards([...flashcards, savedFlashcard].sort((a, b) => a.order - b.order));
         setSuccessMessage('Flashcard creada exitosamente');
       }
 
@@ -299,14 +299,14 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {flashcards.map((flashcard) => (
+              {flashcards.map((flashcard, index) => (
                 <tr
                   key={flashcard.id}
                   className="hover:bg-purple-50/50 transition-colors"
                 >
                   <td className="px-3 py-2 text-center">
                     <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
-                      {flashcard.order}
+                      {flashcard.order ?? (index + 1)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">

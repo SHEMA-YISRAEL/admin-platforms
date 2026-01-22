@@ -241,7 +241,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
         setSummaries(updatedSummaries);
         setSuccessMessage('Resumen actualizado exitosamente');
       } else {
-        setSummaries([...summaries, savedSummary]);
+        setSummaries([...summaries, savedSummary].sort((a, b) => a.order - b.order));
         setSuccessMessage('Resumen creado exitosamente');
       }
 
@@ -292,14 +292,14 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {summaries.map((summary) => (
+              {summaries.map((summary, index) => (
                 <tr
                   key={summary.id}
                   className="hover:bg-teal-50/50 transition-colors"
                 >
                   <td className="px-3 py-2 text-center">
                     <span className="inline-block bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs font-semibold">
-                      {summary.order}
+                      {summary.order ?? (index + 1)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">

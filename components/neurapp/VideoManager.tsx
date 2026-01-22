@@ -250,7 +250,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         setVideos(updatedVideos);
         setSuccessMessage('Video actualizado exitosamente');
       } else {
-        setVideos([...videos, savedVideo]);
+        setVideos([...videos, savedVideo].sort((a, b) => a.order - b.order));
         setSuccessMessage('Video creado exitosamente');
       }
 
@@ -302,14 +302,14 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {videos.map((video) => (
+              {videos.map((video, index) => (
                 <tr
                   key={video.id}
                   className="hover:bg-red-50/50 transition-colors"
                 >
                   <td className="px-3 py-2 text-center">
                     <span className="inline-block bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">
-                      {video.order}
+                      {video.order ?? (index + 1)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
