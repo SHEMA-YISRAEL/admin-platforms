@@ -6,6 +6,7 @@ import { PlayIcon } from "@heroicons/react/24/outline";
 import useVideos, { VideoData } from "@/app/hooks/neurapp/useVideos";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
+import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -47,6 +48,11 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     onOpen: onOpenDeleteModal,
     onClose: onCloseDeleteModal
   } = useDisclosure();
+  const {
+    isOpen: isOpenCancelWarning,
+    onOpen: onOpenCancelWarning,
+    onClose: onCloseCancelWarning
+  } = useDisclosure();
   const [editingVideo, setEditingVideo] = useState<VideoData | null>(null);
   const [deletingVideo, setDeletingVideo] = useState<VideoData | null>(null);
   const [formData, setFormData] = useState({
@@ -60,6 +66,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
   const handleCreate = () => {
@@ -74,6 +81,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     });
     setErrors({});
     setSuccessMessage(null);
+    setIsUploading(false);
     onOpen();
   };
 
@@ -110,6 +118,27 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
     setDeletingVideo(video);
     onOpenDeleteModal();
   }
+
+  const deleteVideoByUrl = async (videoUrl: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/videos/delete/url`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoUrl }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar el video por url');
+      }
+
+    } catch (error) {
+      setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar video por url'});
+    }
+  }
+
 
   const handleDelete = async () => {
     if (!deletingVideo) return;
@@ -155,6 +184,24 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCancelClick = () => {
+    const hasNewUpload = formData.url && formData.url !== editingVideo?.url;
+    if (isUploading || hasNewUpload) {
+      onOpenCancelWarning();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    onCloseCancelWarning();
+    if (formData.url && formData.url !== editingVideo?.url) {
+      await deleteVideoByUrl(formData.url);
+    }
+    setIsUploading(false);
+    onClose();
   };
 
   const handleSave = async () => {
@@ -321,7 +368,7 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
+      <Modal isOpen={isOpen} onClose={handleCancelClick} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingVideo ? 'Editar Video' : 'Nuevo Video'}
@@ -358,37 +405,6 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                 errorMessage={errors.description}
               />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Video</label>
-                <FileUploader
-                  folder="neurapp/videos/uploads"
-                  acceptedFileTypes="video/*"
-                  maxSizeMB={2048}
-                  onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
-                    setFormData({
-                      ...formData,
-                      url: fileUrl,
-                      size: fileSize ? fileSize.toFixed(2) : '',
-                      duration: duration ? duration.toString() : ''
-                    });
-                    if (errors.url) setErrors({ ...errors, url: '' });
-                  }}
-                />
-              </div>
-
-              <Input
-                label="URL"
-                placeholder="URL del video (generada automáticamente)"
-                value={formData.url}
-                isReadOnly
-                isInvalid={!!errors.url}
-                errorMessage={errors.url}
-                description="La URL se genera automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
-
               <Select
                 label="Idioma"
                 placeholder="Selecciona un idioma"
@@ -407,10 +423,33 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
                   </SelectItem>
                 ))}
               </Select>
+              
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Video</label>
+                <FileUploader
+                  folder="neurapp/videos/uploads"
+                  acceptedFileTypes="video/*"
+                  maxSizeMB={2048}
+                  onUploadComplete={(fileUrl, fileName, fileSize, duration) => {
+                    setFormData({
+                      ...formData,
+                      url: fileUrl,
+                      size: fileSize ? fileSize.toFixed(2) : '',
+                      duration: duration ? duration.toString() : ''
+                    });
+                    if (errors.url) setErrors({ ...errors, url: '' });
+                  }}
+                  onUploadingChange={setIsUploading}
+                />
+                {errors.url && (
+                  <p className="text-tiny text-danger">{errors.url}</p>
+                )}
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
+            <Button color="danger" variant="light" onPress={handleCancelClick} isDisabled={saving}>
               Cancelar
             </Button>
             <Button color="primary" onPress={handleSave} isLoading={saving}>
@@ -426,6 +465,14 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
         dataName={deletingVideo ? deletingVideo.title : ''}
         dataType={'video'}>
       </DeleteModal>
+
+      <UploadCancelWarningModal
+        isOpen={isOpenCancelWarning}
+        onClose={onCloseCancelWarning}
+        onConfirmCancel={handleConfirmCancel}
+        isUploading={isUploading}
+        resourceType="video"
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import useSummaries, { SummaryData } from "@/app/hooks/neurapp/useSummaries";
 import FileUploader from "./FileUploader";
 import DeleteModal from "../shared/DeleteModal";
 import SummaryPreviewModal from "./SummaryPreviewModal";
+import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -52,6 +53,12 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
     onClose: onClosePreview
   } = useDisclosure();
   const [previewSummary, setPreviewSummary] = useState<SummaryData | null>(null);
+  const {
+    isOpen: isOpenCancelWarning,
+    onOpen: onOpenCancelWarning,
+    onClose: onCloseCancelWarning
+  } = useDisclosure();
+  const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -143,6 +150,43 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
       setErrors({ general: error instanceof Error ? error.message : 'Error desconocido al eliminar' });
     }
     onCloseDeleteModal();
+  };
+
+  const deleteFileByUrl = async (fileUrl: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/summaries/delete/url`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: fileUrl }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar el archivo por url');
+      }
+    } catch (error) {
+      console.error('Error deleting file by url:', error);
+    }
+  };
+
+  const handleCancelClick = () => {
+    const hasNewUpload = formData.urlFile && formData.urlFile !== editingSummary?.urlFile;
+    if (isUploading || hasNewUpload) {
+      onOpenCancelWarning();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    onCloseCancelWarning();
+    if (formData.urlFile && formData.urlFile !== editingSummary?.urlFile) {
+      await deleteFileByUrl(formData.urlFile);
+    }
+    setIsUploading(false);
+    onClose();
   };
 
   const validateForm = () => {
@@ -339,7 +383,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
         </div>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isDismissable={false}>
+      <Modal isOpen={isOpen} onClose={handleCancelClick} size="2xl" isDismissable={false}>
         <ModalContent>
           <ModalHeader>
             {editingSummary ? 'Editar Resumen' : 'Nuevo Resumen'}
@@ -376,31 +420,41 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                 errorMessage={errors.description}
               />
 
+                            <Select
+                label="Idioma"
+                placeholder="Selecciona un idioma"
+                selectedKeys={[formData.locale]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setFormData({ ...formData, locale: selected });
+                }}
+                isRequired
+                isInvalid={!!errors.locale}
+                errorMessage={errors.locale}
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </Select>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Archivo del Resumen</label>
                 <FileUploader
                   folder="neurapp/summaries"
-                  acceptedFileTypes=".pdf,.doc,.docx"
+                  acceptedFileTypes=".pdf"
                   maxSizeMB={50}
                   onUploadComplete={(fileUrl, fileName, fileSize) => {
                     setFormData({ ...formData, urlFile: fileUrl, size: fileSize || null });
                     if (errors.urlFile) setErrors({ ...errors, urlFile: '' });
                   }}
+                  onUploadingChange={setIsUploading}
                 />
+                {errors.urlFile && (
+                  <p className="text-tiny text-danger">{errors.urlFile}</p>
+                )}
               </div>
-
-              <Input
-                label="URL del Archivo"
-                placeholder="URL del archivo del resumen (generada automáticamente)"
-                value={formData.urlFile}
-                isReadOnly
-                isInvalid={!!errors.urlFile}
-                errorMessage={errors.urlFile}
-                description="La URL se genera automáticamente al subir el archivo"
-                classNames={{
-                  input: "bg-gray-50 cursor-not-allowed"
-                }}
-              />
 
               {formData.urlFile && (
                 <Button
@@ -425,29 +479,10 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   Previsualizar Resumen
                 </Button>
               )}
-
-              <Select
-                label="Idioma"
-                placeholder="Selecciona un idioma"
-                selectedKeys={[formData.locale]}
-                onSelectionChange={(keys) => {
-                  const selected = Array.from(keys)[0] as string;
-                  setFormData({ ...formData, locale: selected });
-                }}
-                isRequired
-                isInvalid={!!errors.locale}
-                errorMessage={errors.locale}
-              >
-                {AVAILABLE_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.value}>
-                    {lang.label}
-                  </SelectItem>
-                ))}
-              </Select>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
+            <Button color="danger" variant="light" onPress={handleCancelClick} isDisabled={saving}>
               Cancelar
             </Button>
             <Button color="primary" onPress={handleSave} isLoading={saving}>
@@ -474,6 +509,14 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
           locale={previewSummary.locale}
         />
       )}
+
+      <UploadCancelWarningModal
+        isOpen={isOpenCancelWarning}
+        onClose={onCloseCancelWarning}
+        onConfirmCancel={handleConfirmCancel}
+        isUploading={isUploading}
+        resourceType="archivo"
+      />
     </div>
   );
 }

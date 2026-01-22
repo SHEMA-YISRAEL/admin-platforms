@@ -6,6 +6,9 @@ import { LessonData } from "@/app/hooks/neurapp/useLessons";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 import SublessonManager from "./SublessonManager";
 import LessonModal from "./LessonModal";
+import SublessonModal from "./SublessonModal";
+
+type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
 
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
 
@@ -26,32 +29,26 @@ interface LessonManagerProps {
 }
 
 function SublessonRow({
-  lessonId,
   onSublessonSelect,
   selectedSublessonId,
   sublessons,
   loading,
   error,
-  onSublessonsChange
 }: {
-  lessonId: number;
   onSublessonSelect?: (sublessonId: number | null) => void;
   selectedSublessonId?: number | null;
   sublessons: SublessonData[];
   loading: boolean;
   error?: string | null;
-  onSublessonsChange: (sublessons: SublessonData[]) => void;
 }) {
   return (
     <tr>
       <td colSpan={3} className="px-0 py-0 bg-gray-50">
-        <div className="px-6 py-4">
+        <div>
           <SublessonManager
-            lessonId={lessonId}
             sublessons={sublessons}
             loading={loading}
             error={error}
-            onSublessonsChange={onSublessonsChange}
             onSublessonSelect={onSublessonSelect}
             selectedSublessonId={selectedSublessonId}
           />
@@ -77,6 +74,7 @@ export default function LessonManager({
   onSublessonsChange
 }: LessonManagerProps) {
   const [modalState, setModalState] = useState<{ isOpen: boolean; lesson: EditingLessonState } | null>(null);
+  const [sublessonModalState, setSublessonModalState] = useState<{ isOpen: boolean; sublesson: EditingSublessonState } | null>(null);
 
   const handleCreate = () => {
     setModalState({ isOpen: true, lesson: { type: 'create', data: null } });
@@ -95,6 +93,18 @@ export default function LessonManager({
     } else {
       onLessonsChange([...lessons, savedLesson].sort((a, b) => a.order - b.order));
     }
+  };
+
+  const handleCreateSublesson = (lessonId: number) => {
+    setSublessonModalState({ isOpen: true, sublesson: { type: 'create', data: null, lessonId } });
+  };
+
+  const handleSublessonModalClose = () => {
+    setSublessonModalState(null);
+  };
+
+  const handleSublessonSave = () => {
+    setSublessonModalState(null);
   };
 
   if (loading) {
@@ -161,23 +171,24 @@ export default function LessonManager({
                       </span>
                     </td>
                     <td className="px-3 py-2 text-gray-700 font-medium max-w-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-xs">
-                          {selectedLessonId === lesson.id ? '▼' : '▶'}
-                        </span>
-                        {lesson.title}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-xs">
+                            {selectedLessonId === lesson.id ? '▼' : '▶'}
+                          </span>
+                          {lesson.title}
+                        </div>
+                          <button onClick={(e) => { e.stopPropagation(); handleCreateSublesson(lesson.id); }} className="cursor-pointer bg-gray-200/75 hover:bg-blue-100 flex justify-center items-center rounded-full w-6 h-6">+</button>
                       </div>
                       </td>
                     </tr>
                     {selectedLessonId === lesson.id && (
                       <SublessonRow
-                        lessonId={selectedLessonId}
                         onSublessonSelect={onSublessonSelect}
                         selectedSublessonId={selectedSublessonId}
                         sublessons={sublessons}
                         loading={sublessonsLoading}
                         error={sublessonsError}
-                        onSublessonsChange={onSublessonsChange}
                       />
                     )}
                   </Fragment>
@@ -196,6 +207,19 @@ export default function LessonManager({
           lesson={modalState.lesson}
           lessons={lessons}
           onSave={handleSave}
+        />
+      )}
+
+      {/* Modal para crear sublección */}
+      {sublessonModalState && (
+        <SublessonModal
+          isOpen={sublessonModalState.isOpen}
+          onClose={handleSublessonModalClose}
+          lessonId={sublessonModalState.sublesson.lessonId}
+          sublesson={sublessonModalState.sublesson}
+          sublessons={sublessons}
+          onSublessonsChange={onSublessonsChange}
+          onSave={handleSublessonSave}
         />
       )}
     </div>
