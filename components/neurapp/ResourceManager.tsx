@@ -74,7 +74,7 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
             onSelectionChange={setSelectedTab}
           >
             <Tab key="videos" title="Videos" />
-            <Tab key="flashcards" title="Flashcards" />
+            {type === 'lesson' && <Tab key="flashcards" title="Flashcards" />}
             <Tab key="summaries" title="Resúmenes" />
           </Tabs>
         </div>
@@ -96,7 +96,7 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
             triggerCreate={triggerCreate.tab === "videos" ? triggerCreate.count : 0}
           />
         )}
-        {selectedTab === "flashcards" && (
+        {selectedTab === "flashcards" && type === 'lesson' && (
           <FlashcardManager
             type={type}
             id={id}
