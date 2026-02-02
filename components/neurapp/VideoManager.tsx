@@ -179,6 +179,10 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
       newErrors.title = 'El título es requerido';
     }
 
+    if (!formData.description.trim()) {
+      newErrors.description = 'La descripción es requerida';
+    }
+
     if (!formData.url.trim()) {
       newErrors.url = 'Debes cargar un archivo de video';
     }
@@ -396,14 +400,17 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
 
               <Input
                 label="Descripción"
-                placeholder="Descripción del video (opcional)"
+                placeholder="Descripción del video"
                 value={formData.description}
+                maxLength={500}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setFormData({ ...formData, description: e.target.value });
                   if (errors.description) setErrors({ ...errors, description: '' });
                 }}
+                isRequired
                 isInvalid={!!errors.description}
                 errorMessage={errors.description}
+                description={`${formData.description.length}/500 caracteres`}
               />
 
               <Select
