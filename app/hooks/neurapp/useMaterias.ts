@@ -48,15 +48,13 @@ function useMaterias() {
 
             const data: MateriaData[] = await response.json();
 
-            // Filter only visible courses and add slugs
-            const visibleCourses = data
-                .filter(materia => materia.visibility === true)
-                .map(materia => ({
-                    ...materia,
-                    slug: generateSlug(materia.title)
-                }));
+            // Add slugs to all courses
+            const courses = data.map(materia => ({
+                ...materia,
+                slug: generateSlug(materia.title)
+            }));
 
-            setMaterias(visibleCourses);
+            setMaterias(courses);
         } catch (err) {
             console.error('Error fetching materias from backend:', err);
             setError(err instanceof Error ? err.message : 'Unknown error');

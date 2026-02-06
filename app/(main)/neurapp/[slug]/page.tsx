@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Card, CardBody, useDisclosure, addToast } from "@heroui/react";
-import { FaPen, FaTrash } from "react-icons/fa";
+import { FaPen, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
 import useMaterias, { API_BASE_URL, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
 import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
@@ -15,6 +15,7 @@ import LessonModal from "@/components/neurapp/LessonModal";
 import SublessonModal from "@/components/neurapp/SublessonModal";
 import MateriaModal from "@/components/neurapp/MateriaModal";
 import DeleteModal from "@/components/shared/DeleteModal";
+import VisibilityModal from "@/components/shared/VisibilityModal";
 
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
 type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
@@ -48,7 +49,9 @@ export default function CoursePage() {
   const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
   const [materiaModalOpen, setMateriaModalOpen] = useState(false);
   const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+  const { isOpen: isVisibilityOpen, onOpen: onOpenVisibility, onClose: onCloseVisibility } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
+  const [togglingVisibility, setTogglingVisibility] = useState(false);
 
   // Reference to detect course change and control auto-selection
   const previousCourseIdRef = useRef<number | null>(null);
@@ -147,6 +150,29 @@ export default function CoursePage() {
     }
   };
 
+  const handleToggleVisibility = async () => {
+    if (!currentCourse) return;
+    try {
+      setTogglingVisibility(true);
+      const response = await fetch(`${API_BASE_URL}/courses/${currentCourse.id}/visibility`, {
+        method: 'PATCH',
+      });
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      const action = currentCourse.visibility ? 'ocultado' : 'visible';
+      addToast({ title: `Curso ${action} exitosamente`, color: 'success' });
+      notifyMateriasUpdated();
+    } catch (error) {
+      console.error('Error toggling visibility:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      addToast({ title: 'Error al cambiar visibilidad', description: errorMessage, color: 'danger' });
+    } finally {
+      setTogglingVisibility(false);
+      onCloseVisibility();
+    }
+  };
+
   const handleMateriaModalClose = () => {
     setMateriaModalOpen(false);
     // Refresh materias if title was edited (slug might have changed)
@@ -176,6 +202,13 @@ export default function CoursePage() {
         {/* Course Title */}
         <div className="mb-6 2xl:ml-40 flex items-center gap-3">
           <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
+          <button
+            onClick={onOpenVisibility}
+            className={`p-2 transition-colors cursor-pointer ${currentCourse.visibility ? 'text-green-500 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}`}
+            title={currentCourse.visibility ? 'Curso visible – clic para ocultar' : 'Curso oculto – clic para hacer visible'}
+          >
+            {currentCourse.visibility ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+          </button>
           <button
             onClick={() => setMateriaModalOpen(true)}
             className="p-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
@@ -290,6 +323,16 @@ export default function CoursePage() {
         dataType="materia"
         dataName={`"${currentCourse.title}"`}
         description="Se eliminará toda la materia incluyendo sus lecciones, sublecciones, videos, flashcards y resúmenes."
+      />
+
+      {/* Visibility Toggle Confirmation Modal */}
+      <VisibilityModal
+        isOpen={isVisibilityOpen}
+        onClose={onCloseVisibility}
+        onConfirm={handleToggleVisibility}
+        courseName={currentCourse.title}
+        currentlyVisible={currentCourse.visibility}
+        loading={togglingVisibility}
       />
     </div>
   );
