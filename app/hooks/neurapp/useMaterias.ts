@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export interface MateriaData {
     id: number;
@@ -11,18 +11,23 @@ export interface MateriaData {
     updatedAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-// Función para generar slugs a partir del título
-function generateSlug(title: string): string {
+// Generate URL-friendly slug from title
+export function generateSlug(title: string): string {
     return title
         .toLowerCase()
         .trim()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
-        .replace(/[^a-z0-9\s-]/g, '') // Eliminar caracteres especiales
-        .replace(/\s+/g, '-') // Reemplazar espacios con guiones
-        .replace(/-+/g, '-'); // Eliminar guiones duplicados
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-'); // Remove duplicate hyphens
+}
+
+// Dispatch event to trigger refetch in all useMaterias instances
+export function notifyMateriasUpdated() {
+    window.dispatchEvent(new Event('materias-updated'));
 }
 
 function useMaterias() {
@@ -30,41 +35,48 @@ function useMaterias() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchMaterias = async () => {
-            try {
-                setLoading(true);
-                setError(null);
+    const fetchMaterias = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-                const response = await fetch(`${API_BASE_URL}/courses`);
+            const response = await fetch(`${API_BASE_URL}/courses`);
 
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const data: MateriaData[] = await response.json();
-
-                // Filtrar solo los cursos visibles y agregar slugs
-                const visibleCourses = data
-                    .filter(materia => materia.visibility === true)
-                    .map(materia => ({
-                        ...materia,
-                        slug: generateSlug(materia.title)
-                    }));
-
-                setMaterias(visibleCourses);
-            } catch (err) {
-                console.error('Error fetching materias from backend:', err);
-                setError(err instanceof Error ? err.message : 'Unknown error');
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
-        };
 
-        fetchMaterias();
+            const data: MateriaData[] = await response.json();
+
+            // Filter only visible courses and add slugs
+            const visibleCourses = data
+                .filter(materia => materia.visibility === true)
+                .map(materia => ({
+                    ...materia,
+                    slug: generateSlug(materia.title)
+                }));
+
+            setMaterias(visibleCourses);
+        } catch (err) {
+            console.error('Error fetching materias from backend:', err);
+            setError(err instanceof Error ? err.message : 'Unknown error');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    return { materias, loading, error };
+    useEffect(() => {
+        fetchMaterias();
+    }, [fetchMaterias]);
+
+    // Listen for materias-updated event to auto-refetch
+    useEffect(() => {
+        const handler = () => { fetchMaterias(); };
+        window.addEventListener('materias-updated', handler);
+        return () => window.removeEventListener('materias-updated', handler);
+    }, [fetchMaterias]);
+
+    return { materias, setMaterias, loading, error, refetch: fetchMaterias };
 }
 
 export default useMaterias;

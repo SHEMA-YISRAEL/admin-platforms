@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react";
 import {
 	User,
 	Dropdown,
@@ -16,12 +17,14 @@ import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
 import { FaBook } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/interfaces/topoquizz";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
+import MateriaModal from "@/components/neurapp/MateriaModal";
 // import { usePermissions } from "@/app/hooks/usePermissions";
 
 
@@ -77,8 +80,10 @@ const NavBarCustom = () => {
 	// Solo cargar materias si el usuario es admin
 	// const shouldLoadMaterias = userData?.rol === "admin";
 	const { materias, loading: loadingMaterias } = useMaterias();
+	const [materiaModalOpen, setMateriaModalOpen] = useState(false);
 
 	return (
+		<>
 		<Navbar className="bg-black p-5 text-white font-bold">
 			<NavbarBrand>
 				<h2 className="text-2xl">ADMIN PANEL</h2>
@@ -171,14 +176,13 @@ const NavBarCustom = () => {
 									Usuarios
 								</DropdownItem>
 								<DropdownItem
-									key="materias-header"
-									description="Seleccionar materia"
-									startContent={<FaBook />}
+									key="nueva-materia"
+									description="Crear una nueva materia"
+									startContent={<FaPlus />}
 									showDivider
-									isReadOnly
-									className="cursor-default opacity-100"
+									onClick={() => setMateriaModalOpen(true)}
 								>
-									<span className="font-bold">Materias</span>
+									<span className="font-bold">Agregar nueva materia</span>
 								</DropdownItem>
 								{loadingMaterias ? (
 									<DropdownItem key="loading" isReadOnly>
@@ -208,6 +212,15 @@ const NavBarCustom = () => {
 				<UserMenu userData={userData} />
 			</NavbarContent>
 		</Navbar>
+
+		{materiaModalOpen && (
+			<MateriaModal
+				isOpen={materiaModalOpen}
+				onClose={() => setMateriaModalOpen(false)}
+				materia={{ type: 'create', data: null }}
+			/>
+		)}
+		</>
 	);
 }
 

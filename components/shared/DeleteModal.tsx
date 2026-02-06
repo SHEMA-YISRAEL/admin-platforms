@@ -6,9 +6,10 @@ type ClickButton = {
     isOpen: boolean;
     dataType: string;
     dataName: string;
+    description?: string;
 }
 
-function DeleteModal ({onClick, onClose, isOpen, dataName, dataType}: ClickButton){
+function DeleteModal ({onClick, onClose, isOpen, dataName, dataType, description}: ClickButton){
     return (
         <div>
             <Modal isOpen={isOpen} onClose={onClose} size="xs">
@@ -18,8 +19,11 @@ function DeleteModal ({onClick, onClose, isOpen, dataName, dataType}: ClickButto
               <ModalHeader className="flex flex-col gap-1">Eliminar {dataType}</ModalHeader>
               <ModalBody>
                 <p>
-                  ¿Estas seguro que deseas eliminar el {dataType} {dataName}?
+                  ¿Estas seguro que deseas eliminar la {dataType} {dataName}?
                 </p>
+                {description && (
+                  <p className="text-sm text-red-500 font-medium">{description}</p>
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
