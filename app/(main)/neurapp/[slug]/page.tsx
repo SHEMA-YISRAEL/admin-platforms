@@ -1,9 +1,10 @@
 'use client';
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Card, CardBody } from "@heroui/react";
-import useMaterias from "@/app/hooks/neurapp/useMaterias";
+import { Card, CardBody, useDisclosure, addToast } from "@heroui/react";
+import { FaPen, FaTrash } from "react-icons/fa";
+import useMaterias, { API_BASE_URL, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
 import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 import LessonManager from "@/components/neurapp/LessonManager";
@@ -12,12 +13,15 @@ import LessonInfoPanel from "@/components/neurapp/LessonInfoPanel";
 import SublessonInfoPanel from "@/components/neurapp/SublessonInfoPanel";
 import LessonModal from "@/components/neurapp/LessonModal";
 import SublessonModal from "@/components/neurapp/SublessonModal";
+import MateriaModal from "@/components/neurapp/MateriaModal";
+import DeleteModal from "@/components/shared/DeleteModal";
 
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
 type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
 
 export default function CoursePage() {
   const params = useParams();
+  const router = useRouter();
 
   // Normalize slug parameter
   const slugParam = useMemo(
@@ -42,6 +46,9 @@ export default function CoursePage() {
   const [selectedSublesson, setSelectedSublesson] = useState<number | null>(null);
   const [lessonModalState, setLessonModalState] = useState<EditingLessonState | null>(null);
   const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
+  const [materiaModalOpen, setMateriaModalOpen] = useState(false);
+  const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+  const [deleting, setDeleting] = useState(false);
 
   // Reference to detect course change and control auto-selection
   const previousCourseIdRef = useRef<number | null>(null);
@@ -117,6 +124,40 @@ export default function CoursePage() {
     });
   };
 
+  const handleDeleteMateria = async () => {
+    if (!currentCourse) return;
+    try {
+      setDeleting(true);
+      const response = await fetch(`${API_BASE_URL}/courses/${currentCourse.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      addToast({ title: 'Materia eliminada exitosamente', color: 'success' });
+      notifyMateriasUpdated();
+      router.push('/neurapp');
+    } catch (error) {
+      console.error('Error deleting materia:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      addToast({ title: 'Error al eliminar', description: errorMessage, color: 'danger' });
+    } finally {
+      setDeleting(false);
+      onCloseDelete();
+    }
+  };
+
+  const handleMateriaModalClose = () => {
+    setMateriaModalOpen(false);
+    // Refresh materias if title was edited (slug might have changed)
+    if (currentCourse) {
+      const newSlug = generateSlug(currentCourse.title);
+      if (newSlug !== courseSlug) {
+        notifyMateriasUpdated();
+      }
+    }
+  };
+
   const handleLessonSave = (savedLesson: LessonData) => {
     if (lessonModalState?.type === 'edit') {
       const updatedLessons = lessons.map(l =>
@@ -133,8 +174,22 @@ export default function CoursePage() {
       {/* Course Dashboard */}
       <div className="mt-4">
         {/* Course Title */}
-        <div className="mb-6 2xl:ml-40">
+        <div className="mb-6 2xl:ml-40 flex items-center gap-3">
           <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
+          <button
+            onClick={() => setMateriaModalOpen(true)}
+            className="p-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
+            title="Editar nombre"
+          >
+            <FaPen size={16} />
+          </button>
+          <button
+            onClick={onOpenDelete}
+            className="p-2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+            title="Eliminar materia"
+          >
+            <FaTrash size={16} />
+          </button>
         </div>
 
         {/* 2-Column Layout: Lessons/Sublessons | Info Panel + Resources */}
@@ -217,6 +272,25 @@ export default function CoursePage() {
           onSave={() => {}}
         />
       )}
+
+      {/* Materia Edit Modal */}
+      {materiaModalOpen && currentCourse && (
+        <MateriaModal
+          isOpen={materiaModalOpen}
+          onClose={handleMateriaModalClose}
+          materia={{ type: 'edit', data: currentCourse }}
+        />
+      )}
+
+      {/* Delete Materia Confirmation Modal */}
+      <DeleteModal
+        isOpen={isDeleteOpen}
+        onClose={onCloseDelete}
+        onClick={handleDeleteMateria}
+        dataType="materia"
+        dataName={`"${currentCourse.title}"`}
+        description="Se eliminará toda la materia incluyendo sus lecciones, sublecciones, videos, flashcards y resúmenes."
+      />
     </div>
   );
 }
