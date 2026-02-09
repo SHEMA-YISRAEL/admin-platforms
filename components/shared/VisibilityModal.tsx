@@ -26,8 +26,8 @@ function VisibilityModal({ isOpen, onClose, onConfirm, courseName, currentlyVisi
                             </p>
                             <p className="text-sm text-gray-500">
                                 {currentlyVisible
-                                    ? "El curso dejará de ser visible para los estudiantes."
-                                    : "El curso será visible para los estudiantes."}
+                                    ? "El curso aparecerá como bloqueado con un mensaje de \"Próximamente\". Los estudiantes no podrán acceder a su contenido."
+                                    : "Los estudiantes podrán acceder al contenido del curso."}
                             </p>
                         </ModalBody>
                         <ModalFooter>
