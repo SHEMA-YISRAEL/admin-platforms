@@ -18,6 +18,7 @@ import { BsTranslate } from "react-icons/bs";
 import { FaBook } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
@@ -196,7 +197,13 @@ const NavBarCustom = () => {
 												className={`pl-8 ${pathname.includes(`/neurapp/${materia.slug}`) ? "bg-gray-400/30" : ""}`}
 												onClick={() => router.push(`/neurapp/${materia.slug}`)}
 											>
-												{materia.title}
+												<span className="flex items-center gap-2">
+													{materia.visibility
+														? <FaEye className="text-green-500 text-sm" />
+														: <FaEyeSlash className="text-gray-400 text-sm" />
+													}
+													{materia.title}
+												</span>
 											</DropdownItem>
 										))}
 									</>
