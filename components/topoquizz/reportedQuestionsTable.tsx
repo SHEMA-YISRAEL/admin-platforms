@@ -163,7 +163,9 @@ const ReportedQuestionsTable: React.FC<ReportedQuestionsTableProps> = ({
         const { displayName, email } = info.row.original;
         return (
           <div className="text-xs">
-            {displayName || email || "Anónimo"}
+            {displayName && <div className="font-semibold">{displayName}</div>}
+            {email && <div className="text-gray-500">{email}</div>}
+            {!displayName && !email && "Anónimo"}
           </div>
         );
       },
