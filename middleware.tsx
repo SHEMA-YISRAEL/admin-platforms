@@ -9,7 +9,7 @@ const rolePermissions: Record<UserRole, string[]> = {
     'translator': ['/topoquizz/translate'],
 
     // Agregar más roles aquí en el futuro:
-    'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/neurapp'],
+    'admin': ['/topoquizz/content', '/topoquizz/dashboard', '/topoquizz/translate', '/topoquizz/reported', '/neurapp'],
     // 'editor': ['/topoquizz/content', '/topoquizz/translate'],
     // 'viewer': ['/topoquizz/content']
 };
