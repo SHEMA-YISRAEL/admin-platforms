@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { db } from "@/utils/firebase";
 import { ReportedQuestionData } from "@/interfaces/topoquizz";
 
-function useReportedQuestions(showSolved: boolean = false) {
+export type ReportFilter = "pending" | "solved" | "all";
+
+function useReportedQuestions(filter: ReportFilter = "pending") {
   const [reportedQuestions, setReportedQuestions] = useState<ReportedQuestionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,9 +16,12 @@ function useReportedQuestions(showSolved: boolean = false) {
 
     const colRef = collection(db, "reportQuestion");
 
-    const q = showSolved
-      ? query(colRef, orderBy("createdAt", "desc"))
-      : query(colRef, where("solved", "==", false), orderBy("createdAt", "desc"));
+    let q;
+    if (filter === "all") {
+      q = query(colRef, orderBy("createdAt", "desc"));
+    } else {
+      q = query(colRef, where("solved", "==", filter === "solved"), orderBy("createdAt", "desc"));
+    }
 
     const unsubscribe = onSnapshot(
       q,
@@ -55,7 +60,7 @@ function useReportedQuestions(showSolved: boolean = false) {
     );
 
     return () => unsubscribe();
-  }, [showSolved]);
+  }, [filter]);
 
   return { reportedQuestions, loading, error };
 }

@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { Tabs, Tab } from '@heroui/react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import ReportedQuestionsTable from '@/components/topoquizz/reportedQuestionsTable';
-import useReportedQuestions from '@/lib/firebase/getReportedQuestions';
+import useReportedQuestions, { ReportFilter } from '@/lib/firebase/getReportedQuestions';
 
 const ReportedQuestionsPage: React.FC = () => {
-  const [showSolved, setShowSolved] = useState(false);
-  const { reportedQuestions, loading } = useReportedQuestions(showSolved);
+  const [filter, setFilter] = useState<ReportFilter>('pending');
+  const { reportedQuestions, loading } = useReportedQuestions(filter);
 
   return (
     <ProtectedRoute>
@@ -21,13 +21,14 @@ const ReportedQuestionsPage: React.FC = () => {
 
             <div className="flex items-center justify-center">
               <Tabs
-                selectedKey={showSolved ? 'all' : 'pending'}
-                onSelectionChange={(key) => setShowSolved(key === 'all')}
+                selectedKey={filter}
+                onSelectionChange={(key) => setFilter(key as ReportFilter)}
                 aria-label="Filtro de reportes"
                 color="danger"
                 variant="bordered"
               >
                 <Tab key="pending" title="Pendientes" />
+                <Tab key="solved" title="Resueltos" />
                 <Tab key="all" title="Todos" />
               </Tabs>
             </div>

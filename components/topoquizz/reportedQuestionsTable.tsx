@@ -219,6 +219,7 @@ const ReportedQuestionsTable: React.FC<ReportedQuestionsTableProps> = ({
               isIconOnly
               size="sm"
               color="warning"
+              isDisabled={report.solved}
               isLoading={loadingQuestionId === report.id}
               onPress={() => handleEditQuestion(report)}
               title="Editar pregunta"
