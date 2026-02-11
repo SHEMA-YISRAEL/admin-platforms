@@ -2,7 +2,7 @@ import { useEffect, useState} from "react";
 import QuestionsTable from "../questionsTable";
 import useQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
-import { IDifficult } from "@/types/Topoqizz";
+import { IDifficult, DifficultyLevel } from "@/types/Topoqizz";
 import { LanguageCode } from "@/types/languages";
 
 interface QuestionsComponentProps {
@@ -37,7 +37,7 @@ const QuestionsComponent: React.FC<QuestionsComponentProps> = ({
       let filteredData = questions;
 
       // Filtrar por dificultad
-      if (filterValue.identifier !== -1) {
+      if (filterValue.identifier !== DifficultyLevel.ALL) {
         filteredData = filteredData.filter((el) => el.difficulty === filterValue.identifier);
       }
 

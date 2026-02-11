@@ -18,7 +18,7 @@ import { BsTranslate } from "react-icons/bs";
 import { FaBook } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaFlag } from "react-icons/fa";
 
 import { usePathname, useRouter} from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
@@ -139,6 +139,14 @@ const NavBarCustom = () => {
 									onClick={()=> router.push('/topoquizz/content')}
 								>
 									Contenido
+								</DropdownItem>
+								<DropdownItem
+									key="reported"
+									description="Gestión de preguntas reportadas por usuarios"
+									startContent={<FaFlag/>}
+									onClick={()=> router.push('/topoquizz/reported')}
+								>
+									Preguntas Reportadas
 								</DropdownItem>
 							</>:<></>
             }

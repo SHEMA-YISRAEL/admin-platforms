@@ -1,6 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveAlias: {
+      fs: {
+        browser: './empty.ts',
+      },
+    },
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',

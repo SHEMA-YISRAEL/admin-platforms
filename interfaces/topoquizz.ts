@@ -76,6 +76,22 @@ export interface UserPermissions {
   canViewSpanishVersion?: boolean;
 }
 
+export interface ReportedQuestionData {
+  id: string;
+  reason: string[];
+  suggestion: string;
+  solved: boolean;
+  questionId: string;
+  question: string;
+  userId?: string;
+  displayName?: string;
+  email?: string;
+  lessonId?: string;
+  lessonName?: string;
+  subjectName?: string;
+  createdAt: Date | null;
+}
+
 export interface UserData {
   id: string;
   userName: string;
