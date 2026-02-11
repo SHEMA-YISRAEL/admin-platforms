@@ -14,7 +14,7 @@ import NewQuestionModal from '@/components/topoquizz/modals/newQuestion';
 import DifficultFilter from '@/components/topoquizz/questions/difficultFilter';
 import SearchFilter from '@/components/topoquizz/questions/searchFilter';
 import LanguageSelector from '@/components/topoquizz/questions/languageSelector';
-import { IDifficult } from '@/types/Topoqizz';
+import { IDifficult, DIFFICULTY_LEVELS } from '@/types/Topoqizz';
 import { LanguageCode, DEFAULT_LANGUAGE } from '@/types/languages';
 
 // import { useAuthContext } from "@/contexts/AuthContext";
@@ -30,31 +30,8 @@ const ContentPage: React.FC = () => {
   const [isNewQuestionModalOpen, setIsNewQuestionModalOpen] =
     useState<boolean>(false);
 
-  const difficultLevels = [
-    {
-      id: 'all',
-      label: 'Todos',
-      identifier: -1,
-    },
-    {
-      id: 'easy',
-      label: 'Fácil',
-      identifier: 1,
-    },
-    {
-      id: 'medium',
-      label: 'Medio',
-      identifier: 2,
-    },
-    {
-      id: 'hard',
-      label: 'Difícil',
-      identifier: 3,
-    },
-  ];
-
   const [levelSelected, setLevelSelected] = useState<IDifficult>(
-    difficultLevels[0],
+    DIFFICULTY_LEVELS[0],
   );
   const [searchText, setSearchText] = useState<string>('');
   const [selectedLanguage, setSelectedLanguage] =
@@ -85,7 +62,7 @@ const ContentPage: React.FC = () => {
                 />
 
                 <DifficultFilter
-                  difficultLevels={difficultLevels}
+                  difficultLevels={DIFFICULTY_LEVELS}
                   levelSelected={levelSelected}
                   methodSetLevelSelected={setLevelSelected}
                 />
