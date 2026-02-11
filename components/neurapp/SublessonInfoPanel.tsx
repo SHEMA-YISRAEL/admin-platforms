@@ -34,11 +34,6 @@ export default function SublessonInfoPanel({
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
                 Título
               </th>
-              {sublesson.description && (
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                  Descripción
-                </th>
-              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -46,11 +41,6 @@ export default function SublessonInfoPanel({
               <td className="px-4 py-3 text-sm text-gray-800 align-top">
                 {sublesson.title}
               </td>
-              {sublesson.description && (
-                <td className="px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap align-top">
-                  {sublesson.description}
-                </td>
-              )}
             </tr>
           </tbody>
         </table>

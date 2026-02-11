@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, Tab, Card, CardBody, Button } from "@heroui/react";
 import VideoManager from "./VideoManager";
 import FlashcardManager from "./FlashcardManager";
@@ -12,11 +12,16 @@ interface ResourceManagerProps {
 }
 
 export default function ResourceManager({ type, id }: ResourceManagerProps) {
-  const [selectedTab, setSelectedTab] = useState<string | number>("videos");
+  const defaultTab = type === 'lesson' ? "flashcards" : "videos";
+  const [selectedTab, setSelectedTab] = useState<string | number>(defaultTab);
   const [triggerCreate, setTriggerCreate] = useState<{tab: string | number, count: number}>({
-    tab: "videos",
+    tab: defaultTab,
     count: 0
   });
+
+  useEffect(() => {
+    setSelectedTab(defaultTab);
+  }, [type]);
 
   const handleNewResource = () => {
     setTriggerCreate(prev => ({
@@ -73,27 +78,30 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
             selectedKey={selectedTab}
             onSelectionChange={setSelectedTab}
           >
-            <Tab key="videos" title="Videos" />
+            {type === 'sublesson' && <Tab key="videos" title="Video" />}
             {type === 'lesson' && <Tab key="flashcards" title="Flashcards" />}
             <Tab key="summaries" title="Resúmenes" />
           </Tabs>
         </div>
-        <Button
-          className={`bg-gradient-to-r ${buttonConfig.gradient} text-white shadow-sm`}
-          onPress={handleNewResource}
-          size="sm"
-        >
-          {buttonConfig.label}
-        </Button>
+        {selectedTab !== "videos" && (
+          <Button
+            className={`bg-gradient-to-r ${buttonConfig.gradient} text-white shadow-sm`}
+            onPress={handleNewResource}
+            size="sm"
+          >
+            {buttonConfig.label}
+          </Button>
+        )}
       </div>
 
       {/* Content below tabs */}
       <div className="mt-4">
-        {selectedTab === "videos" && (
+        {selectedTab === "videos" && type === 'sublesson' && (
           <VideoManager
             type={type}
             id={id}
             triggerCreate={triggerCreate.tab === "videos" ? triggerCreate.count : 0}
+            maxVideos={1}
           />
         )}
         {selectedTab === "flashcards" && type === 'lesson' && (

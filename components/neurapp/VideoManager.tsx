@@ -39,9 +39,10 @@ interface VideoManagerProps {
   type: 'lesson' | 'sublesson';
   id: number;
   triggerCreate?: number;
+  maxVideos?: number;
 }
 
-export default function VideoManager({ type, id, triggerCreate }: VideoManagerProps) {
+export default function VideoManager({ type, id, triggerCreate, maxVideos }: VideoManagerProps) {
   const { videos, loading, setVideos } = useVideos(type, id);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -70,7 +71,10 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
   const [isUploading, setIsUploading] = useState(false);
   const prevTriggerCreate = useRef<number | undefined>(undefined);
 
+  const hasReachedMax = maxVideos !== undefined && videos.length >= maxVideos;
+
   const handleCreate = () => {
+    if (hasReachedMax) return;
     setEditingVideo(null);
     setFormData({
       title: '',
@@ -280,6 +284,18 @@ export default function VideoManager({ type, id, triggerCreate }: VideoManagerPr
           <Chip color="success" variant="flat">
             {successMessage}
           </Chip>
+        </div>
+      )}
+
+      {!hasReachedMax && (
+        <div className="flex justify-end mb-3">
+          <Button
+            className="bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm"
+            onPress={handleCreate}
+            size="sm"
+          >
+            + Nuevo Video
+          </Button>
         </div>
       )}
 
