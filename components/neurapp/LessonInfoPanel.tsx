@@ -34,11 +34,6 @@ export default function LessonInfoPanel({
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
                 Título
               </th>
-              {lesson.description && (
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
-                  Descripción
-                </th>
-              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -46,11 +41,6 @@ export default function LessonInfoPanel({
               <td className="px-4 py-3 text-sm text-gray-800 align-top">
                 {lesson.title}
               </td>
-              {lesson.description && (
-                <td className="px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap align-top">
-                  {lesson.description}
-                </td>
-              )}
             </tr>
           </tbody>
         </table>

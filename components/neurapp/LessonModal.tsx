@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip, addToast } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
 import { LessonData } from "@/app/hooks/neurapp/useLessons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -25,7 +25,6 @@ export default function LessonModal({
 }: LessonModalProps) {
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
     order: lessons.length + 1
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,13 +34,11 @@ export default function LessonModal({
     if (lesson.type === 'edit' && lesson.data) {
       setFormData({
         title: lesson.data.title,
-        description: lesson.data.description || '',
         order: lesson.data.order
       });
     } else {
       setFormData({
         title: '',
-        description: '',
         order: lessons.length + 1
       });
     }
@@ -158,14 +155,6 @@ export default function LessonModal({
             isRequired
             isInvalid={!!errors.title}
             errorMessage={errors.title}
-          />
-
-          <Textarea
-            label="Descripción"
-            placeholder="Descripción de la lección (opcional)"
-            value={formData.description}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
-            minRows={3}
           />
 
           <div className="flex flex-col gap-1">
