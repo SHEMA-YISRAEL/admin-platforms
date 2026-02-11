@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Chip, addToast } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -27,7 +27,6 @@ export default function SublessonModal({
 }: SublessonModalProps) {
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
     order: sublessons.length + 1
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -37,13 +36,11 @@ export default function SublessonModal({
     if (sublesson.type === 'edit' && sublesson.data) {
       setFormData({
         title: sublesson.data.title,
-        description: sublesson.data.description || '',
         order: sublesson.data.order
       });
     } else {
       setFormData({
         title: '',
-        description: '',
         order: sublessons.length + 1
       });
     }
@@ -165,14 +162,6 @@ export default function SublessonModal({
             isRequired
             isInvalid={!!errors.title}
             errorMessage={errors.title}
-          />
-
-          <Textarea
-            label="Descripción"
-            placeholder="Descripción de la sublección (opcional)"
-            value={formData.description}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
-            minRows={3}
           />
 
           <div className="flex flex-col gap-1">
