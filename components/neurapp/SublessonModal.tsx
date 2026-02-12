@@ -9,8 +9,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface SublessonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lessonId: number;
-  sublesson: { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
+  lessonId: string;
+  sublesson: { type: 'create' | 'edit', data: SublessonData | null, lessonId: string };
   sublessons: SublessonData[];
   onSublessonsChange: (sublessons: SublessonData[]) => void;
   onSave: () => void;

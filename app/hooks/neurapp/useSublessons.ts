@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
 export interface SublessonData {
-    id: number;
-    lessonId: number;
+    id: string;
+    lessonId: string;
     title: string;
     description: string | null;
     order: number;
@@ -10,7 +10,7 @@ export interface SublessonData {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-function useSublessons(lessonId: number | null) {
+function useSublessons(lessonId: string | null) {
     const [sublessons, setSublessons] = useState<SublessonData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

@@ -294,7 +294,7 @@ export default function UsersPage() {
                       ) : (
                         table.getRowModel().rows.map(row => (
                           <tr
-                            key={row.id}
+                            key={row.original.id}
                             className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                             onClick={() => handleUserClick(row.original)}
                           >

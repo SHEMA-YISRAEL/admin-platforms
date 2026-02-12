@@ -27,7 +27,7 @@ const formatFileSize = (mb: number | null | undefined): string => {
 
 interface FlashcardManagerProps {
   type: 'lesson' | 'sublesson';
-  id: number;
+  id: string;
   triggerCreate?: number;
 }
 
@@ -527,7 +527,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                   startContent={<EyeIcon className="h-4 w-4" />}
                   onPress={() => {
                     const tempFlashcard: FlashcardData = {
-                      id: editingFlashcard?.id || 0,
+                      id: editingFlashcard?.id || "",
                       title: formData.title || null,
                       obverse_side_url: formData.obverse_side_url,
                       reverse_side_url: formData.reverse_side_url,

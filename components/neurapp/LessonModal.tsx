@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 interface LessonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  courseId: number;
+  courseId: string;
   lesson: { type: 'create' | 'edit', data: LessonData | null };
   lessons: LessonData[];
   onSave: (lesson: LessonData) => void;

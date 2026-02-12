@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 
 export interface MateriaData {
-    id: number;
+    id: string;
     title: string;
     slug: string;
     description: string | null;
     visibility: boolean;
-    professorId: number | null;
+    professorId: string | null;
     createdAt: string;
     updatedAt: string;
 }
