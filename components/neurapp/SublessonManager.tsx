@@ -6,8 +6,8 @@ interface SublessonManagerProps {
   sublessons: SublessonData[];
   loading: boolean;
   error?: string | null;
-  onSublessonSelect?: (sublessonId: number | null) => void;
-  selectedSublessonId?: number | null;
+  onSublessonSelect?: (sublessonId: string | null) => void;
+  selectedSublessonId?: string | null;
 }
 
 export default function SublessonManager({

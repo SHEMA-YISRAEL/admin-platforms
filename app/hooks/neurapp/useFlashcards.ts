@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export interface FlashcardData {
-    id: number;
+    id: string;
     title?: string | null;
     obverse_side_url: string;
     reverse_side_url: string;
@@ -15,13 +15,13 @@ export interface FlashcardData {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-function useFlashcards(type: 'lesson' | 'sublesson' | null, id: number | null) {
+function useFlashcards(type: 'lesson' | 'sublesson' | null, parentId: string | null) {
     const [flashcards, setFlashcards] = useState<FlashcardData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!type || !id) {
+        if (!type || !parentId) {
             setLoading(false);
             setFlashcards([]);
             return;
@@ -33,8 +33,8 @@ function useFlashcards(type: 'lesson' | 'sublesson' | null, id: number | null) {
                 setError(null);
 
                 const endpoint = type === 'lesson'
-                    ? `${API_BASE_URL}/lessons/${id}/flashcards`
-                    : `${API_BASE_URL}/sublessons/${id}/flashcards`;
+                    ? `${API_BASE_URL}/lessons/${parentId}/flashcards`
+                    : `${API_BASE_URL}/sublessons/${parentId}/flashcards`;
 
                 const response = await fetch(endpoint);
 
@@ -53,7 +53,7 @@ function useFlashcards(type: 'lesson' | 'sublesson' | null, id: number | null) {
         };
 
         fetchFlashcards();
-    }, [type, id]);
+    }, [type, parentId]);
 
     return { flashcards, loading, error, setFlashcards };
 }

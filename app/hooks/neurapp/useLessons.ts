@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
 export interface LessonData {
-    id: number;
-    courseId: number;
+    id: string;
+    courseId: string;
     title: string;
     description: string | null;
     order: number;
@@ -10,7 +10,7 @@ export interface LessonData {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-function useLessons(courseId: number | null) {
+function useLessons(courseId: string | null) {
     const [lessons, setLessons] = useState<LessonData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

@@ -37,7 +37,7 @@ const formatDuration = (seconds: number | null | undefined): string => {
 
 interface VideoManagerProps {
   type: 'lesson' | 'sublesson';
-  id: number;
+  id: string;
   triggerCreate?: number;
   maxVideos?: number;
 }

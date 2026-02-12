@@ -27,7 +27,7 @@ const formatFileSize = (mb: number | null | undefined): string => {
 
 interface SummaryManagerProps {
   type: 'lesson' | 'sublesson';
-  id: number;
+  id: string;
   triggerCreate?: number;
 }
 
@@ -466,7 +466,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                   startContent={<EyeIcon className="h-4 w-4" />}
                   onPress={() => {
                     const tempSummary: SummaryData = {
-                      id: editingSummary?.id || 0,
+                      id: editingSummary?.id || "",
                       title: formData.title || 'Vista Previa',
                       urlFile: formData.urlFile,
                       description: formData.description || null,

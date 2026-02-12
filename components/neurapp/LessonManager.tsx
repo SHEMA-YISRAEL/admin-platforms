@@ -8,20 +8,20 @@ import SublessonManager from "./SublessonManager";
 import LessonModal from "./LessonModal";
 import SublessonModal from "./SublessonModal";
 
-type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
+type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: string };
 
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
 
 interface LessonManagerProps {
-  courseId: number;
+  courseId: string;
   lessons: LessonData[];
   loading: boolean;
   error?: string | null;
-  onLessonSelect: (lessonId: number | null) => void;
+  onLessonSelect: (lessonId: string | null) => void;
   onLessonsChange: (lessons: LessonData[]) => void;
-  selectedLessonId: number | null;
-  onSublessonSelect?: (sublessonId: number | null) => void;
-  selectedSublessonId?: number | null;
+  selectedLessonId: string | null;
+  onSublessonSelect?: (sublessonId: string | null) => void;
+  selectedSublessonId?: string | null;
   sublessons: SublessonData[];
   sublessonsLoading: boolean;
   sublessonsError?: string | null;
@@ -35,8 +35,8 @@ function SublessonRow({
   loading,
   error,
 }: {
-  onSublessonSelect?: (sublessonId: number | null) => void;
-  selectedSublessonId?: number | null;
+  onSublessonSelect?: (sublessonId: string | null) => void;
+  selectedSublessonId?: string | null;
   sublessons: SublessonData[];
   loading: boolean;
   error?: string | null;
@@ -95,7 +95,7 @@ export default function LessonManager({
     }
   };
 
-  const handleCreateSublesson = (lessonId: number) => {
+  const handleCreateSublesson = (lessonId: string) => {
     setSublessonModalState({ isOpen: true, sublesson: { type: 'create', data: null, lessonId } });
   };
 

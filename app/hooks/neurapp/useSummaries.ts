@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export interface SummaryData {
-    id: number;
+    id: string;
     title: string;
     urlFile: string;
     description?: string | null;
@@ -14,13 +14,13 @@ export interface SummaryData {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-function useSummaries(type: 'lesson' | 'sublesson' | null, id: number | null) {
+function useSummaries(type: 'lesson' | 'sublesson' | null, parentId: string | null) {
     const [summaries, setSummaries] = useState<SummaryData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!type || !id) {
+        if (!type || !parentId) {
             setLoading(false);
             setSummaries([]);
             return;
@@ -32,8 +32,8 @@ function useSummaries(type: 'lesson' | 'sublesson' | null, id: number | null) {
                 setError(null);
 
                 const endpoint = type === 'lesson'
-                    ? `${API_BASE_URL}/lessons/${id}/summaries`
-                    : `${API_BASE_URL}/sublessons/${id}/summaries`;
+                    ? `${API_BASE_URL}/lessons/${parentId}/summaries`
+                    : `${API_BASE_URL}/sublessons/${parentId}/summaries`;
 
                 const response = await fetch(endpoint);
 
@@ -52,7 +52,7 @@ function useSummaries(type: 'lesson' | 'sublesson' | null, id: number | null) {
         };
 
         fetchSummaries();
-    }, [type, id]);
+    }, [type, parentId]);
 
     return { summaries, loading, error, setSummaries };
 }

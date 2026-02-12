@@ -8,7 +8,7 @@ import SummaryManager from "./SummaryManager";
 
 interface ResourceManagerProps {
   type: 'lesson' | 'sublesson';
-  id: number | null;
+  id: string | null;
 }
 
 export default function ResourceManager({ type, id }: ResourceManagerProps) {

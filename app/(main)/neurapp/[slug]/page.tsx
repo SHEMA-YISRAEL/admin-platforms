@@ -18,7 +18,7 @@ import DeleteModal from "@/components/shared/DeleteModal";
 import VisibilityModal from "@/components/shared/VisibilityModal";
 
 type EditingLessonState = { type: 'create' | 'edit', data: LessonData | null };
-type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: number };
+type EditingSublessonState = { type: 'create' | 'edit', data: SublessonData | null, lessonId: string };
 
 export default function CoursePage() {
   const params = useParams();
@@ -35,16 +35,16 @@ export default function CoursePage() {
 
   // Find course by slug and get its ID
   const currentCourse = materias.find(m => m.slug === courseSlug);
-  const courseId = currentCourse?.id ?? 0;
+  const courseId = currentCourse?.id ?? null;
 
   // Avoid calling useLessons with invalid ID
-  const lessonsEnabled = courseId > 0;
+  const lessonsEnabled = !!courseId;
   const { lessons, loading: lessonsLoading, setLessons, error: lessonsError } =
-    useLessons(lessonsEnabled ? courseId : 0);
+    useLessons(lessonsEnabled ? courseId : null);
 
-  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
-  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
-  const [selectedSublesson, setSelectedSublesson] = useState<number | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
+  const [expandedLesson, setExpandedLesson] = useState<string | null>(null);
+  const [selectedSublesson, setSelectedSublesson] = useState<string | null>(null);
   const [lessonModalState, setLessonModalState] = useState<EditingLessonState | null>(null);
   const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
   const [materiaModalOpen, setMateriaModalOpen] = useState(false);
@@ -54,7 +54,7 @@ export default function CoursePage() {
   const [togglingVisibility, setTogglingVisibility] = useState(false);
 
   // Reference to detect course change and control auto-selection
-  const previousCourseIdRef = useRef<number | null>(null);
+  const previousCourseIdRef = useRef<string | null>(null);
   const shouldAutoSelectRef = useRef<boolean>(true);
 
   // Hook for sublessons of the expanded lesson
@@ -63,7 +63,7 @@ export default function CoursePage() {
 
   // Reset selection when course changes
   useEffect(() => {
-    if (courseId > 0 && previousCourseIdRef.current !== courseId) {
+    if (courseId && previousCourseIdRef.current !== courseId) {
       setSelectedLesson(null);
       setExpandedLesson(null);
       setSelectedSublesson(null);
@@ -88,7 +88,7 @@ export default function CoursePage() {
     return <div className="p-8 text-center text-red-500">Curso no encontrado</div>;
   }
 
-  const handleLessonSelect = (lessonId: number | null) => {
+  const handleLessonSelect = (lessonId: string | null) => {
     if (!lessonId) return;
 
     // If clicking on the same expanded lesson, only collapse the list
@@ -104,7 +104,7 @@ export default function CoursePage() {
     }
   };
 
-  const handleSublessonSelect = (sublessonId: number | null) => {
+  const handleSublessonSelect = (sublessonId: string | null) => {
     setSelectedSublesson(sublessonId);
     // Ensure selectedLesson is synced with expandedLesson
     if (expandedLesson && selectedLesson !== expandedLesson) {
@@ -230,7 +230,7 @@ export default function CoursePage() {
           {/* Left Column: Lessons and Sublessons */}
           <div>
             <LessonManager
-              courseId={courseId}
+              courseId={courseId!}
               lessons={lessons}
               loading={lessonsLoading}
               error={lessonsError}
@@ -286,7 +286,7 @@ export default function CoursePage() {
         <LessonModal
           isOpen={true}
           onClose={() => setLessonModalState(null)}
-          courseId={courseId}
+          courseId={courseId!}
           lesson={lessonModalState}
           lessons={lessons}
           onSave={handleLessonSave}

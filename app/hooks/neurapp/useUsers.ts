@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { auth } from "@/utils/firebase";
 
 export interface UserListData {
-    id: number;
+    id: string;
     name: string;
     lastName: string;
     email: string;
