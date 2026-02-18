@@ -200,7 +200,8 @@ export default function CoursePage() {
       {/* Course Dashboard */}
       <div className="mt-4">
         {/* Course Title */}
-        <div className="mb-6 2xl:ml-40 flex items-center gap-3">
+        <div className="mb-6 2xl:ml-40">
+          <div className="flex items-center gap-3">
           <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
           <button
             onClick={onOpenVisibility}
@@ -212,7 +213,7 @@ export default function CoursePage() {
           <button
             onClick={() => setMateriaModalOpen(true)}
             className="p-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
-            title="Editar nombre"
+            title="Editar materia"
           >
             <FaPen size={16} />
           </button>
@@ -223,6 +224,10 @@ export default function CoursePage() {
           >
             <FaTrash size={16} />
           </button>
+          </div>
+          {currentCourse.description && (
+            <p className="mt-2 text-gray-600">{currentCourse.description}</p>
+          )}
         </div>
 
         {/* 2-Column Layout: Lessons/Sublessons | Info Panel + Resources */}
