@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, addToast } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, addToast } from "@heroui/react";
 import { MateriaData, API_BASE_URL, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
+
+interface Professor {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+}
 
 interface MateriaModalProps {
   isOpen: boolean;
@@ -15,16 +22,27 @@ export default function MateriaModal({ isOpen, onClose, materia }: MateriaModalP
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [professorId, setProfessorId] = useState<string>('');
+  const [professors, setProfessors] = useState<Professor[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/professors`)
+      .then(r => r.json())
+      .then(setProfessors)
+      .catch(() => setProfessors([]));
+  }, []);
 
   useEffect(() => {
     if (materia.type === 'edit' && materia.data) {
       setTitle(materia.data.title);
       setDescription(materia.data.description ?? '');
+      setProfessorId(materia.data.professorId ?? '');
     } else {
       setTitle('');
       setDescription('');
+      setProfessorId('');
     }
     setErrors({});
   }, [materia, isOpen]);
@@ -56,7 +74,11 @@ export default function MateriaModal({ isOpen, onClose, materia }: MateriaModalP
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), description: description.trim() }),
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          ...(professorId ? { professorId } : {}),
+        }),
       });
 
       if (!response.ok) {
@@ -132,6 +154,18 @@ export default function MateriaModal({ isOpen, onClose, materia }: MateriaModalP
             errorMessage={errors.description}
             minRows={3}
           />
+          <Select
+            label="Docente"
+            placeholder="Seleccionar docente"
+            selectedKeys={professorId ? new Set([professorId]) : new Set()}
+            onSelectionChange={(keys) => setProfessorId(Array.from(keys)[0] as string ?? '')}
+          >
+            {professors.map((p) => (
+              <SelectItem key={p.id}>
+                {`${p.firstName} ${p.lastName}`}
+              </SelectItem>
+            ))}
+          </Select>
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
