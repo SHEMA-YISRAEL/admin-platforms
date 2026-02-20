@@ -49,8 +49,10 @@ export default function CoursePage() {
   const [sublessonModalState, setSublessonModalState] = useState<EditingSublessonState | null>(null);
   const [materiaModalOpen, setMateriaModalOpen] = useState(false);
   const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+  const { isOpen: isDeleteItemOpen, onOpen: onOpenDeleteItem, onClose: onCloseDeleteItem } = useDisclosure();
   const { isOpen: isVisibilityOpen, onOpen: onOpenVisibility, onClose: onCloseVisibility } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
+  const [deleteItemTarget, setDeleteItemTarget] = useState<{ type: 'lesson' | 'sublesson', id: string, title: string } | null>(null);
   const [togglingVisibility, setTogglingVisibility] = useState(false);
 
   // Reference to detect course change and control auto-selection
@@ -125,6 +127,56 @@ export default function CoursePage() {
       data: sublessons.find(s => s.id === selectedSublesson) || null,
       lessonId: expandedLesson!
     });
+  };
+
+  const handleDeleteLessonClick = () => {
+    const lesson = lessons.find(l => l.id === selectedLesson);
+    if (!lesson) return;
+    setDeleteItemTarget({ type: 'lesson', id: lesson.id, title: lesson.title });
+    onOpenDeleteItem();
+  };
+
+  const handleDeleteSublessonClick = () => {
+    const sublesson = sublessons.find(s => s.id === selectedSublesson);
+    if (!sublesson) return;
+    setDeleteItemTarget({ type: 'sublesson', id: sublesson.id, title: sublesson.title });
+    onOpenDeleteItem();
+  };
+
+  const handleDeleteItem = async () => {
+    if (!deleteItemTarget) return;
+    try {
+      setDeleting(true);
+      const url = deleteItemTarget.type === 'lesson'
+        ? `${API_BASE_URL}/lessons/${deleteItemTarget.id}`
+        : `${API_BASE_URL}/sublessons/${deleteItemTarget.id}`;
+      const response = await fetch(url, { method: 'DELETE' });
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
+      const typeLabel = deleteItemTarget.type === 'lesson' ? 'Lección' : 'Sublección';
+      addToast({ title: `${typeLabel} eliminada exitosamente`, color: 'success' });
+
+      if (deleteItemTarget.type === 'lesson') {
+        setLessons(lessons.filter(l => l.id !== deleteItemTarget.id));
+        if (selectedLesson === deleteItemTarget.id) {
+          setSelectedLesson(null);
+          setExpandedLesson(null);
+          setSelectedSublesson(null);
+        }
+      } else {
+        setSublessons(sublessons.filter(s => s.id !== deleteItemTarget.id));
+        if (selectedSublesson === deleteItemTarget.id) {
+          setSelectedSublesson(null);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      addToast({ title: 'Error al eliminar', description: errorMessage, color: 'danger' });
+    } finally {
+      setDeleting(false);
+      onCloseDeleteItem();
+      setDeleteItemTarget(null);
+    }
   };
 
   const handleDeleteMateria = async () => {
@@ -202,28 +254,28 @@ export default function CoursePage() {
         {/* Course Title */}
         <div className="mb-6 2xl:ml-40">
           <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
-          <button
-            onClick={onOpenVisibility}
-            className={`p-2 transition-colors cursor-pointer ${currentCourse.visibility ? 'text-green-500 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}`}
-            title={currentCourse.visibility ? 'Curso visible – clic para ocultar' : 'Curso oculto – clic para hacer visible'}
-          >
-            {currentCourse.visibility ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
-          </button>
-          <button
-            onClick={() => setMateriaModalOpen(true)}
-            className="p-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
-            title="Editar materia"
-          >
-            <FaPen size={16} />
-          </button>
-          <button
-            onClick={onOpenDelete}
-            className="p-2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
-            title="Eliminar materia"
-          >
-            <FaTrash size={16} />
-          </button>
+            <h1 className="text-3xl font-bold text-gray-800">{currentCourse.title}</h1>
+            <button
+              onClick={onOpenVisibility}
+              className={`p-2 transition-colors cursor-pointer ${currentCourse.visibility ? 'text-green-500 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}`}
+              title={currentCourse.visibility ? 'Curso visible – clic para ocultar' : 'Curso oculto – clic para hacer visible'}
+            >
+              {currentCourse.visibility ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+            </button>
+            <button
+              onClick={() => setMateriaModalOpen(true)}
+              className="p-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
+              title="Editar materia"
+            >
+              <FaPen size={16} />
+            </button>
+            <button
+              onClick={onOpenDelete}
+              className="p-2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+              title="Eliminar materia"
+            >
+              <FaTrash size={16} />
+            </button>
           </div>
           {currentCourse.description && (
             <p className="mt-2 text-gray-600">{currentCourse.description}</p>
@@ -260,6 +312,7 @@ export default function CoursePage() {
                   <LessonInfoPanel
                     lesson={lessons.find(l => l.id === selectedLesson)!}
                     onEdit={handleLessonEdit}
+                    onDelete={handleDeleteLessonClick}
                   />
                 </CardBody>
               </Card>
@@ -272,6 +325,7 @@ export default function CoursePage() {
                   <SublessonInfoPanel
                     sublesson={sublessons.find(s => s.id === selectedSublesson)!}
                     onEdit={handleSublessonEdit}
+                    onDelete={handleDeleteSublessonClick}
                   />
                 </CardBody>
               </Card>
@@ -307,7 +361,7 @@ export default function CoursePage() {
           sublesson={sublessonModalState}
           sublessons={sublessons}
           onSublessonsChange={setSublessons}
-          onSave={() => {}}
+          onSave={() => { }}
         />
       )}
 
@@ -328,6 +382,15 @@ export default function CoursePage() {
         dataType="materia"
         dataName={`"${currentCourse.title}"`}
         description="Se eliminará toda la materia incluyendo sus lecciones, sublecciones, videos, flashcards y resúmenes."
+      />
+
+      {/* Delete Lesson / Sublesson Confirmation Modal */}
+      <DeleteModal
+        isOpen={isDeleteItemOpen}
+        onClose={onCloseDeleteItem}
+        onClick={handleDeleteItem}
+        dataType={deleteItemTarget?.type === 'lesson' ? 'lección' : 'sublección'}
+        dataName={deleteItemTarget ? `"${deleteItemTarget.title}"` : ''}
       />
 
       {/* Visibility Toggle Confirmation Modal */}

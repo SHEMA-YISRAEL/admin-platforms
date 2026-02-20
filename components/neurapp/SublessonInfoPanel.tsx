@@ -6,11 +6,13 @@ import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 interface SublessonInfoPanelProps {
   sublesson: SublessonData;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
 export default function SublessonInfoPanel({
   sublesson,
-  onEdit
+  onEdit,
+  onDelete
 }: SublessonInfoPanelProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -18,13 +20,23 @@ export default function SublessonInfoPanel({
         <h3 className="text-lg font-bold text-gray-800">
           Información de la Sublección
         </h3>
-        <Button
-          color="primary"
-          size="sm"
-          onPress={onEdit}
-        >
-          Editar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            color="primary"
+            size="sm"
+            onPress={onEdit}
+          >
+            Editar
+          </Button>
+          <Button
+            color="danger"
+            size="sm"
+            variant="light"
+            onPress={onDelete}
+          >
+            Eliminar
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg">
