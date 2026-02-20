@@ -6,11 +6,13 @@ import { LessonData } from "@/app/hooks/neurapp/useLessons";
 interface LessonInfoPanelProps {
   lesson: LessonData;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
 export default function LessonInfoPanel({
   lesson,
-  onEdit
+  onEdit,
+  onDelete
 }: LessonInfoPanelProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -18,13 +20,23 @@ export default function LessonInfoPanel({
         <h3 className="text-lg font-bold text-gray-800">
           Información de la Lección
         </h3>
-        <Button
-          color="primary"
-          size="sm"
-          onPress={onEdit}
-        >
-          Editar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            color="primary"
+            size="sm"
+            onPress={onEdit}
+          >
+            Editar
+          </Button>
+          <Button
+            color="danger"
+            size="sm"
+            variant="light"
+            onPress={onDelete}
+          >
+            Eliminar
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg">
