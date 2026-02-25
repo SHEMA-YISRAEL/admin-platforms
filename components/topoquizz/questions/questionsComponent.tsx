@@ -1,6 +1,5 @@
 import { useEffect, useState} from "react";
 import QuestionsTable from "../questionsTable";
-import useQuestionsByLesson from "@/lib/firebase/getQuestionsByLesson";
 import { ILessonData, QuestionData } from "@/interfaces/topoquizz";
 import { IDifficult, DifficultyLevel } from "@/types/Topoqizz";
 import { LanguageCode } from "@/types/languages";
@@ -10,19 +9,18 @@ interface QuestionsComponentProps {
   filterValue: IDifficult
   searchText: string
   selectedLanguage: LanguageCode
+  questionsData: QuestionData[]
+  isLoading: boolean
 }
 
 const QuestionsComponent: React.FC<QuestionsComponentProps> = ({
-  lessonSelected, 
-  filterValue, 
-  searchText, 
-  selectedLanguage
+  lessonSelected,
+  filterValue,
+  searchText,
+  selectedLanguage,
+  questionsData: questions,
+  isLoading: questionsLoading,
 }) => {
-
-  const {
-    questionsData: questions,
-    loading: questionsLoading
-  } = useQuestionsByLesson(lessonSelected.id);
 
   const [dataForTable, setDataForTable] = useState<QuestionData[]>([]);
 
