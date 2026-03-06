@@ -15,7 +15,7 @@ export async function neuremyFetch(path: string, options?: RequestInit): Promise
   const currentUser = auth.currentUser ?? await waitForAuthInit();
 
   if (!currentUser) {
-    throw new Error('No estás autenticado. Por favor, inicia sesión primero.');
+    throw new Error('Please log in first');
   }
 
   const token = await currentUser.getIdToken();
