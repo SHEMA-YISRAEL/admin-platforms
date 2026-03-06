@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface SublessonData {
     id: string;
@@ -7,8 +8,6 @@ export interface SublessonData {
     description: string | null;
     order: number;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function useSublessons(lessonId: string | null) {
     const [sublessons, setSublessons] = useState<SublessonData[]>([]);
@@ -27,7 +26,7 @@ function useSublessons(lessonId: string | null) {
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/sublessons`);
+                const response = await neuremyFetch(`/lessons/${lessonId}/sublessons`);
 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);

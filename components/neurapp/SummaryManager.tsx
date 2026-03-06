@@ -10,7 +10,7 @@ import DeleteModal from "../shared/DeleteModal";
 import SummaryPreviewModal from "./SummaryPreviewModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 // Available languages
 const AVAILABLE_LANGUAGES = [
@@ -122,7 +122,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
 
     try {
       // Delete from backend (backend will handle S3 deletion)
-      const backendResponse = await fetch(`${API_BASE_URL}/summaries/${deletingSummary.id}`, {
+      const backendResponse = await neuremyFetch(`/summaries/${deletingSummary.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
 
   const deleteFileByUrl = async (fileUrl: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/summaries/delete/url`, {
+      const response = await neuremyFetch(`/summaries/delete/url`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -212,18 +212,15 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
 
     try {
       setSaving(true);
-      const baseUrl = type === 'lesson'
-        ? `${API_BASE_URL}/lessons/${id}/summaries`
-        : `${API_BASE_URL}/sublessons/${id}/summaries`;
+      const basePath = type === 'lesson'
+        ? `/lessons/${id}/summaries`
+        : `/sublessons/${id}/summaries`;
 
-      const url = editingSummary ? `${baseUrl}/${editingSummary.id}` : baseUrl;
+      const path = editingSummary ? `${basePath}/${editingSummary.id}` : basePath;
       const method = editingSummary ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(path, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData),
       });
 
@@ -338,11 +335,9 @@ export default function SummaryManager({ type, id, triggerCreate }: SummaryManag
                         className="bg-blue-50 text-blue-600 hover:bg-blue-100"
                         onPress={async () => {
                           // Get signed URL before opening
-                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
                           try {
-                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                            const response = await neuremyFetch('/s3/signed-url', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ fileUrl: summary.urlFile }),
                             });
                             if (response.ok) {

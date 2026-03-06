@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface MateriaData {
     id: string;
@@ -10,8 +11,6 @@ export interface MateriaData {
     createdAt: string;
     updatedAt: string;
 }
-
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Generate URL-friendly slug from title
 export function generateSlug(title: string): string {
@@ -40,7 +39,7 @@ function useMaterias() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${API_BASE_URL}/courses`);
+            const response = await neuremyFetch('/courses');
 
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
