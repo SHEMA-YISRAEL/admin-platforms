@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
 import { LessonData } from "@/app/hooks/neurapp/useLessons";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 interface LessonModalProps {
   isOpen: boolean;
@@ -77,17 +76,14 @@ export default function LessonModal({
 
     try {
       setSaving(true);
-      const url = lesson.type === 'edit' && lesson.data
-        ? `${API_BASE_URL}/courses/${courseId}/lessons/${lesson.data.id}`
-        : `${API_BASE_URL}/courses/${courseId}/lessons`;
+      const path = lesson.type === 'edit' && lesson.data
+        ? `/courses/${courseId}/lessons/${lesson.data.id}`
+        : `/courses/${courseId}/lessons`;
 
       const method = lesson.type === 'edit' ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(path, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData),
       });
 

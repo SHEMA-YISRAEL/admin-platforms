@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 interface SublessonModalProps {
   isOpen: boolean;
@@ -79,17 +78,14 @@ export default function SublessonModal({
 
     try {
       setSaving(true);
-      const url = sublesson.type === 'edit' && sublesson.data
-        ? `${API_BASE_URL}/lessons/${lessonId}/sublessons/${sublesson.data.id}`
-        : `${API_BASE_URL}/lessons/${lessonId}/sublessons`;
+      const path = sublesson.type === 'edit' && sublesson.data
+        ? `/lessons/${lessonId}/sublessons/${sublesson.data.id}`
+        : `/lessons/${lessonId}/sublessons`;
 
       const method = sublesson.type === 'edit' ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(path, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData),
       });
 

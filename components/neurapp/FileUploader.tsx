@@ -5,6 +5,7 @@ import { Button, Progress, Card, CardBody, Spinner } from '@heroui/react';
 import { FiUpload, FiX, FiCheck } from 'react-icons/fi';
 import { FileTypeCategory, formatAllowedTypes } from '@/constants/file-types';
 import { validateFileType } from '@/utils/file-validation';
+import { neuremyFetch } from '@/lib/neuremy-api';
 
 interface FileUploaderProps {
   folder?: string;
@@ -121,14 +122,10 @@ export default function FileUploader({
     try {
       const fileSizeBytes = selectedFile.size;
       const fileSizeMB = fileSizeBytes / (1024 * 1024); // Convertir a MB
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
       // Step 1: Get presigned URL from backend
-      const presignedResponse = await fetch(`${apiUrl}/s3/presigned-url`, {
+      const presignedResponse = await neuremyFetch('/s3/presigned-url', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           fileName: selectedFile.name,
           fileType: selectedFile.type,

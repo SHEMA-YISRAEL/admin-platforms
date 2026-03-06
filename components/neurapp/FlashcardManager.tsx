@@ -10,7 +10,7 @@ import DeleteModal from "../shared/DeleteModal";
 import FlashcardPreviewModal from "./FlashcardPreviewModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 // Available languages
 const AVAILABLE_LANGUAGES = [
@@ -125,7 +125,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
 
     try {
       // Delete from backend (backend handles S3 deletion internally)
-      const backendResponse = await fetch(`${API_BASE_URL}/flashcards/${deletingFlashCard.id}`, {
+      const backendResponse = await neuremyFetch(`/flashcards/${deletingFlashCard.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
 
   const deleteFileByUrl = async (fileUrl: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/flashcards/delete/url`, {
+      const response = await neuremyFetch(`/flashcards/delete/url`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -219,18 +219,15 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
 
     try {
       setSaving(true);
-      const baseUrl = type === 'lesson'
-        ? `${API_BASE_URL}/lessons/${id}/flashcards`
-        : `${API_BASE_URL}/sublessons/${id}/flashcards`;
+      const basePath = type === 'lesson'
+        ? `/lessons/${id}/flashcards`
+        : `/sublessons/${id}/flashcards`;
 
-      const url = editingFlashcard ? `${baseUrl}/${editingFlashcard.id}` : baseUrl;
+      const path = editingFlashcard ? `${basePath}/${editingFlashcard.id}` : basePath;
       const method = editingFlashcard ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(path, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData),
       });
 
@@ -345,11 +342,9 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         className="bg-blue-50 text-blue-600 hover:bg-blue-100"
                         onPress={async () => {
                           // Get signed URL before opening
-                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
                           try {
-                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                            const response = await neuremyFetch('/s3/signed-url', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ fileUrl: flashcard.obverse_side_url }),
                             });
                             if (response.ok) {
@@ -373,11 +368,9 @@ export default function FlashcardManager({ type, id, triggerCreate }: FlashcardM
                         className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
                         onPress={async () => {
                           // Get signed URL before opening
-                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
                           try {
-                            const response = await fetch(`${apiUrl}/s3/signed-url`, {
+                            const response = await neuremyFetch('/s3/signed-url', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ fileUrl: flashcard.reverse_side_url }),
                             });
                             if (response.ok) {

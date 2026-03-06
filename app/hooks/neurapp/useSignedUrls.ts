@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { useState } from 'react';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 interface UseSignedUrlsResult {
   signedUrls: Record<string, string>;
@@ -32,11 +31,8 @@ export function useSignedUrls(): UseSignedUrlsResult {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/s3/signed-url`, {
+      const response = await neuremyFetch('/s3/signed-url', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ fileUrl: url }),
       });
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface FlashcardData {
     id: string;
@@ -12,8 +13,6 @@ export interface FlashcardData {
     createdAt: string;
     updatedAt: string;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function useFlashcards(type: 'lesson' | 'sublesson' | null, parentId: string | null) {
     const [flashcards, setFlashcards] = useState<FlashcardData[]>([]);
@@ -33,10 +32,10 @@ function useFlashcards(type: 'lesson' | 'sublesson' | null, parentId: string | n
                 setError(null);
 
                 const endpoint = type === 'lesson'
-                    ? `${API_BASE_URL}/lessons/${parentId}/flashcards`
-                    : `${API_BASE_URL}/sublessons/${parentId}/flashcards`;
+                    ? `/lessons/${parentId}/flashcards`
+                    : `/sublessons/${parentId}/flashcards`;
 
-                const response = await fetch(endpoint);
+                const response = await neuremyFetch(endpoint);
 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface VideoData {
   id: string;
@@ -12,8 +13,6 @@ export interface VideoData {
   createdAt: string;
   updatedAt: string;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 function useVideos(type: "lesson" | "sublesson" | null, parentId: string | null) {
   const [videos, setVideos] = useState<VideoData[]>([]);
@@ -34,10 +33,10 @@ function useVideos(type: "lesson" | "sublesson" | null, parentId: string | null)
 
         const endpoint =
           type === "lesson"
-            ? `${API_BASE_URL}/lessons/${parentId}/videos`
-            : `${API_BASE_URL}/sublessons/${parentId}/videos`;
+            ? `/lessons/${parentId}/videos`
+            : `/sublessons/${parentId}/videos`;
 
-        const response = await fetch(endpoint);
+        const response = await neuremyFetch(endpoint);
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);

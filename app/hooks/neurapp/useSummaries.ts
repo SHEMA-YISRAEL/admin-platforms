@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface SummaryData {
     id: string;
@@ -11,8 +12,6 @@ export interface SummaryData {
     createdAt: string;
     updatedAt: string;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function useSummaries(type: 'lesson' | 'sublesson' | null, parentId: string | null) {
     const [summaries, setSummaries] = useState<SummaryData[]>([]);
@@ -32,10 +31,10 @@ function useSummaries(type: 'lesson' | 'sublesson' | null, parentId: string | nu
                 setError(null);
 
                 const endpoint = type === 'lesson'
-                    ? `${API_BASE_URL}/lessons/${parentId}/summaries`
-                    : `${API_BASE_URL}/sublessons/${parentId}/summaries`;
+                    ? `/lessons/${parentId}/summaries`
+                    : `/sublessons/${parentId}/summaries`;
 
-                const response = await fetch(endpoint);
+                const response = await neuremyFetch(endpoint);
 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);

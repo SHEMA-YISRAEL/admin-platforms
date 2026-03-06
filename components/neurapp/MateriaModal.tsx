@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, addToast } from "@heroui/react";
-import { MateriaData, API_BASE_URL, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
+import { MateriaData, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 interface Professor {
   id: string;
@@ -28,7 +29,7 @@ export default function MateriaModal({ isOpen, onClose, materia }: MateriaModalP
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/professors`)
+    neuremyFetch('/professors')
       .then(r => r.json())
       .then(setProfessors)
       .catch(() => setProfessors([]));
@@ -65,15 +66,14 @@ export default function MateriaModal({ isOpen, onClose, materia }: MateriaModalP
     try {
       setSaving(true);
 
-      const url = materia.type === 'edit' && materia.data
-        ? `${API_BASE_URL}/courses/${materia.data.id}`
-        : `${API_BASE_URL}/courses`;
+      const path = materia.type === 'edit' && materia.data
+        ? `/courses/${materia.data.id}`
+        : `/courses`;
 
       const method = materia.type === 'edit' ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(path, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim(),

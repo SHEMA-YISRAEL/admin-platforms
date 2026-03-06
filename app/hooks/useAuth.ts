@@ -11,12 +11,12 @@ interface UseAuthReturn {
   error: string | null;
 }
 
-// Mapear roles de Firebase a roles del sistema
+// Map Firebase roles to system roles
 function mapFirebaseRoleToUserRole(firebaseRole: string): UserRole | null {
   switch (firebaseRole) {
     case 'translator':
       return 'translator';
-    // Agregar más roles en el futuro:
+    // Add more roles in the future:
     case 'admin':
       return 'admin';
     // case 'editor':
@@ -24,7 +24,7 @@ function mapFirebaseRoleToUserRole(firebaseRole: string): UserRole | null {
     // case 'viewer':
     //   return 'viewer';
     default:
-      return null; // Rol no reconocido
+      return null; // Unrecognized role
   }
 }
 
@@ -38,30 +38,33 @@ export const useAuth = (): UseAuthReturn => {
       setLoading(true);
       setError(null);
 
-      // Hacer login con Firebase Auth
+      // Sign in with Firebase Auth
       const user = await loginWithEmailAndPassword(email, password);
 
-      // Obtener los datos del usuario y sus permisos
+      // Fetch user data and permissions
       const userData = await getUserData(user.uid);
 
-      // Redirigir según los permisos del usuario
+      // Ensure user data exists before proceeding
       if (!userData) {
         throw new Error('No se pudieron obtener los datos del usuario');
       }
 
-      // Mapear el rol de Firebase al rol del sistema
+      // Map Firebase role to system role
       const userRole = mapFirebaseRoleToUserRole(userData.rol || '');
 
-      // Verificar que el rol sea válido
+      // Ensure the role is valid and authorized
       if (!userRole) {
         throw new Error('Usuario sin rol válido o no autorizado');
       }
 
-      // Guardar las cookies de sesión con el rol del usuario
-      await setUserSession(userRole, userData.userName || user.email || undefined);
+      // Set custom claim in Firebase and persist session cookies
+      await setUserSession(userRole, userData.userName || user.email || undefined, user.uid);
 
-      // Determinar la ruta según permisos
-      let redirectPath = '/'; // La raíz redirigirá automáticamente según el rol
+      // Force token refresh so the new custom claim is included
+      await user.getIdToken(true);
+
+      // Determine redirect path based on role
+      let redirectPath = '/'; // Root will automatically redirect based on role
 
       if(userData.rol === "translator"){
         redirectPath = '/topoquizz/translate';
@@ -71,13 +74,13 @@ export const useAuth = (): UseAuthReturn => {
         redirectPath = '/topoquizz/content';
       }
 
-      // Redirigir a la ruta apropiada
+      // Redirect to the appropriate route
       router.push(redirectPath);
 
     } catch (err) {
-      console.error('Error en login:', err);
+      console.error('Login error:', err);
 
-      // Manejo de errores específicos de Firebase
+      // Handle specific Firebase error codes
       let errorMessage = 'Error al iniciar sesión';
 
       if (err instanceof Error) {
@@ -108,15 +111,15 @@ export const useAuth = (): UseAuthReturn => {
       setLoading(true);
       setError(null);
 
-      // Cerrar sesión en Firebase
+      // Sign out from Firebase
       await firebaseLogout();
 
-      // Limpiar las cookies de sesión
+      // Clear session cookies
       await clearUserSession();
 
       router.push('/login');
     } catch (err) {
-      console.error('Error en logout:', err);
+      console.error('Logout error:', err);
       setError('Error al cerrar sesión');
       throw err;
     } finally {

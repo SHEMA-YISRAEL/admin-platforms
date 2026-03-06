@@ -4,7 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Card, CardBody, useDisclosure, addToast } from "@heroui/react";
 import { FaPen, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
-import useMaterias, { API_BASE_URL, generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
+import useMaterias, { generateSlug, notifyMateriasUpdated } from "@/app/hooks/neurapp/useMaterias";
+import { neuremyFetch } from "@/lib/neuremy-api";
 import useLessons, { LessonData } from "@/app/hooks/neurapp/useLessons";
 import useSublessons, { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 import LessonManager from "@/components/neurapp/LessonManager";
@@ -147,10 +148,10 @@ export default function CoursePage() {
     if (!deleteItemTarget) return;
     try {
       setDeleting(true);
-      const url = deleteItemTarget.type === 'lesson'
-        ? `${API_BASE_URL}/lessons/${deleteItemTarget.id}`
-        : `${API_BASE_URL}/sublessons/${deleteItemTarget.id}`;
-      const response = await fetch(url, { method: 'DELETE' });
+      const path = deleteItemTarget.type === 'lesson'
+        ? `/lessons/${deleteItemTarget.id}`
+        : `/sublessons/${deleteItemTarget.id}`;
+      const response = await neuremyFetch(path, { method: 'DELETE' });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
       const typeLabel = deleteItemTarget.type === 'lesson' ? 'Lección' : 'Sublección';
@@ -183,7 +184,7 @@ export default function CoursePage() {
     if (!currentCourse) return;
     try {
       setDeleting(true);
-      const response = await fetch(`${API_BASE_URL}/courses/${currentCourse.id}`, {
+      const response = await neuremyFetch(`/courses/${currentCourse.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -206,7 +207,7 @@ export default function CoursePage() {
     if (!currentCourse) return;
     try {
       setTogglingVisibility(true);
-      const response = await fetch(`${API_BASE_URL}/courses/${currentCourse.id}/visibility`, {
+      const response = await neuremyFetch(`/courses/${currentCourse.id}/visibility`, {
         method: 'PATCH',
       });
       if (!response.ok) {

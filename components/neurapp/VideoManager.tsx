@@ -9,7 +9,7 @@ import { VIDEO_FILE_TYPES } from "@/constants/file-types";
 import DeleteModal from "../shared/DeleteModal";
 import UploadCancelWarningModal from "./UploadCancelWarningModal";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 // Available languages
 const AVAILABLE_LANGUAGES = [
@@ -126,7 +126,7 @@ export default function VideoManager({ type, id, triggerCreate, maxVideos }: Vid
 
   const deleteVideoByUrl = async (videoUrl: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/videos/delete/url`, {
+      const response = await neuremyFetch(`/videos/delete/url`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export default function VideoManager({ type, id, triggerCreate, maxVideos }: Vid
 
     try {
       // Delete from backend (which now handles S3 deletion internally)
-      const backendResponse = await fetch(`${API_BASE_URL}/videos/${deletingVideo.id}`, {
+      const backendResponse = await neuremyFetch(`/videos/${deletingVideo.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -220,11 +220,11 @@ export default function VideoManager({ type, id, triggerCreate, maxVideos }: Vid
 
     try {
       setSaving(true);
-      const baseUrl = type === 'lesson'
-        ? `${API_BASE_URL}/lessons/${id}/videos`
-        : `${API_BASE_URL}/sublessons/${id}/videos`;
+      const basePath = type === 'lesson'
+        ? `/lessons/${id}/videos`
+        : `/sublessons/${id}/videos`;
 
-      const url = editingVideo ? `${baseUrl}/${editingVideo.id}` : baseUrl;
+      const url = editingVideo ? `${basePath}/${editingVideo.id}` : basePath;
       const method = editingVideo ? 'PATCH' : 'POST';
 
       const payload = {
@@ -236,11 +236,8 @@ export default function VideoManager({ type, id, triggerCreate, maxVideos }: Vid
         locale: formData.locale
       };
 
-      const response = await fetch(url, {
+      const response = await neuremyFetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(payload),
       });
 
