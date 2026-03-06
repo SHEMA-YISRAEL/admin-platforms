@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { auth } from "@/utils/firebase";
+import { neuremyFetch } from "@/lib/neuremy-api";
 
 export interface UserListData {
     id: string;
@@ -12,8 +12,6 @@ export interface UserListData {
     updatedAt: Date;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
 function useUsers() {
     const [users, setUsers] = useState<UserListData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -25,23 +23,7 @@ function useUsers() {
                 setLoading(true);
                 setError(null);
 
-                const currentUser = auth.currentUser;
-
-                if (!currentUser) {
-                    setError('No estás autenticado. Por favor, inicia sesión primero.');
-                    setLoading(false);
-                    return;
-                }
-
-                // Obtener el token de Firebase Auth
-                const firebaseToken = await currentUser.getIdToken();
-
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${firebaseToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const response = await neuremyFetch('/users');
 
                 if (!response.ok) {
                     if (response.status === 401) {

@@ -57,8 +57,11 @@ export const useAuth = (): UseAuthReturn => {
         throw new Error('Usuario sin rol válido o no autorizado');
       }
 
-      // Guardar las cookies de sesión con el rol del usuario
-      await setUserSession(userRole, userData.userName || user.email || undefined);
+      // Setear custom claim en Firebase y guardar cookies de sesión
+      await setUserSession(userRole, userData.userName || user.email || undefined, user.uid);
+
+      // Forzar refresh del token para que incluya el custom claim recién asignado
+      await user.getIdToken(true);
 
       // Determinar la ruta según permisos
       let redirectPath = '/'; // La raíz redirigirá automáticamente según el rol
