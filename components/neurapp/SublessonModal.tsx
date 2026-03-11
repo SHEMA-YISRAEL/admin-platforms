@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, Switch, addToast } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -27,7 +27,8 @@ export default function SublessonModal({
 }: SublessonModalProps) {
   const [formData, setFormData] = useState({
     title: '',
-    order: sublessons.length + 1
+    order: sublessons.length + 1,
+    isFree: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -36,12 +37,14 @@ export default function SublessonModal({
     if (sublesson.type === 'edit' && sublesson.data) {
       setFormData({
         title: sublesson.data.title,
-        order: sublesson.data.order
+        order: sublesson.data.order,
+        isFree: sublesson.data.isFree
       });
     } else {
       setFormData({
         title: '',
-        order: sublessons.length + 1
+        order: sublessons.length + 1,
+        isFree: false
       });
     }
     setErrors({});
@@ -178,6 +181,18 @@ export default function SublessonModal({
               isInvalid={!!errors.order}
               errorMessage={errors.order}
               description={`Órdenes en uso: ${sublessons.filter(s => sublesson.type === 'edit' && s.id === sublesson.data?.id ? false : true).map(s => s.order).sort((a, b) => a - b).join(', ') || 'ninguno'}`}
+            />
+          </div>
+
+          <div className="flex items-center justify-between px-1 py-2 border rounded-xl border-gray-200">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-700">Acceso libre</span>
+              <span className="text-xs text-gray-400">Los usuarios sin suscripción podrán acceder a esta sublección</span>
+            </div>
+            <Switch
+              isSelected={formData.isFree}
+              onValueChange={(value) => setFormData({ ...formData, isFree: value })}
+              color="success"
             />
           </div>
         </ModalBody>
