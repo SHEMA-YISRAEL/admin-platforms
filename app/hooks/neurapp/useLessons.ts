@@ -7,6 +7,7 @@ export interface LessonData {
     title: string;
     description: string | null;
     order: number;
+    isFree: boolean;
 }
 
 function useLessons(courseId: string | null) {
