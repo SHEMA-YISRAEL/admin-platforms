@@ -58,13 +58,6 @@ export default function SublessonManager({
                   <td className="py-2 text-gray-700 font-medium max-w-xs">
                     <div className="flex items-center gap-2">
                       {sublesson.title}
-                      <Chip
-                        size="sm"
-                        variant="flat"
-                        color={sublesson.isFree ? 'success' : 'default'}
-                      >
-                        {sublesson.isFree ? 'Libre' : 'De pago'}
-                      </Chip>
                     </div>
                   </td>
                 </tr>

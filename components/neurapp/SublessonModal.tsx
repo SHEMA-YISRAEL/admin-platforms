@@ -180,7 +180,7 @@ export default function SublessonModal({
             />
           </div>
 
-          <div className="flex items-center justify-between px-1 py-2 border rounded-xl border-gray-200">
+          {/* <div className="flex items-center justify-between px-1 py-2 border rounded-xl border-gray-200">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-700">Acceso libre</span>
               <span className="text-xs text-gray-400">Los usuarios sin suscripción podrán acceder a esta sublección</span>
@@ -190,7 +190,7 @@ export default function SublessonModal({
               onValueChange={(value) => setFormData({ ...formData, isFree: value })}
               color="success"
             />
-          </div>
+          </div> */}
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="light" onPress={onClose} isDisabled={saving}>
