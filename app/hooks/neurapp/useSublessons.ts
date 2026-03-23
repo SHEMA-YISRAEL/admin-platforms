@@ -7,6 +7,7 @@ export interface SublessonData {
     title: string;
     description: string | null;
     order: number;
+    isFree: boolean;
 }
 
 function useSublessons(lessonId: string | null) {

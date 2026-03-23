@@ -1,5 +1,6 @@
 'use client';
 
+import { Chip } from "@heroui/react";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 
 interface SublessonManagerProps {
@@ -55,7 +56,9 @@ export default function SublessonManager({
                     </span>
                   </td>
                   <td className="py-2 text-gray-700 font-medium max-w-xs">
-                    {sublesson.title}
+                    <div className="flex items-center gap-2">
+                      {sublesson.title}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useState } from "react";
-import { Card, CardBody, Button } from "@heroui/react";
+import { Card, CardBody, Button, Chip } from "@heroui/react";
 import { LessonData } from "@/app/hooks/neurapp/useLessons";
 import { SublessonData } from "@/app/hooks/neurapp/useSublessons";
 import SublessonManager from "./SublessonManager";
@@ -177,6 +177,13 @@ export default function LessonManager({
                             {selectedLessonId === lesson.id ? '▼' : '▶'}
                           </span>
                           {lesson.title}
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            color={lesson.isFree ? 'success' : 'default'}
+                          >
+                            {lesson.isFree ? 'Libre' : 'De pago'}
+                          </Chip>
                         </div>
                           <button onClick={(e) => { e.stopPropagation(); handleCreateSublesson(lesson.id); }} className="cursor-pointer bg-gray-200/75 hover:bg-blue-100 flex justify-center items-center rounded-full w-6 h-6">+</button>
                       </div>

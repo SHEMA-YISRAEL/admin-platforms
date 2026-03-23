@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, addToast } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Chip, Switch, addToast } from "@heroui/react";
 import { LessonData } from "@/app/hooks/neurapp/useLessons";
 import { neuremyFetch } from "@/lib/neuremy-api";
 
@@ -24,7 +24,8 @@ export default function LessonModal({
 }: LessonModalProps) {
   const [formData, setFormData] = useState({
     title: '',
-    order: lessons.length + 1
+    order: lessons.length + 1,
+    isFree: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -33,12 +34,14 @@ export default function LessonModal({
     if (lesson.type === 'edit' && lesson.data) {
       setFormData({
         title: lesson.data.title,
-        order: lesson.data.order
+        order: lesson.data.order,
+        isFree: lesson.data.isFree
       });
     } else {
       setFormData({
         title: '',
-        order: lessons.length + 1
+        order: lessons.length + 1,
+        isFree: false
       });
     }
     setErrors({});
@@ -167,6 +170,18 @@ export default function LessonModal({
               isInvalid={!!errors.order}
               errorMessage={errors.order}
               description={`Órdenes en uso: ${lessons.filter(l => lesson.type === 'edit' && l.id === lesson.data?.id ? false : true).map(l => l.order).sort((a, b) => a - b).join(', ') || 'ninguno'}`}
+            />
+          </div>
+
+          <div className="flex items-center justify-between px-1 py-2 border rounded-xl border-gray-200">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-700">Acceso libre</span>
+              <span className="text-xs text-gray-400">Los usuarios sin suscripción podrán acceder a esta lección</span>
+            </div>
+            <Switch
+              isSelected={formData.isFree}
+              onValueChange={(value) => setFormData({ ...formData, isFree: value })}
+              color="success"
             />
           </div>
         </ModalBody>
