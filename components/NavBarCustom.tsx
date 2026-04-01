@@ -10,29 +10,16 @@ import {
 	Navbar, NavbarBrand, Button, NavbarItem, NavbarContent
 } from "@heroui/react";
 
-// import Link from "next/link";
 
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaLayerGroup, FaBook, FaUsers, FaPlus, FaEye, FaEyeSlash, FaFlag } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { BsTranslate } from "react-icons/bs";
-import { FaBook } from "react-icons/fa";
-import { FaUsers } from "react-icons/fa";
-import { FaPlus } from "react-icons/fa";
-import { FaEye, FaEyeSlash, FaFlag } from "react-icons/fa";
-
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from "@/app/hooks/useAuth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/interfaces/topoquizz";
 import useMaterias from "@/app/hooks/neurapp/useMaterias";
 import MateriaModal from "@/components/neurapp/MateriaModal";
-// import { usePermissions } from "@/app/hooks/usePermissions";
-
-
-// const checkTranslatePermission = (permissions?: UserPermissions) : boolean =>{
-// 	if(!permissions) return false
-// 	return hasPermission(permissions, 'translateEnglish')
-// }
 
 interface UserMenu {
 
@@ -71,9 +58,6 @@ const NavBarCustom = () => {
 	const pathname = usePathname()
 	const router = useRouter()
 	const { userData } = useAuthContext();
-
-	// Solo cargar materias si el usuario es admin
-	// const shouldLoadMaterias = userData?.rol === "admin";
 	const { materias, loading: loadingMaterias } = useMaterias();
 	const [materiaModalOpen, setMateriaModalOpen] = useState(false);
 
@@ -177,6 +161,14 @@ const NavBarCustom = () => {
 										onClick={() => router.push('/neurapp/usuarios')}
 									>
 										Usuarios
+									</DropdownItem>
+									<DropdownItem
+										key="tips"
+										startContent={<FaLayerGroup />}
+										description="Gestión de tips"
+										onClick={() => router.push('/neurapp/tips')}
+									>
+										Tips
 									</DropdownItem>
 									<DropdownItem
 										key="nueva-materia"
