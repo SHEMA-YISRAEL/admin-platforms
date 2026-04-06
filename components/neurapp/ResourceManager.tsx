@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { Tabs, Tab, Card, CardBody, Button } from "@heroui/react";
-import VideoManager from "./VideoManager";
-import FlashcardManager from "./FlashcardManager";
-import SummaryManager from "./SummaryManager";
+import { useState, useEffect } from 'react';
+import { Tabs, Tab, Card, CardBody, Button } from '@heroui/react';
+import VideoManager from './VideoManager';
+import FlashcardManager from './FlashcardManager';
+import SummaryManager from './SummaryManager';
+import QuestionManager from './QuestionManager';
 
 interface ResourceManagerProps {
   type: 'lesson' | 'sublesson';
@@ -12,11 +13,14 @@ interface ResourceManagerProps {
 }
 
 export default function ResourceManager({ type, id }: ResourceManagerProps) {
-  const defaultTab = type === 'lesson' ? "flashcards" : "videos";
+  const defaultTab = type === 'lesson' ? 'flashcards' : 'videos';
   const [selectedTab, setSelectedTab] = useState<string | number>(defaultTab);
-  const [triggerCreate, setTriggerCreate] = useState<{tab: string | number, count: number}>({
+  const [triggerCreate, setTriggerCreate] = useState<{
+    tab: string | number;
+    count: number;
+  }>({
     tab: defaultTab,
-    count: 0
+    count: 0,
   });
 
   useEffect(() => {
@@ -24,33 +28,38 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
   }, [type]);
 
   const handleNewResource = () => {
-    setTriggerCreate(prev => ({
+    setTriggerCreate((prev) => ({
       tab: selectedTab,
-      count: prev.count + 1
+      count: prev.count + 1,
     }));
   };
 
   const getButtonConfig = () => {
     switch (selectedTab) {
-      case "videos":
+      case 'videos':
         return {
-          label: "+ Nuevo Video",
-          gradient: "from-red-400 to-red-500"
+          label: '+ Nuevo Video',
+          gradient: 'from-red-400 to-red-500',
         };
-      case "flashcards":
+      case 'flashcards':
         return {
-          label: "+ Nueva Flashcard",
-          gradient: "from-purple-400 to-purple-500"
+          label: '+ Nueva Flashcard',
+          gradient: 'from-purple-400 to-purple-500',
         };
-      case "summaries":
+      case 'summaries':
         return {
-          label: "+ Nuevo Resumen",
-          gradient: "from-teal-400 to-teal-500"
+          label: '+ Nuevo Resumen',
+          gradient: 'from-teal-400 to-teal-500',
+        };
+      case 'evaluation':
+        return {
+          label: '+ Nueva Pregunta',
+          gradient: 'from-blue-400 to-blue-500',
         };
       default:
         return {
-          label: "+ Nuevo",
-          gradient: "from-gray-500 to-gray-600"
+          label: '+ Nuevo',
+          gradient: 'from-gray-500 to-gray-600',
         };
     }
   };
@@ -58,10 +67,11 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
   const buttonConfig = getButtonConfig();
   if (!id) {
     return (
-      <Card className="2xl:mx-20 mb-3 rounded-lg shadow-md border border-gray-200">
+      <Card className='2xl:mx-20 mb-3 rounded-lg shadow-md border border-gray-200'>
         <CardBody>
-          <p className="text-center text-gray-500 py-4">
-            Selecciona una {type === 'lesson' ? 'lección' : 'sublección'} para gestionar sus recursos
+          <p className='text-center text-gray-500 py-4'>
+            Selecciona una {type === 'lesson' ? 'lección' : 'sublección'} para
+            gestionar sus recursos
           </p>
         </CardBody>
       </Card>
@@ -70,24 +80,25 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Recursos</h2>
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div className="flex-1">
+      <h2 className='text-xl font-bold mb-4'>Recursos</h2>
+      <div className='flex items-start justify-between gap-4 mb-4'>
+        <div className='flex-1'>
           <Tabs
-            aria-label="Resource Types"
+            aria-label='Resource Types'
             selectedKey={selectedTab}
             onSelectionChange={setSelectedTab}
           >
-            {type === 'sublesson' && <Tab key="videos" title="Video" />}
-            {type === 'lesson' && <Tab key="flashcards" title="Flashcards" />}
-            <Tab key="summaries" title="Resúmenes" />
+            {type === 'sublesson' && <Tab key='videos' title='Video' />}
+            {type === 'lesson' && <Tab key='flashcards' title='Flashcards' />}
+            <Tab key='summaries' title='Resúmen' />
+            {type === 'lesson' && <Tab key='evaluation' title='Evaluación' />}
           </Tabs>
         </div>
-        {selectedTab !== "videos" && (
+        {selectedTab !== 'videos' && (
           <Button
             className={`bg-gradient-to-r ${buttonConfig.gradient} text-white shadow-sm`}
             onPress={handleNewResource}
-            size="sm"
+            size='sm'
           >
             {buttonConfig.label}
           </Button>
@@ -95,27 +106,41 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
       </div>
 
       {/* Content below tabs */}
-      <div className="mt-4">
-        {selectedTab === "videos" && type === 'sublesson' && (
+      <div className='mt-4'>
+        {selectedTab === 'videos' && type === 'sublesson' && (
           <VideoManager
             type={type}
             id={id}
-            triggerCreate={triggerCreate.tab === "videos" ? triggerCreate.count : 0}
+            triggerCreate={
+              triggerCreate.tab === 'videos' ? triggerCreate.count : 0
+            }
             maxVideos={1}
           />
         )}
-        {selectedTab === "flashcards" && type === 'lesson' && (
+        {selectedTab === 'flashcards' && type === 'lesson' && (
           <FlashcardManager
             type={type}
             id={id}
-            triggerCreate={triggerCreate.tab === "flashcards" ? triggerCreate.count : 0}
+            triggerCreate={
+              triggerCreate.tab === 'flashcards' ? triggerCreate.count : 0
+            }
           />
         )}
-        {selectedTab === "summaries" && (
+        {selectedTab === 'summaries' && (
           <SummaryManager
             type={type}
             id={id}
-            triggerCreate={triggerCreate.tab === "summaries" ? triggerCreate.count : 0}
+            triggerCreate={
+              triggerCreate.tab === 'summaries' ? triggerCreate.count : 0
+            }
+          />
+        )}
+        {selectedTab === 'evaluation' && type === 'lesson' && (
+          <QuestionManager
+            id={id}
+            triggerCreate={
+              triggerCreate.tab === 'evaluation' ? triggerCreate.count : 0
+            }
           />
         )}
       </div>
