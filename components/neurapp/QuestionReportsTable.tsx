@@ -150,8 +150,9 @@ export default function QuestionReportsTable({ reports, isLoading, onReportsChan
         pt: emptyTranslation(),
       };
       for (const t of q.translations ?? []) {
-        if (t.locale === 'es' || t.locale === 'en' || t.locale === 'pt') {
-          translations[t.locale] = {
+        const locale = t.locale as LocaleKey;
+        if (locale === 'es' || locale === 'en' || locale === 'pt') {
+          translations[locale] = {
             question: t.questionText ?? '',
             options: [
               t.options?.[0] ?? '',
