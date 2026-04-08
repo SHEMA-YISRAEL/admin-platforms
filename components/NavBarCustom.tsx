@@ -185,7 +185,7 @@ const NavBarCustom = () => {
                   key='reported'
                   startContent={<FaFlag />}
                   description='Preguntas reportadas por usuarios'
-                  onClick={() => router.push('/neurapp/reported')}
+                  onClick={() => router.push('/neurapp/reported-evaluation')}
                 >
                   Preguntas Reportadas (Evaluación)
                 </DropdownItem>
