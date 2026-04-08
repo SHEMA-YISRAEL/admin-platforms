@@ -20,7 +20,7 @@ const rolePermissions: Record<UserRole, string[]> = {
   // 'viewer': ['/topoquizz/content']
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Rutas públicas que no requieren autenticación
