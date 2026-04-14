@@ -190,6 +190,14 @@ const NavBarCustom = () => {
                   Preguntas Reportadas (Evaluación)
                 </DropdownItem>
                 <DropdownItem
+                  key='reported-clinical'
+                  startContent={<FaFlag />}
+                  description='Casos clínicos reportados por usuarios'
+                  onClick={() => router.push('/neurapp/reported-clinical-cases')}
+                >
+                  Casos Clínicos Reportados
+                </DropdownItem>
+                <DropdownItem
                   key='nueva-materia'
                   description='Crear una nueva materia'
                   startContent={<FaPlus />}

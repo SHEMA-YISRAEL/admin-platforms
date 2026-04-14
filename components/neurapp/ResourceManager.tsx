@@ -6,6 +6,7 @@ import VideoManager from './VideoManager';
 import FlashcardManager from './FlashcardManager';
 import SummaryManager from './SummaryManager';
 import QuestionManager from './QuestionManager';
+import ClinicalCaseManager from './ClinicalCaseManager';
 
 interface ResourceManagerProps {
   type: 'lesson' | 'sublesson';
@@ -56,6 +57,11 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
           label: '+ Nueva Pregunta',
           gradient: 'from-blue-400 to-blue-500',
         };
+      case 'clinicalCases':
+        return {
+          label: '+ Nuevo Caso Clínico',
+          gradient: 'from-teal-500 to-teal-600',
+        };
       default:
         return {
           label: '+ Nuevo',
@@ -92,6 +98,7 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
             {type === 'lesson' && <Tab key='flashcards' title='Flashcards' />}
             <Tab key='summaries' title='Resúmen' />
             {type === 'lesson' && <Tab key='evaluation' title='Evaluación' />}
+            {type === 'lesson' && <Tab key='clinicalCases' title='Casos Clínicos' />}
           </Tabs>
         </div>
         {selectedTab !== 'videos' && (
@@ -140,6 +147,14 @@ export default function ResourceManager({ type, id }: ResourceManagerProps) {
             id={id}
             triggerCreate={
               triggerCreate.tab === 'evaluation' ? triggerCreate.count : 0
+            }
+          />
+        )}
+        {selectedTab === 'clinicalCases' && type === 'lesson' && (
+          <ClinicalCaseManager
+            id={id}
+            triggerCreate={
+              triggerCreate.tab === 'clinicalCases' ? triggerCreate.count : 0
             }
           />
         )}
