@@ -332,7 +332,7 @@ export default function QuestionReportsTable({ reports, isLoading, onReportsChan
                 <FaCheck size={12} />
               </Button>
             )}
-            {report.question && (
+            {report.question && !report.solved && (
               <Button
                 isIconOnly
                 size='sm'
